@@ -70,6 +70,7 @@ tr:hover{background:#111827}
 <a class="nl" onclick="showPage('alerts')">Live Alerts</a>
 <a class="nl" onclick="showPage('markets')">Markets</a>
 <a class="nl" onclick="showPage('crypto')">Crypto</a>
+<a class="nl" onclick="showPage('opportunities')">Opportunities</a>
 <a class="nl" onclick="showPage('positions')">Positions</a>
 <a class="nl" onclick="showPage('forensics')">Forensics</a>
 <a class="nl" onclick="showPage('trading')">Trading Guide</a>
@@ -185,6 +186,20 @@ tr:hover{background:#111827}
 <div id="btc-markets" class="loading">Loading...</div>
 <h3>Ethereum Threshold Markets</h3>
 <div id="eth-markets" class="loading">Loading...</div>
+</div>
+
+<!-- OPPORTUNITIES -->
+<div id="page-opportunities" class="page">
+<h2>Live Opportunities — What to Bet On Right Now</h2>
+<p class="st">Auto-scanned every 15 minutes. These are markets where the scanner has found a potential edge — either time decay (deadline approaching, price hasn't converged) or crypto thresholds (Binance price near a Polymarket level).</p>
+
+<h3>Time Decay Opportunities</h3>
+<p class="st">Markets with deadlines approaching where the price hasn't fully converged to 0% or 100%. The closer the deadline with no resolution, the more predictable the profit.</p>
+<div id="opps-timedecay" class="loading">Loading...</div>
+
+<h3>Crypto Threshold Opportunities</h3>
+<p class="st">BTC or ETH is close to a Polymarket price threshold. If it crosses, the market will reprice — you can bet before that happens.</p>
+<div id="opps-crypto" class="loading">Loading...</div>
 </div>
 
 <!-- POSITIONS -->
@@ -402,10 +417,63 @@ async function loadGistData(){
     }
     document.getElementById('alerts-list').innerHTML=ah||'<p style="color:#4b5563;text-align:center;padding:30px">No alerts yet.</p>';
 
+    // Opportunities page
+    const opps=content.opportunities||[];
+    renderOpportunities(opps);
+
     // Positions page
     window._lastPositions=positions;
     renderPositions(positions);
   }catch(e){console.error('Gist load error:',e)}
+}
+
+function renderOpportunities(opps){
+  const td=opps.filter(o=>o.type=='TIME_DECAY');
+  const cr=opps.filter(o=>o.type=='CRYPTO_THRESHOLD');
+
+  let tdH='';
+  if(td.length){
+    tdH='<table><tr><th>Market</th><th>YES Price</th><th>Days Left</th><th>Suggested</th><th>Confidence</th><th>Volume</th><th>Why</th></tr>';
+    for(const o of td){
+      const conf=o.confidence;
+      const confColor=conf=='HIGH'?'#00ff88':conf=='MEDIUM'?'#fbbf24':'#6b7280';
+      const sideClass=o.suggested_side=='YES'?'b-g':'b-r';
+      tdH+='<tr>';
+      tdH+='<td>'+((o.question||'?').substring(0,50))+'</td>';
+      tdH+='<td class="mp">'+(o.yes_price*100).toFixed(1)+'%</td>';
+      tdH+='<td style="color:#fbbf24;font-weight:700">'+o.days_left+'d</td>';
+      tdH+='<td><span class="badge '+sideClass+'">'+o.suggested_side+'</span></td>';
+      tdH+='<td style="color:'+confColor+';font-weight:700">'+conf+'</td>';
+      tdH+='<td style="color:#6b7280">'+fv(o.volume)+'</td>';
+      tdH+='<td style="color:#9ca3af;font-size:11px">'+o.reason+'</td>';
+      tdH+='</tr>';
+    }
+    tdH+='</table>';
+  }else{
+    tdH='<p style="color:#4b5563;padding:20px;text-align:center">No time-decay opportunities right now. Markets may have already converged.</p>';
+  }
+  document.getElementById('opps-timedecay').innerHTML=tdH;
+
+  let crH='';
+  if(cr.length){
+    crH='<table><tr><th>Market</th><th>YES Price</th><th>Crypto</th><th>Live Price</th><th>Threshold</th><th>Distance</th><th>Above?</th></tr>';
+    for(const o of cr){
+      const aboveColor=o.above_threshold?'#00ff88':'#ef4444';
+      crH+='<tr>';
+      crH+='<td>'+((o.question||'?').substring(0,50))+'</td>';
+      crH+='<td class="mp">'+(o.yes_price*100).toFixed(1)+'%</td>';
+      crH+='<td style="color:#fbbf24;font-weight:700">'+o.crypto+'</td>';
+      crH+='<td style="color:#fbbf24">$'+o.crypto_price.toLocaleString()+'</td>';
+      crH+='<td>$'+o.threshold.toLocaleString()+'</td>';
+      crH+='<td>'+o.distance_pct.toFixed(1)+'%</td>';
+      crH+='<td style="color:'+aboveColor+';font-weight:700">'+(o.above_threshold?'YES':'NO')+'</td>';
+      crH+='</tr>';
+    }
+    crH+='</table>';
+  }else{
+    crH='<p style="color:#4b5563;padding:20px;text-align:center">No crypto threshold opportunities right now. BTC/ETH not near any active Polymarket levels.</p>';
+  }
+  document.getElementById('opps-crypto').innerHTML=crH;
 }
 
 var _marketPrices={};
