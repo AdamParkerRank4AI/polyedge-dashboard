@@ -189,15 +189,29 @@ tr:hover{background:#111827}
 
 <!-- POSITIONS -->
 <div id="page-positions" class="page">
-<h2>Positions — Live P&L</h2>
+<h2>Paper Trading — Live P&L and Sell Signals</h2>
+<p class="st">Every position tracks live Polymarket prices and tells you when to sell. This is paper trading — proving the edge is real before risking money.</p>
+
+<div class="stats" id="pos-stats">
+<div class="stat"><div class="sv" id="ps-open">--</div><div class="sl">Open</div></div>
+<div class="stat"><div class="sv" id="ps-pnl">--</div><div class="sl">Open P&L</div></div>
+<div class="stat"><div class="sv" id="ps-closed">--</div><div class="sl">Closed</div></div>
+<div class="stat"><div class="sv" id="ps-realised">--</div><div class="sl">Realised P&L</div></div>
+<div class="stat"><div class="sv" id="ps-winrate">--</div><div class="sl">Win Rate</div></div>
+</div>
+
 <div class="ins" style="margin-bottom:15px">
 <strong>Sell Signals:</strong>
-<span class="up">TAKE PROFIT</span> (15%+ gain) |
-<span style="color:#fbbf24">HOLD</span> (profitable, not at target) |
-<span class="dn">STOP LOSS</span> (10%+ against you) |
-<span style="color:#60a5fa">TIME DECAY</span> (deadline near + profitable)
+<span class="up">TAKE PROFIT</span> — 15%+ in your favour, market repriced, sell now |
+<span style="color:#fbbf24">HOLD</span> — profitable but not at target, wait |
+<span class="dn">STOP LOSS</span> — 10%+ against you, cut losses |
+<span style="color:#60a5fa">TIME DECAY</span> — deadline within 3 days + profitable, take the sure money
 </div>
+
 <div id="positions-view" class="loading">Loading positions...</div>
+
+<h3>Closed Trades</h3>
+<div id="closed-view"></div>
 </div>
 
 <!-- FORENSICS -->
@@ -389,36 +403,124 @@ async function loadGistData(){
     document.getElementById('alerts-list').innerHTML=ah||'<p style="color:#4b5563;text-align:center;padding:30px">No alerts yet.</p>';
 
     // Positions page
+    window._lastPositions=positions;
     renderPositions(positions);
   }catch(e){console.error('Gist load error:',e)}
 }
 
+var _marketPrices={};
+
 function renderPositions(positions){
   const open=positions.filter(p=>p.status=='open');
   const closed=positions.filter(p=>p.status=='closed');
-  let h='<h3>Open Positions ('+open.length+')</h3>';
+  let totalPnl=0,totalRealised=0,wins=0;
+
+  // Open positions
+  let h='<table><tr><th>Market</th><th>Side</th><th>Entry</th><th>Now</th><th>P&L</th><th>Signal</th><th>Opened</th></tr>';
   if(open.length){
-    h+='<table><tr><th>Market</th><th>Side</th><th>Entry</th><th>Stake</th><th>Opened</th></tr>';
     for(const p of open){
-      h+='<tr><td>'+((p.question||'?').substring(0,55))+'</td><td><span class="badge '+(p.side=='YES'?'b-g':'b-r')+'">'+p.side+'</span></td><td>'+(p.entry_price*100).toFixed(1)+'c</td><td>$'+p.stake+'</td><td>'+(p.opened||'?').substring(0,10)+'</td></tr>';
+      const entry=p.entry_price||0;
+      const stake=p.stake||100;
+      const shares=entry>0?Math.floor(stake/entry):0;
+      const slug=p.slug||'';
+      let cur=entry;
+
+      // Get live price from cached market data
+      if(_marketPrices[slug]!==undefined){
+        const yesPrice=_marketPrices[slug];
+        cur=p.side=='YES'?yesPrice:(1-yesPrice);
+      }
+
+      const curValue=shares*cur;
+      const pnl=curValue-stake;
+      const pnlPct=stake>0?(pnl/stake*100):0;
+      totalPnl+=pnl;
+
+      // Sell signal
+      const movePct=entry>0?((cur-entry)/entry*100):0;
+      let signal,sigColor;
+      const endDate=p.end_date||'';
+      let daysLeft=999;
+      if(endDate){try{daysLeft=Math.ceil((new Date(endDate)-new Date())/(86400000));}catch(e){}}
+
+      if(movePct>=15){signal='TAKE PROFIT';sigColor='#00ff88';}
+      else if(movePct<=-10){signal='STOP LOSS';sigColor='#ef4444';}
+      else if(daysLeft<=3&&movePct>0){signal='TIME DECAY ('+daysLeft+'d)';sigColor='#60a5fa';}
+      else if(movePct>0){signal='HOLD';sigColor='#fbbf24';}
+      else{signal='WATCHING';sigColor='#6b7280';}
+
+      const pnlColor=pnl>=0?'up':'dn';
+      const borderColor=sigColor;
+      h+='<tr style="border-left:3px solid '+borderColor+'"><td>'+((p.question||'?').substring(0,50))+'</td>';
+      h+='<td><span class="badge '+(p.side=='YES'?'b-g':'b-r')+'">'+p.side+'</span></td>';
+      h+='<td>'+(entry*100).toFixed(1)+'c</td>';
+      h+='<td class="mp">'+(cur*100).toFixed(1)+'c</td>';
+      h+='<td class="'+pnlColor+'" style="font-weight:700">$'+pnl.toFixed(2)+' ('+pnlPct.toFixed(1)+'%)</td>';
+      h+='<td style="color:'+sigColor+';font-weight:700">'+signal+'</td>';
+      h+='<td style="color:#4b5563">'+(p.opened||'?').substring(0,10)+'</td></tr>';
     }
-    h+='</table>';
-  }else{h+='<p style="color:#4b5563;padding:20px;text-align:center">No open positions.</p>';}
-  if(closed.length){
-    h+='<h3>Closed Trades ('+closed.length+')</h3><table><tr><th>Market</th><th>Side</th><th>Entry</th><th>Exit</th><th>Closed</th></tr>';
-    for(const p of closed.slice(-10).reverse()){
-      h+='<tr><td>'+((p.question||'?').substring(0,55))+'</td><td>'+p.side+'</td><td>'+(p.entry_price*100).toFixed(1)+'c</td><td>'+((p.exit_price||0)*100).toFixed(1)+'c</td><td>'+(p.closed||'?').substring(0,10)+'</td></tr>';
-    }
-    h+='</table>';
+  }else{
+    h+='<tr><td colspan="7" style="color:#4b5563;text-align:center;padding:25px">No open positions. Paper trades will appear here when added from the scanner.</td></tr>';
   }
+  h+='</table>';
   document.getElementById('positions-view').innerHTML=h;
+
+  // Closed trades
+  let ch='';
+  if(closed.length){
+    ch='<table><tr><th>Market</th><th>Side</th><th>Entry</th><th>Exit</th><th>P&L</th><th>Return</th><th>Held</th></tr>';
+    for(const p of closed.slice(-20).reverse()){
+      const entry=p.entry_price||0;
+      const exit=p.exit_price||0;
+      const stake=p.stake||100;
+      const shares=entry>0?Math.floor(stake/entry):0;
+      const pnl=shares*(exit-entry);
+      const pnlPct=stake>0?(pnl/stake*100):0;
+      totalRealised+=pnl;
+      if(pnl>0)wins++;
+
+      // Days held
+      let held='?';
+      if(p.opened&&p.closed){
+        try{const d=Math.ceil((new Date(p.closed)-new Date(p.opened))/(86400000));held=d+'d';}catch(e){}
+      }
+
+      const pc=pnl>=0?'up':'dn';
+      ch+='<tr><td>'+((p.question||'?').substring(0,50))+'</td><td>'+p.side+'</td>';
+      ch+='<td>'+(entry*100).toFixed(1)+'c</td><td>'+(exit*100).toFixed(1)+'c</td>';
+      ch+='<td class="'+pc+'" style="font-weight:700">$'+pnl.toFixed(2)+'</td>';
+      ch+='<td class="'+pc+'" style="font-weight:700">'+pnlPct.toFixed(1)+'%</td>';
+      ch+='<td style="color:#4b5563">'+held+'</td></tr>';
+    }
+    ch+='</table>';
+  }
+  document.getElementById('closed-view').innerHTML=ch;
+
+  // Stats
+  const winRate=closed.length>0?Math.round(wins/closed.length*100):0;
+  document.getElementById('ps-open').textContent=open.length;
+  document.getElementById('ps-pnl').textContent='$'+totalPnl.toFixed(2);
+  document.getElementById('ps-pnl').className='sv '+(totalPnl>=0?'':'rd');
+  document.getElementById('ps-closed').textContent=closed.length;
+  document.getElementById('ps-realised').textContent='$'+totalRealised.toFixed(2);
+  document.getElementById('ps-realised').className='sv '+(totalRealised>=0?'':'rd');
+  document.getElementById('ps-winrate').textContent=closed.length>0?winRate+'%':'--';
 }
 
 async function loadMarkets(){
   try{
-    const r=await fetch(GAMMA+'/markets?closed=false&active=true&limit=40&order=volume24hr&ascending=false');
+    const r=await fetch(GAMMA+'/markets?closed=false&active=true&limit=100&order=volume24hr&ascending=false');
     const markets=await r.json();
     document.getElementById('s-markets').textContent=markets.length;
+
+    // Cache prices for position P&L
+    for(const m of markets){
+      const slug=m.slug||'';
+      const prices=JSON.parse(m.outcomePrices||'[]');
+      if(slug&&prices[0])_marketPrices[slug]=parseFloat(prices[0]);
+    }
+    // Re-render positions with live prices
+    if(window._lastPositions)renderPositions(window._lastPositions);
 
     let h='<table><tr><th>Market</th><th>YES</th><th>24h Volume</th></tr>';
     for(const m of markets){
