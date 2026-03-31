@@ -71,6 +71,8 @@ tr:hover{background:#111827}
 <a class="nl" onclick="showPage('markets')">Markets</a>
 <a class="nl" onclick="showPage('crypto')">Crypto</a>
 <a class="nl" onclick="showPage('opportunities')">Opportunities</a>
+<a class="nl" onclick="showPage('movers')">Movers</a>
+<a class="nl" onclick="showPage('watchlist')">Watchlist</a>
 <a class="nl" onclick="showPage('positions')">Positions</a>
 <a class="nl" onclick="showPage('forensics')">Forensics</a>
 <a class="nl" onclick="showPage('trading')">Trading Guide</a>
@@ -186,6 +188,20 @@ tr:hover{background:#111827}
 <div id="btc-markets" class="loading">Loading...</div>
 <h3>Ethereum Threshold Markets</h3>
 <div id="eth-markets" class="loading">Loading...</div>
+</div>
+
+<!-- MOVERS -->
+<div id="page-movers" class="page">
+<h2>Biggest Movers (24h) — Why Did They Move?</h2>
+<p class="st">Markets with the biggest price changes in the last 24 hours, excluding sports. For each mover, the scanner searches recent news to find the likely cause. <strong>If no news matches, it could be whale orders or insider activity — that's a signal too.</strong></p>
+<div id="movers-list" class="loading">Loading movers...</div>
+</div>
+
+<!-- WATCHLIST -->
+<div id="page-watchlist" class="page">
+<h2>Watchlist — Markets You're Tracking</h2>
+<p class="st">Markets you've flagged to keep an eye on. Prices update every 90 seconds. Watch for big moves or approaching deadlines.</p>
+<div id="watchlist-view" class="loading">Loading watchlist...</div>
 </div>
 
 <!-- OPPORTUNITIES -->
@@ -417,6 +433,12 @@ async function loadGistData(){
     }
     document.getElementById('alerts-list').innerHTML=ah||'<p style="color:#4b5563;text-align:center;padding:30px">No alerts yet.</p>';
 
+    // Movers page
+    renderMovers(content.movers||[]);
+
+    // Watchlist page
+    renderWatchlist(content.watchlist||[]);
+
     // Opportunities page
     const opps=content.opportunities||[];
     renderOpportunities(opps);
@@ -425,6 +447,85 @@ async function loadGistData(){
     window._lastPositions=positions;
     renderPositions(positions);
   }catch(e){console.error('Gist load error:',e)}
+}
+
+function renderMovers(movers){
+  let h='';
+  if(movers.length){
+    for(const m of movers){
+      const ch=(m.change_24h||0)*100;
+      const chColor=ch>0?'up':'dn';
+      const chStr=ch>0?'+'+ch.toFixed(1)+'%':ch.toFixed(1)+'%';
+      const cause=m.likely_cause||'Unknown';
+      const src=m.cause_source||'';
+      const link=m.cause_link||'';
+      const noNews=m.cause_score===0;
+
+      h+='<div class="ac" style="border-left:3px solid '+(ch>0?'#00ff88':'#ef4444')+'">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+      h+='<span style="font-size:14px;font-weight:500">'+((m.question||'?').substring(0,60))+'</span>';
+      h+='<span class="'+chColor+'" style="font-size:18px;font-weight:700">'+chStr+'</span>';
+      h+='</div>';
+      h+='<div style="display:flex;gap:15px;font-size:12px;color:#6b7280;margin-bottom:8px">';
+      h+='<span>YES: <span class="mp">'+fp(m.yes_price)+'</span></span>';
+      h+='<span>24h Vol: '+fv(m.volume_24h)+'</span>';
+      h+='</div>';
+
+      if(noNews){
+        h+='<div style="background:#1a1a00;border:1px solid #ffaa0044;padding:8px 10px;border-radius:4px;font-size:12px;color:#fbbf24">';
+        h+='<strong>No matching news found</strong> — this move may be driven by large orders, insider activity, or a news source we don\'t cover. Check Polymarket comments or X/Twitter for context.';
+        h+='</div>';
+      }else{
+        h+='<div style="background:#0f172a;padding:8px 10px;border-radius:4px;font-size:12px">';
+        h+='<span style="color:#9ca3af">Likely cause:</span> ';
+        if(link){h+='<a href="'+link+'" target="_blank" style="color:#60a5fa">'+cause.substring(0,80)+'</a>';}
+        else{h+='<span style="color:#e5e7eb">'+cause.substring(0,80)+'</span>';}
+        if(src){h+=' <span style="color:#4b5563">('+src+')</span>';}
+        h+='</div>';
+      }
+      h+='</div>';
+    }
+  }else{
+    h='<p style="color:#4b5563;padding:30px;text-align:center">No significant movers in the last 24 hours. Markets are quiet.</p>';
+  }
+  document.getElementById('movers-list').innerHTML=h;
+}
+
+function renderWatchlist(watchlist){
+  let h='';
+  if(watchlist.length){
+    h='<table><tr><th>Market</th><th>YES</th><th>24h Change</th><th>24h Volume</th><th>End Date</th><th>Reason</th></tr>';
+    for(const w of watchlist){
+      const ch=(w.change_24h||0)*100;
+      const chColor=ch>0.5?'up':ch<-0.5?'dn':'fl';
+      const chStr=ch>0?'+'+ch.toFixed(1)+'%':ch<0?ch.toFixed(1)+'%':'--';
+      const endDate=w.end_date?(w.end_date).substring(0,10):'--';
+
+      // Days until deadline
+      let daysStr='';
+      if(w.end_date){
+        try{
+          const days=Math.ceil((new Date(w.end_date)-new Date())/(86400000));
+          if(days<=3)daysStr=' <span style="color:#ef4444;font-weight:700">('+days+'d!)</span>';
+          else if(days<=7)daysStr=' <span style="color:#fbbf24">('+days+'d)</span>';
+          else daysStr=' <span style="color:#4b5563">('+days+'d)</span>';
+        }catch(e){}
+      }
+
+      h+='<tr>';
+      h+='<td>'+((w.question||'?').substring(0,50))+'</td>';
+      h+='<td class="mp">'+fp(w.yes_price)+'</td>';
+      h+='<td class="'+chColor+'" style="font-weight:700">'+chStr+'</td>';
+      h+='<td style="color:#6b7280">'+fv(w.volume_24h)+'</td>';
+      h+='<td style="color:#6b7280">'+endDate+daysStr+'</td>';
+      h+='<td style="color:#9ca3af;font-size:11px">'+(w.reason||'')+'</td>';
+      h+='</tr>';
+    }
+    h+='</table>';
+  }else{
+    h='<p style="color:#4b5563;padding:30px;text-align:center">No markets on watchlist. Add markets by editing ~/polyedge/watchlist.json</p>';
+  }
+  document.getElementById('watchlist-view').innerHTML=h;
 }
 
 function renderOpportunities(opps){
