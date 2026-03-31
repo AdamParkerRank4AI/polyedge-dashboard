@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PolyEdge — Prediction Market Intelligence</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background:#06080c;color:#e0e0e0}
+a{color:#60a5fa;text-decoration:none}a:hover{text-decoration:underline}
+
+.nav{background:#0a1020;border-bottom:1px solid #1a2a44;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
+.nav-brand{color:#00ff88;font-size:20px;font-weight:800;padding:14px 15px 14px 0;border-right:1px solid #1a2a44;margin-right:5px}
+.nav a.nl{color:#6b7280;padding:12px 14px;font-size:13px;font-weight:500;border-bottom:2px solid transparent;cursor:pointer}
+.nav a.nl:hover{color:#d1d5db;text-decoration:none}.nav a.nl.active{color:#00ff88;border-bottom-color:#00ff88}
+.nav-right{margin-left:auto;font-size:11px;color:#374151}
+.status-on{color:#00ff88;font-weight:700}.status-off{color:#ef4444;font-weight:700}
+
+.page{display:none;padding:20px 25px;max-width:1300px;margin:0 auto}.page.active{display:block}
+h2{color:#00aaff;font-size:17px;margin:22px 0 10px;border-bottom:1px solid #1e293b;padding-bottom:6px}
+h3{color:#ffaa00;font-size:14px;margin:16px 0 8px}
+.st{color:#9ca3af;font-size:13px;line-height:1.6;margin-bottom:12px}.st strong{color:#e5e7eb}
+
+.stats{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.stat{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:12px 16px;flex:1;text-align:center;min-width:100px}
+.sv{font-size:24px;font-weight:700;color:#00ff88}.sv.or{color:#ffaa00}.sv.bl{color:#60a5fa}.sv.rd{color:#ef4444}
+.sl{font-size:9px;color:#4b5563;margin-top:2px;text-transform:uppercase;letter-spacing:1px}
+
+.eg{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin:12px 0}
+.ec{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:14px;position:relative;overflow:hidden}
+.ec::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#00ff88,#00aa55)}
+.en{font-size:12px;color:#9ca3af;margin-bottom:6px;line-height:1.4}.en strong{color:#e5e7eb}
+.em{font-size:11px;color:#6b7280;margin-bottom:8px;padding:5px 7px;background:#0f172a;border-radius:4px}
+.er{display:flex;gap:8px;flex-wrap:wrap}
+.ep{background:#0f172a;border-radius:8px;padding:5px 10px;text-align:center}
+.ev{font-size:16px;font-weight:700}.ev.gr{color:#00ff88}.ev.rd{color:#ef4444}.ev.bl{color:#60a5fa}.ev.or{color:#fbbf24}
+.el{font-size:8px;color:#4b5563;text-transform:uppercase;letter-spacing:.5px}
+.ee{font-size:11px;color:#6b7280;margin-top:8px;line-height:1.4;padding-top:7px;border-top:1px solid #1e293b}.ee strong{color:#d1d5db}
+
+.ac{background:#111827;border:1px solid #1e293b;border-radius:8px;padding:12px;margin-bottom:8px}
+.ac:hover{border-color:#334155}
+.ah{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11px}
+.at{color:#4b5563;font-family:monospace}.as{color:#6b7280}
+.ahl{font-size:13px;font-weight:500;margin-bottom:6px}
+.badge{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.b-r{background:#7f1d1d;color:#fca5a5}.b-o{background:#78350f;color:#fcd34d}.b-g{background:#064e3b;color:#6ee7b7}
+.mr{display:flex;align-items:center;gap:8px;padding:4px 7px;background:#0f172a;border-radius:4px;margin:2px 0;font-size:11px}
+.mq{flex:1;color:#d1d5db}.mp{color:#00ff88;font-weight:700;min-width:45px;text-align:right}
+.mv{color:#6b7280;min-width:50px;text-align:right}
+
+table{width:100%;border-collapse:collapse;margin:10px 0}
+th{text-align:left;color:#4b5563;font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:7px;border-bottom:1px solid #1e293b}
+td{padding:7px;border-bottom:1px solid #111827;font-size:12px}
+tr:hover{background:#111827}
+.up{color:#00ff88}.dn{color:#ef4444}.fl{color:#374151}
+.ins{background:#001a00;border:1px solid #00ff8844;padding:10px 12px;border-radius:6px;margin:10px 0;font-size:12px;line-height:1.5}
+.ins strong{color:#e5e7eb}
+.ins-w{background:#1a1a00;border-color:#ffaa0044}
+.ins-d{background:#1a0000;border-color:#ff444444}
+.footer{text-align:center;padding:25px;color:#1e293b;font-size:11px}
+.loading{text-align:center;padding:40px;color:#4b5563}
+@media(max-width:768px){.nav{padding:0 10px}.page{padding:15px}.stats{gap:6px}.stat{padding:8px 10px}.sv{font-size:18px}}
+</style>
+</head>
+<body>
+
+<div class="nav">
+<span class="nav-brand">PolyEdge</span>
+<a class="nl active" onclick="showPage('overview')">Overview</a>
+<a class="nl" onclick="showPage('alerts')">Live Alerts</a>
+<a class="nl" onclick="showPage('markets')">Markets</a>
+<a class="nl" onclick="showPage('crypto')">Crypto</a>
+<a class="nl" onclick="showPage('positions')">Positions</a>
+<a class="nl" onclick="showPage('forensics')">Forensics</a>
+<a class="nl" onclick="showPage('trading')">Trading Guide</a>
+<a class="nl" onclick="showPage('howto')">How It Works</a>
+<span class="nav-right">Scanner: <span id="scanner-status" class="status-on">CHECKING...</span> | <span id="last-update">--</span></span>
+</div>
+
+<!-- OVERVIEW -->
+<div id="page-overview" class="page active">
+<div class="stats" id="stats-bar">
+<div class="stat"><div class="sv" id="s-today">--</div><div class="sl">Today's Alerts</div></div>
+<div class="stat"><div class="sv" id="s-total">--</div><div class="sl">Total Alerts</div></div>
+<div class="stat"><div class="sv or" id="s-high">--</div><div class="sl">High Score (5+)</div></div>
+<div class="stat"><div class="sv bl" id="s-markets">--</div><div class="sl">Active Markets</div></div>
+<div class="stat"><div class="sv or" id="s-btc">--</div><div class="sl">BTC (Binance)</div></div>
+<div class="stat"><div class="sv or" id="s-eth">--</div><div class="sl">ETH (Binance)</div></div>
+</div>
+
+<h2>The Edge Is Real — Proven Examples This Month</h2>
+<p class="st">Real price movements from March 2026. Each shows what happened, how long you had to act, and what $100 would have returned. <strong>All from actual Polymarket CLOB data.</strong></p>
+
+<div class="eg">
+<div class="ec">
+<div class="en"><strong>Mar 16 — CNBC:</strong> Trump asks China to delay Xi meeting. Polymarket "Visit by Apr 30?" still at 88.5%.</div>
+<div class="em">Market crashed to 45.5% two days later, then to 2.6%</div>
+<div class="er">
+<div class="ep"><div class="ev or">24-36 hrs</div><div class="el">Window</div></div>
+<div class="ep"><div class="ev gr">+$746</div><div class="el">Profit / $100</div></div>
+<div class="ep"><div class="ev bl">88.5%</div><div class="el">When News Broke</div></div>
+<div class="ep"><div class="ev rd">2.6%</div><div class="el">Price Now</div></div>
+</div>
+<div class="ee"><strong>Trade:</strong> Buy NO at $0.115. Trump said it's delayed on camera. Market stayed at 88.5% for 24hrs. NO shares now $0.974. <strong>Profit: $746 on $100.</strong></div>
+</div>
+
+<div class="ec">
+<div class="en"><strong>Mar 25 — White House:</strong> Confirms Trump-Xi moved to May 14-15. "Visit by April 30?" at 34.5%.</div>
+<div class="em">Crashed to 2.6% within hours</div>
+<div class="er">
+<div class="ep"><div class="ev or">~1 hr</div><div class="el">Window</div></div>
+<div class="ep"><div class="ev gr">+$186</div><div class="el">Profit / $100</div></div>
+<div class="ep"><div class="ev bl">34.5%</div><div class="el">When News Broke</div></div>
+<div class="ep"><div class="ev rd">2.6%</div><div class="el">Price Now</div></div>
+</div>
+<div class="ee"><strong>Trade:</strong> Buy NO at $0.655. May dates confirmed = April 30 market dead. <strong>Profit: $186.</strong></div>
+</div>
+
+<div class="ec">
+<div class="en"><strong>Mar 8-29 — Time decay:</strong> Active war, daily bombings. "Ceasefire by Mar 31?" at 24.5% with no diplomacy.</div>
+<div class="em">Steadily dropped to 1.5%</div>
+<div class="er">
+<div class="ep"><div class="ev or">Days</div><div class="el">Window</div></div>
+<div class="ep"><div class="ev gr">+$30</div><div class="el">Profit / $100</div></div>
+<div class="ep"><div class="ev bl">24.5%</div><div class="el">Entry</div></div>
+<div class="ep"><div class="ev gr">1.5%</div><div class="el">Now</div></div>
+</div>
+<div class="ee"><strong>Trade:</strong> Buy NO. Active bombing, no talks. Safest edge: <strong>time decay — the closer the deadline, the more certain the profit.</strong></div>
+</div>
+
+<div class="ec">
+<div class="en"><strong>Mar 25 — Same news, other side:</strong> May dates confirmed. "Visit by May 31?" jumped from 47.5%.</div>
+<div class="em">Rose to 76%</div>
+<div class="er">
+<div class="ep"><div class="ev or">~2 hrs</div><div class="el">Window</div></div>
+<div class="ep"><div class="ev gr">+$60</div><div class="el">Profit / $100</div></div>
+<div class="ep"><div class="ev bl">47.5%</div><div class="el">Entry</div></div>
+<div class="ep"><div class="ev gr">76%</div><div class="el">Now</div></div>
+</div>
+<div class="ee"><strong>Trade:</strong> Buy YES at $0.475. May 14-15 confirmed. <strong>$60 profit so far, likely $110+ at resolution.</strong></div>
+</div>
+</div>
+
+<h2>Three Types of Edge</h2>
+<div class="eg" style="grid-template-columns:repeat(3,1fr)">
+<div class="ins"><strong>1. Breaking News</strong> (mins-hours)<br>Wire services break it. Polymarket hasn't repriced. Trump/China had a 24-36hr window.</div>
+<div class="ins ins-w"><strong>2. Mispricing</strong> (days)<br>Markets stay wrong. "Regime fall" at 10.8% ten days into war. Obvious to anyone watching.</div>
+<div class="ins"><strong>3. Time Decay</strong> (predictable)<br>Deadline markets converge to 0/100%. If it's not happening, sell YES. Lowest risk.</div>
+</div>
+
+<h2>Where the Edge Is (Non-Sports)</h2>
+<table>
+<tr><th>Category</th><th>Volume</th><th>Edge Type</th><th>Window</th></tr>
+<tr><td><strong>Geopolitics / Iran</strong></td><td>$324M</td><td>Breaking news</td><td>Hours</td></tr>
+<tr><td><strong>US Politics / 2028</strong></td><td>$1.9B</td><td>News + mispricing</td><td>Hours-days</td></tr>
+<tr><td><strong>Crypto (BTC/ETH)</strong></td><td>$119M</td><td>Binance lead</td><td>Seconds-mins</td></tr>
+<tr><td><strong>Crude Oil</strong></td><td>$72M</td><td>Exchange lead</td><td>Minutes</td></tr>
+<tr><td><strong>Fed / Rates</strong></td><td>$43M</td><td>Breaking news</td><td>Mins-hours</td></tr>
+<tr><td><strong>World Elections</strong></td><td>$95M</td><td>News lag</td><td>Hours-days</td></tr>
+</table>
+</div>
+
+<!-- LIVE ALERTS -->
+<div id="page-alerts" class="page">
+<h2>Live Edge Alerts</h2>
+<p class="st">Scanner checks 200 markets against 10 RSS feeds + 12 Bluesky accounts every 15 minutes. Score 5+ triggers email.</p>
+<div id="alerts-list" class="loading">Loading alerts...</div>
+</div>
+
+<!-- MARKETS -->
+<div id="page-markets" class="page">
+<h2>Live Polymarket Markets</h2>
+<div id="markets-table" class="loading">Loading markets...</div>
+</div>
+
+<!-- CRYPTO -->
+<div id="page-crypto" class="page">
+<h2>Crypto Edge — Binance vs Polymarket</h2>
+<p class="st">Binance updates every second. Polymarket threshold markets lag behind. When Binance crosses a threshold, bet before Polymarket adjusts.</p>
+<div class="stats" id="crypto-prices">
+<div class="stat"><div class="sv or" id="c-btc">--</div><div class="sl">BTC (Binance)</div></div>
+<div class="stat"><div class="sv or" id="c-eth">--</div><div class="sl">ETH (Binance)</div></div>
+</div>
+<h3>Bitcoin Threshold Markets</h3>
+<div id="btc-markets" class="loading">Loading...</div>
+<h3>Ethereum Threshold Markets</h3>
+<div id="eth-markets" class="loading">Loading...</div>
+</div>
+
+<!-- POSITIONS -->
+<div id="page-positions" class="page">
+<h2>Positions — Live P&L</h2>
+<div class="ins" style="margin-bottom:15px">
+<strong>Sell Signals:</strong>
+<span class="up">TAKE PROFIT</span> (15%+ gain) |
+<span style="color:#fbbf24">HOLD</span> (profitable, not at target) |
+<span class="dn">STOP LOSS</span> (10%+ against you) |
+<span style="color:#60a5fa">TIME DECAY</span> (deadline near + profitable)
+</div>
+<div id="positions-view" class="loading">Loading positions...</div>
+</div>
+
+<!-- FORENSICS -->
+<div id="page-forensics" class="page">
+<h2>Forensic Research: News vs Market Movements</h2>
+<p class="st">Cross-referencing when news broke against when Polymarket repriced. The gap is the edge.</p>
+
+<h3>Event 1: US-Iran War — Feb 28, 2026</h3>
+<div class="ac">
+<div style="font-size:12px;line-height:1.8">
+<span style="color:#60a5fa;font-family:monospace">Feb 27, 20:38 UTC</span> — Trump orders Operation Epic Fury<br>
+<span style="color:#60a5fa;font-family:monospace">Feb 28, 06:35 UTC</span> — CENTCOM announces airstrikes<br>
+<span style="color:#60a5fa;font-family:monospace">Feb 28, 06:45 UTC</span> — Israeli AF strikes — Khamenei killed<br>
+<span style="color:#60a5fa;font-family:monospace">Mar 1</span> — $529M+ on Iran bets — Polymarket record
+</div></div>
+<div class="ins">Market-creation event. Ceasefire started at 61% — now 1.5%. Early NO buyers made massive returns.</div>
+
+<h3>Event 2: Trump-Xi Postponement</h3>
+<div class="ac">
+<div style="font-size:12px;line-height:1.8">
+<span style="color:#60a5fa;font-family:monospace">Mar 16, ~14:00 UTC</span> — CNBC: Trump says delay. <span class="mp">88.5%</span><br>
+<span style="color:#60a5fa;font-family:monospace">Mar 16, ~15:00 UTC</span> — WashPo confirms. <span class="mp">~85%</span><br>
+<span style="color:#ef4444;font-family:monospace">Mar 18, 00:00 UTC</span> — Polymarket crashes 24-36hrs later. <span class="dn">45.5%</span><br>
+<span style="color:#60a5fa;font-family:monospace">Mar 25, ~17:00 UTC</span> — WH confirms May 14-15. <span class="mp">34.5%</span><br>
+<span style="color:#ef4444;font-family:monospace">Mar 25, 18:00 UTC</span> — Crashes ~1hr later. <span class="dn">2.6%</span>
+</div></div>
+<div class="ins"><strong>Key:</strong> Stage 1 had a 24-36hr window. President said it on camera and Polymarket stayed at 88.5% for a full day. Stage 2 was faster (~1hr) but still tradeable.</div>
+
+<h3>Event 3: Iran Ceasefire — Steady Decline</h3>
+<div class="ac">
+<div style="font-size:12px;line-height:1.8">
+<span style="color:#60a5fa;font-family:monospace">Mar 3</span> — Launches at <span class="mp">52.5%</span><br>
+<span style="color:#60a5fa;font-family:monospace">Mar 5</span> — War intensifies. <span style="color:#fbbf24">25.5%</span><br>
+<span style="color:#60a5fa;font-family:monospace">Mar 8</span> — Settles. <span style="color:#fbbf24">24.5%</span><br>
+<span style="color:#60a5fa;font-family:monospace">Mar 25</span> — No talks. <span class="dn">19.5%</span><br>
+<span style="color:#60a5fa;font-family:monospace">Mar 31</span> — Deadline day. <span class="dn">0.4%</span>
+</div></div>
+<div class="ins"><strong>Time decay:</strong> Active war, no diplomatic channel. Anyone who bought NO at any point profited. Safest edge type.</div>
+</div>
+
+<!-- TRADING GUIDE -->
+<div id="page-trading" class="page">
+<h2>How to Trade on Polymarket</h2>
+<p class="st">Polymarket is an exchange, not just a betting site. Buy shares, sell before resolution, pocket the difference.</p>
+
+<h3>Example Trade</h3>
+<div class="ac" style="font-family:monospace;font-size:12px;line-height:1.8">
+1. "Ceasefire by Mar 31?" at 24.5% — you think NO<br>
+2. Buy 132 NO shares at $0.755 = $100<br>
+3. Price drops to 1.5% over 3 weeks<br>
+4. Sell 132 NO shares at $0.985 = $130<br>
+5. Fee: 2% of $30 profit = $0.60<br>
+6. <strong>Net: $29.40 profit (29.4% return)</strong>
+</div>
+
+<h3>Fees</h3>
+<table>
+<tr><td><strong>Trading</strong></td><td>2% on profit only. Lose = pay nothing.</td></tr>
+<tr><td><strong>Deposit (crypto)</strong></td><td>Free</td></tr>
+<tr><td><strong>Deposit (card)</strong></td><td>~3-5% (MoonPay)</td></tr>
+<tr><td><strong>Withdrawal</strong></td><td>~$0.01 (Polygon gas)</td></tr>
+</table>
+
+<h3>Order Types</h3>
+<table>
+<tr><td><strong>Limit</strong></td><td>Set price, wait. Avoids spread. Default choice.</td></tr>
+<tr><td><strong>Market</strong></td><td>Instant fill. Use for breaking news speed.</td></tr>
+</table>
+
+<h3>Spreads</h3>
+<table>
+<tr><td>Top markets</td><td>1-2c spread</td><td>Easy exit</td></tr>
+<tr><td>Active ($50K+)</td><td>2-5c</td><td>Fine</td></tr>
+<tr><td>Medium</td><td>5-10c</td><td>Check depth first</td></tr>
+<tr><td>Low volume</td><td>10-25c+</td><td>Risk of being stuck</td></tr>
+</table>
+
+<h3>UK Access</h3>
+<div class="ins">UK users can access Polymarket. No IP block. Not FCA regulated. Profits likely tax-free (gambling). Grey area — could change.</div>
+
+<h3>Setup</h3>
+<table>
+<tr><td>Chain</td><td>Polygon (fast, cheap)</td></tr>
+<tr><td>Currency</td><td>USDC (stablecoin)</td></tr>
+<tr><td>Wallet</td><td>Auto-created. Email or MetaMask</td></tr>
+<tr><td>KYC</td><td>Not needed under $10K</td></tr>
+<tr><td>API</td><td>Fully allowed. py-clob-client (Python)</td></tr>
+</table>
+</div>
+
+<!-- HOW IT WORKS -->
+<div id="page-howto" class="page">
+<h2>How PolyEdge Works</h2>
+
+<h3>Step 1: Scanner Finds an Edge</h3>
+<div class="ac"><p class="st">Every 15 mins: pulls 200 markets, checks 10 RSS feeds + 12 Bluesky news accounts. Matches headlines to markets. Score 5+ = email alert.</p></div>
+
+<h3>Step 2: You Decide</h3>
+<div class="ac"><p class="st">
+<strong>Is the news genuinely new?</strong> Not a rehash.<br>
+<strong>Should it move this market?</strong> Direct impact, not tangential.<br>
+<strong>Has the market already moved?</strong> Check the price. If it crashed, you're late.<br>
+<strong>Enough liquidity?</strong> Over $100K volume = safe.
+</p></div>
+
+<h3>Step 3: You Buy</h3>
+<div class="eg" style="grid-template-columns:1fr 1fr">
+<div class="ins"><strong style="color:#00ff88">Event MORE likely</strong><br>Buy YES. E.g. "Visit by May 31?" — dates confirmed. Buy YES, sell when it rises.</div>
+<div class="ins ins-d"><strong style="color:#ef4444">Event LESS likely</strong><br>Buy NO. E.g. "Ceasefire by Mar 31?" — active war. Buy NO, sell as it drops.</div>
+</div>
+
+<h3>Step 4: Watch — Sell Signals</h3>
+<div class="eg" style="grid-template-columns:1fr 1fr">
+<div class="ins"><strong><span class="up">TAKE PROFIT</span></strong> — 15%+ in your favour. Market repriced. Sell.</div>
+<div class="ins ins-w"><strong><span style="color:#fbbf24">TIME DECAY</span></strong> — Deadline within 3 days + profitable. Take the sure money.</div>
+<div class="ins ins-d"><strong><span class="dn">STOP LOSS</span></strong> — 10%+ against you. You were wrong. Cut losses.</div>
+<div class="ins"><strong><span style="color:#60a5fa">HOLD</span></strong> — Profitable but not at target. Wait.</div>
+</div>
+
+<h3>Step 5: Sell</h3>
+<div class="ac"><p class="st">Place sell order on Polymarket. USDC back in wallet. Typical hold: 1 hour to 2 days. Target: 15-50% return. Fee: 2% of profit.</p></div>
+
+<h3>Golden Rules</h3>
+<div class="eg" style="grid-template-columns:1fr 1fr 1fr">
+<div class="ins">Only trade >$100K volume</div>
+<div class="ins">Use limit orders</div>
+<div class="ins">Bet on price movement, not outcome</div>
+<div class="ins">Paper trade first</div>
+<div class="ins">Time decay = safest</div>
+<div class="ins">10% stop loss always</div>
+</div>
+</div>
+
+<div class="footer">PolyEdge Intelligence | All data from free APIs | Zero cost</div>
+
+<script>
+const GIST_URL='https://api.github.com/gists/291b8da0c6006afb5ee6851a16d4d7df';
+const GAMMA='https://gamma-api.polymarket.com';
+const BINANCE='https://api.binance.com/api/v3/ticker/price';
+
+function showPage(n){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nl').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+n).classList.add('active');
+  document.querySelectorAll('.nl').forEach(t=>{if(t.textContent.toLowerCase().replace(/\s/g,'')==n.replace(/\s/g,''))t.classList.add('active')});
+  event.target.classList.add('active');
+}
+
+function fp(p){return p!=null?(p*100).toFixed(1)+'%':'?'}
+function fv(v){v=parseFloat(v)||0;return v>=1e6?'$'+(v/1e6).toFixed(1)+'M':v>=1e3?'$'+(v/1e3).toFixed(0)+'K':'$'+v.toFixed(0)}
+
+async function loadGistData(){
+  try{
+    const r=await fetch(GIST_URL);const d=await r.json();
+    const content=JSON.parse(d.files['polyedge_data.json'].content);
+    const alerts=content.alerts||[];
+    const positions=content.positions||[];
+    const updated=content.last_updated||'?';
+
+    document.getElementById('scanner-status').textContent=content.scanner_status=='active'?'LIVE':'OFF';
+    document.getElementById('scanner-status').className=content.scanner_status=='active'?'status-on':'status-off';
+    document.getElementById('last-update').textContent=updated.substring(0,19).replace('T',' ')+' UTC';
+
+    const today=new Date().toISOString().substring(0,10);
+    const todayAlerts=alerts.filter(a=>(a.timestamp||'').substring(0,10)==today);
+    const highAlerts=alerts.filter(a=>Math.max(...(a.matches||[]).map(m=>m.score||0),0)>=5);
+
+    document.getElementById('s-today').textContent=todayAlerts.length;
+    document.getElementById('s-total').textContent=alerts.length;
+    document.getElementById('s-high').textContent=highAlerts.length;
+
+    // Alerts page
+    let ah='';
+    for(const a of alerts.slice().reverse().slice(0,50)){
+      const ts=(a.timestamp||'').substring(0,19).replace('T',' ');
+      const src=a.source||'?';
+      const hl=a.headline||'?';
+      const link=a.link||'';
+      const matches=a.matches||[];
+      const topScore=Math.max(...matches.map(m=>m.score||0),0);
+      const bc=topScore>=7?'b-r':topScore>=5?'b-o':'b-g';
+      let mh='';
+      for(const m of matches.slice(0,3)){
+        mh+='<div class="mr"><span class="mq">'+((m.question||'?').substring(0,60))+'</span><span class="mp">'+fp(m.yes_price)+'</span><span class="mv">'+fv(m.volume_24h)+'</span></div>';
+      }
+      const hlEl=link?'<a href="'+link+'" target="_blank">'+hl.substring(0,90)+'</a>':hl.substring(0,90);
+      ah+='<div class="ac"><div class="ah"><span class="at">'+ts+'</span><span class="badge '+bc+'">Score: '+topScore+'</span><span class="as">'+src+'</span></div><div class="ahl">'+hlEl+'</div>'+mh+'</div>';
+    }
+    document.getElementById('alerts-list').innerHTML=ah||'<p style="color:#4b5563;text-align:center;padding:30px">No alerts yet.</p>';
+
+    // Positions page
+    renderPositions(positions);
+  }catch(e){console.error('Gist load error:',e)}
+}
+
+function renderPositions(positions){
+  const open=positions.filter(p=>p.status=='open');
+  const closed=positions.filter(p=>p.status=='closed');
+  let h='<h3>Open Positions ('+open.length+')</h3>';
+  if(open.length){
+    h+='<table><tr><th>Market</th><th>Side</th><th>Entry</th><th>Stake</th><th>Opened</th></tr>';
+    for(const p of open){
+      h+='<tr><td>'+((p.question||'?').substring(0,55))+'</td><td><span class="badge '+(p.side=='YES'?'b-g':'b-r')+'">'+p.side+'</span></td><td>'+(p.entry_price*100).toFixed(1)+'c</td><td>$'+p.stake+'</td><td>'+(p.opened||'?').substring(0,10)+'</td></tr>';
+    }
+    h+='</table>';
+  }else{h+='<p style="color:#4b5563;padding:20px;text-align:center">No open positions.</p>';}
+  if(closed.length){
+    h+='<h3>Closed Trades ('+closed.length+')</h3><table><tr><th>Market</th><th>Side</th><th>Entry</th><th>Exit</th><th>Closed</th></tr>';
+    for(const p of closed.slice(-10).reverse()){
+      h+='<tr><td>'+((p.question||'?').substring(0,55))+'</td><td>'+p.side+'</td><td>'+(p.entry_price*100).toFixed(1)+'c</td><td>'+((p.exit_price||0)*100).toFixed(1)+'c</td><td>'+(p.closed||'?').substring(0,10)+'</td></tr>';
+    }
+    h+='</table>';
+  }
+  document.getElementById('positions-view').innerHTML=h;
+}
+
+async function loadMarkets(){
+  try{
+    const r=await fetch(GAMMA+'/markets?closed=false&active=true&limit=40&order=volume24hr&ascending=false');
+    const markets=await r.json();
+    document.getElementById('s-markets').textContent=markets.length;
+
+    let h='<table><tr><th>Market</th><th>YES</th><th>24h Volume</th></tr>';
+    for(const m of markets){
+      const q=(m.question||'?').substring(0,60);
+      const prices=JSON.parse(m.outcomePrices||'[]');
+      const yes=prices[0]?fp(parseFloat(prices[0])):'?';
+      h+='<tr><td>'+q+'</td><td class="mp" style="font-size:14px">'+yes+'</td><td style="color:#6b7280">'+fv(m.volume24hr)+'</td></tr>';
+    }
+    h+='</table>';
+    document.getElementById('markets-table').innerHTML=h;
+
+    // Crypto threshold markets
+    let btcH='<table><tr><th>Market</th><th>YES</th><th>Vol</th></tr>',ethH='<table><tr><th>Market</th><th>YES</th><th>Vol</th></tr>';
+    let btcC=0,ethC=0;
+    for(const m of markets){
+      const q=(m.question||'').toLowerCase();
+      const prices=JSON.parse(m.outcomePrices||'[]');
+      const yes=prices[0]?fp(parseFloat(prices[0])):'?';
+      if((q.includes('bitcoin'))&&(q.includes('hit')||q.includes('above')||q.includes('reach'))){
+        btcH+='<tr><td>'+m.question.substring(0,60)+'</td><td class="mp">'+yes+'</td><td style="color:#6b7280">'+fv(m.volume24hr)+'</td></tr>';btcC++;
+      }
+      if((q.includes('ethereum'))&&(q.includes('hit')||q.includes('above')||q.includes('reach'))){
+        ethH+='<tr><td>'+m.question.substring(0,60)+'</td><td class="mp">'+yes+'</td><td style="color:#6b7280">'+fv(m.volume24hr)+'</td></tr>';ethC++;
+      }
+    }
+    btcH+='</table>';ethH+='</table>';
+    document.getElementById('btc-markets').innerHTML=btcC?btcH:'<p style="color:#4b5563">No active BTC threshold markets</p>';
+    document.getElementById('eth-markets').innerHTML=ethC?ethH:'<p style="color:#4b5563">No active ETH threshold markets</p>';
+  }catch(e){console.error('Market load error:',e)}
+}
+
+async function loadCrypto(){
+  try{
+    const [br,er]=await Promise.all([fetch(BINANCE+'?symbol=BTCUSDT'),fetch(BINANCE+'?symbol=ETHUSDT')]);
+    const btc=parseFloat((await br.json()).price);
+    const eth=parseFloat((await er.json()).price);
+    document.getElementById('s-btc').textContent='$'+btc.toLocaleString(undefined,{maximumFractionDigits:0});
+    document.getElementById('s-eth').textContent='$'+eth.toLocaleString(undefined,{maximumFractionDigits:0});
+    document.getElementById('c-btc').textContent='$'+btc.toLocaleString(undefined,{maximumFractionDigits:2});
+    document.getElementById('c-eth').textContent='$'+eth.toLocaleString(undefined,{maximumFractionDigits:2});
+  }catch(e){console.error('Crypto error:',e)}
+}
+
+// Load everything
+loadGistData();loadMarkets();loadCrypto();
+// Refresh every 90 seconds
+setInterval(function(){loadGistData();loadMarkets();loadCrypto();},90000);
+</script>
+</body>
+</html>
