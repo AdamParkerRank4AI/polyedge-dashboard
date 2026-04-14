@@ -3,62 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>PolyEdge — Prediction Market Intelligence</title>
+<title>PolyEdge</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background:#06080c;color:#e0e0e0}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background:#06080c;color:#e0e0e0;font-size:13px}
 a{color:#60a5fa;text-decoration:none}a:hover{text-decoration:underline}
-
 .nav{background:#0a1020;border-bottom:1px solid #1a2a44;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
 .nav-brand{color:#00ff88;font-size:20px;font-weight:800;padding:14px 15px 14px 0;border-right:1px solid #1a2a44;margin-right:5px}
 .nav a.nl{color:#6b7280;padding:12px 14px;font-size:13px;font-weight:500;border-bottom:2px solid transparent;cursor:pointer}
 .nav a.nl:hover{color:#d1d5db;text-decoration:none}.nav a.nl.active{color:#00ff88;border-bottom-color:#00ff88}
 .nav-right{margin-left:auto;font-size:11px;color:#374151}
 .status-on{color:#00ff88;font-weight:700}.status-off{color:#ef4444;font-weight:700}
-
-.page{display:none;padding:20px 25px;max-width:1300px;margin:0 auto}.page.active{display:block}
+.page{display:none;padding:20px 25px;max-width:1400px;margin:0 auto}.page.active{display:block}
 h2{color:#00aaff;font-size:17px;margin:22px 0 10px;border-bottom:1px solid #1e293b;padding-bottom:6px}
-h3{color:#ffaa00;font-size:14px;margin:16px 0 8px}
-.st{color:#9ca3af;font-size:13px;line-height:1.6;margin-bottom:12px}.st strong{color:#e5e7eb}
-
+h3{color:#ffaa00;font-size:14px;margin:14px 0 8px}
+.st{color:#9ca3af;font-size:13px;line-height:1.5;margin-bottom:12px}
 .stats{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
-.stat{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:12px 16px;flex:1;text-align:center;min-width:100px}
-.sv{font-size:24px;font-weight:700;color:#00ff88}.sv.or{color:#ffaa00}.sv.bl{color:#60a5fa}.sv.rd{color:#ef4444}
+.stat{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:12px 16px;flex:1;text-align:center;min-width:120px}
+.sv{font-size:24px;font-weight:700;color:#00ff88}.sv.or{color:#ffaa00}.sv.bl{color:#60a5fa}.sv.rd{color:#ef4444}.sv.gy{color:#9ca3af}
 .sl{font-size:9px;color:#4b5563;margin-top:2px;text-transform:uppercase;letter-spacing:1px}
-
-.eg{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin:12px 0}
-.ec{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:14px;position:relative;overflow:hidden}
-.ec::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#00ff88,#00aa55)}
-.en{font-size:12px;color:#9ca3af;margin-bottom:6px;line-height:1.4}.en strong{color:#e5e7eb}
-.em{font-size:11px;color:#6b7280;margin-bottom:8px;padding:5px 7px;background:#0f172a;border-radius:4px}
-.er{display:flex;gap:8px;flex-wrap:wrap}
-.ep{background:#0f172a;border-radius:8px;padding:5px 10px;text-align:center}
-.ev{font-size:16px;font-weight:700}.ev.gr{color:#00ff88}.ev.rd{color:#ef4444}.ev.bl{color:#60a5fa}.ev.or{color:#fbbf24}
-.el{font-size:8px;color:#4b5563;text-transform:uppercase;letter-spacing:.5px}
-.ee{font-size:11px;color:#6b7280;margin-top:8px;line-height:1.4;padding-top:7px;border-top:1px solid #1e293b}.ee strong{color:#d1d5db}
-
+.plays-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:14px 0}
+.play-card{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:16px;position:relative;overflow:hidden}
+.play-card.news{border-left:4px solid #00ff88}
+.play-card.time{border-left:4px solid #60a5fa}
+.play-card.crypto{border-left:4px solid #fbbf24}
+.play-card.mover{border-left:4px solid #a78bfa}
+.play-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.play-title{font-size:15px;font-weight:700;color:#e5e7eb}
+.play-toggle{font-size:10px;padding:3px 9px;border-radius:12px;font-weight:700}
+.play-toggle.on{background:#064e3b;color:#6ee7b7}
+.play-toggle.off{background:#7f1d1d;color:#fca5a5}
+.play-desc{font-size:12px;color:#9ca3af;margin-bottom:10px;line-height:1.5}
+.play-rules{font-size:11px;color:#6b7280;margin-bottom:10px;line-height:1.6;padding:8px;background:#0a1020;border-radius:6px}
+.play-rules strong{color:#d1d5db}
+.play-stats{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.ps{background:#0a1020;padding:6px 8px;border-radius:6px;flex:1;text-align:center;min-width:60px}
+.ps-v{font-size:15px;font-weight:700}
+.ps-v.gr{color:#00ff88}.ps-v.rd{color:#ef4444}.ps-v.bl{color:#60a5fa}.ps-v.gy{color:#6b7280}
+.ps-l{font-size:8px;color:#4b5563;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
 .ac{background:#111827;border:1px solid #1e293b;border-radius:8px;padding:12px;margin-bottom:8px}
 .ac:hover{border-color:#334155}
 .ah{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11px}
 .at{color:#4b5563;font-family:monospace}.as{color:#6b7280}
 .ahl{font-size:13px;font-weight:500;margin-bottom:6px}
-.badge{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
+.badge{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;display:inline-block}
 .b-r{background:#7f1d1d;color:#fca5a5}.b-o{background:#78350f;color:#fcd34d}.b-g{background:#064e3b;color:#6ee7b7}
+.b-n{background:#064e3b;color:#6ee7b7}.b-t{background:#0c4a6e;color:#7dd3fc}.b-c{background:#78350f;color:#fcd34d}.b-m{background:#4c1d95;color:#c4b5fd}
 .mr{display:flex;align-items:center;gap:8px;padding:4px 7px;background:#0f172a;border-radius:4px;margin:2px 0;font-size:11px}
 .mq{flex:1;color:#d1d5db}.mp{color:#00ff88;font-weight:700;min-width:45px;text-align:right}
 .mv{color:#6b7280;min-width:50px;text-align:right}
-
 table{width:100%;border-collapse:collapse;margin:10px 0}
 th{text-align:left;color:#4b5563;font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:7px;border-bottom:1px solid #1e293b}
 td{padding:7px;border-bottom:1px solid #111827;font-size:12px}
 tr:hover{background:#111827}
 .up{color:#00ff88}.dn{color:#ef4444}.fl{color:#374151}
-.ins{background:#001a00;border:1px solid #00ff8844;padding:10px 12px;border-radius:6px;margin:10px 0;font-size:12px;line-height:1.5}
-.ins strong{color:#e5e7eb}
-.ins-w{background:#1a1a00;border-color:#ffaa0044}
-.ins-d{background:#1a0000;border-color:#ff444444}
-.footer{text-align:center;padding:25px;color:#1e293b;font-size:11px}
+.filter-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.fb{background:#1e293b;color:#9ca3af;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid transparent}
+.fb:hover{background:#334155}
+.fb.active{background:#064e3b;color:#6ee7b7;border-color:#00ff88}
 .loading{text-align:center;padding:40px;color:#4b5563}
+.footer{text-align:center;padding:25px;color:#1e293b;font-size:11px}
+.settings-box{background:#111827;border:1px solid #1e293b;border-radius:8px;padding:14px;margin:10px 0}
+.settings-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #1e293b;font-size:12px}
+.settings-row:last-child{border-bottom:none}
+.settings-label{color:#9ca3af}.settings-value{color:#00ff88;font-weight:600;font-family:monospace}
 @media(max-width:768px){.nav{padding:0 10px}.page{padding:15px}.stats{gap:6px}.stat{padding:8px 10px}.sv{font-size:18px}}
 </style>
 </head>
@@ -67,677 +75,481 @@ tr:hover{background:#111827}
 <div class="nav">
 <span class="nav-brand">PolyEdge</span>
 <a class="nl active" onclick="showPage('overview')">Overview</a>
-<a class="nl" onclick="showPage('alerts')">Live Alerts</a>
-<a class="nl" onclick="showPage('markets')">Markets</a>
-<a class="nl" onclick="showPage('crypto')">Crypto</a>
+<a class="nl" onclick="showPage('plays')">Plays</a>
+<a class="nl" onclick="showPage('positions')">Positions</a>
+<a class="nl" onclick="showPage('alerts')">Alerts</a>
 <a class="nl" onclick="showPage('opportunities')">Opportunities</a>
 <a class="nl" onclick="showPage('movers')">Movers</a>
-<a class="nl" onclick="showPage('watchlist')">Watchlist</a>
-<a class="nl" onclick="showPage('positions')">Positions</a>
-<a class="nl" onclick="showPage('forensics')">Forensics</a>
-<a class="nl" onclick="showPage('trading')">Trading Guide</a>
-<a class="nl" onclick="showPage('howto')">How It Works</a>
+<a class="nl" onclick="showPage('settings')">Settings</a>
 <span class="nav-right">Scanner: <span id="scanner-status" class="status-on">CHECKING...</span> | <span id="last-update">--</span></span>
 </div>
 
 <!-- OVERVIEW -->
 <div id="page-overview" class="page active">
-<div class="stats" id="stats-bar">
-<div class="stat"><div class="sv" id="s-today">--</div><div class="sl">Today's Alerts</div></div>
-<div class="stat"><div class="sv" id="s-total">--</div><div class="sl">Total Alerts</div></div>
-<div class="stat"><div class="sv or" id="s-high">--</div><div class="sl">High Score (5+)</div></div>
-<div class="stat"><div class="sv bl" id="s-markets">--</div><div class="sl">Active Markets</div></div>
-<div class="stat"><div class="sv or" id="s-btc">--</div><div class="sl">BTC (Binance)</div></div>
-<div class="stat"><div class="sv or" id="s-eth">--</div><div class="sl">ETH (Binance)</div></div>
+<div class="stats">
+<div class="stat"><div class="sv" id="s-pnl">--</div><div class="sl">Net P&L</div></div>
+<div class="stat"><div class="sv bl" id="s-winrate">--</div><div class="sl">Win Rate</div></div>
+<div class="stat"><div class="sv" id="s-wins">--</div><div class="sl">Wins</div></div>
+<div class="stat"><div class="sv rd" id="s-losses">--</div><div class="sl">Losses</div></div>
+<div class="stat"><div class="sv or" id="s-open">--</div><div class="sl">Open Positions</div></div>
+<div class="stat"><div class="sv gy" id="s-markets">--</div><div class="sl">Markets Scanned</div></div>
 </div>
 
-<h2>The Edge Is Real — Proven Examples This Month</h2>
-<p class="st">Real price movements from March 2026. Each shows what happened, how long you had to act, and what $100 would have returned. <strong>All from actual Polymarket CLOB data.</strong></p>
+<h2>The Plays — Live P&L by Type</h2>
+<div class="plays-grid" id="plays-overview"></div>
 
-<div class="eg">
-<div class="ec">
-<div class="en"><strong>Mar 16 — CNBC:</strong> Trump asks China to delay Xi meeting. Polymarket "Visit by Apr 30?" still at 88.5%.</div>
-<div class="em">Market crashed to 45.5% two days later, then to 2.6%</div>
-<div class="er">
-<div class="ep"><div class="ev or">24-36 hrs</div><div class="el">Window</div></div>
-<div class="ep"><div class="ev gr">+$746</div><div class="el">Profit / $100</div></div>
-<div class="ep"><div class="ev bl">88.5%</div><div class="el">When News Broke</div></div>
-<div class="ep"><div class="ev rd">2.6%</div><div class="el">Price Now</div></div>
-</div>
-<div class="ee"><strong>Trade:</strong> Buy NO at $0.115. Trump said it's delayed on camera. Market stayed at 88.5% for 24hrs. NO shares now $0.974. <strong>Profit: $746 on $100.</strong></div>
+<h2>Currently Open Positions</h2>
+<div id="overview-open" class="loading">Loading...</div>
 </div>
 
-<div class="ec">
-<div class="en"><strong>Mar 25 — White House:</strong> Confirms Trump-Xi moved to May 14-15. "Visit by April 30?" at 34.5%.</div>
-<div class="em">Crashed to 2.6% within hours</div>
-<div class="er">
-<div class="ep"><div class="ev or">~1 hr</div><div class="el">Window</div></div>
-<div class="ep"><div class="ev gr">+$186</div><div class="el">Profit / $100</div></div>
-<div class="ep"><div class="ev bl">34.5%</div><div class="el">When News Broke</div></div>
-<div class="ep"><div class="ev rd">2.6%</div><div class="el">Price Now</div></div>
-</div>
-<div class="ee"><strong>Trade:</strong> Buy NO at $0.655. May dates confirmed = April 30 market dead. <strong>Profit: $186.</strong></div>
-</div>
-
-<div class="ec">
-<div class="en"><strong>Mar 8-29 — Time decay:</strong> Active war, daily bombings. "Ceasefire by Mar 31?" at 24.5% with no diplomacy.</div>
-<div class="em">Steadily dropped to 1.5%</div>
-<div class="er">
-<div class="ep"><div class="ev or">Days</div><div class="el">Window</div></div>
-<div class="ep"><div class="ev gr">+$30</div><div class="el">Profit / $100</div></div>
-<div class="ep"><div class="ev bl">24.5%</div><div class="el">Entry</div></div>
-<div class="ep"><div class="ev gr">1.5%</div><div class="el">Now</div></div>
-</div>
-<div class="ee"><strong>Trade:</strong> Buy NO. Active bombing, no talks. Safest edge: <strong>time decay — the closer the deadline, the more certain the profit.</strong></div>
-</div>
-
-<div class="ec">
-<div class="en"><strong>Mar 25 — Same news, other side:</strong> May dates confirmed. "Visit by May 31?" jumped from 47.5%.</div>
-<div class="em">Rose to 76%</div>
-<div class="er">
-<div class="ep"><div class="ev or">~2 hrs</div><div class="el">Window</div></div>
-<div class="ep"><div class="ev gr">+$60</div><div class="el">Profit / $100</div></div>
-<div class="ep"><div class="ev bl">47.5%</div><div class="el">Entry</div></div>
-<div class="ep"><div class="ev gr">76%</div><div class="el">Now</div></div>
-</div>
-<div class="ee"><strong>Trade:</strong> Buy YES at $0.475. May 14-15 confirmed. <strong>$60 profit so far, likely $110+ at resolution.</strong></div>
-</div>
-</div>
-
-<h2>Three Types of Edge</h2>
-<div class="eg" style="grid-template-columns:repeat(3,1fr)">
-<div class="ins"><strong>1. Breaking News</strong> (mins-hours)<br>Wire services break it. Polymarket hasn't repriced. Trump/China had a 24-36hr window.</div>
-<div class="ins ins-w"><strong>2. Mispricing</strong> (days)<br>Markets stay wrong. "Regime fall" at 10.8% ten days into war. Obvious to anyone watching.</div>
-<div class="ins"><strong>3. Time Decay</strong> (predictable)<br>Deadline markets converge to 0/100%. If it's not happening, sell YES. Lowest risk.</div>
-</div>
-
-<h2>Where the Edge Is (Non-Sports)</h2>
-<table>
-<tr><th>Category</th><th>Volume</th><th>Edge Type</th><th>Window</th></tr>
-<tr><td><strong>Geopolitics / Iran</strong></td><td>$324M</td><td>Breaking news</td><td>Hours</td></tr>
-<tr><td><strong>US Politics / 2028</strong></td><td>$1.9B</td><td>News + mispricing</td><td>Hours-days</td></tr>
-<tr><td><strong>Crypto (BTC/ETH)</strong></td><td>$119M</td><td>Binance lead</td><td>Seconds-mins</td></tr>
-<tr><td><strong>Crude Oil</strong></td><td>$72M</td><td>Exchange lead</td><td>Minutes</td></tr>
-<tr><td><strong>Fed / Rates</strong></td><td>$43M</td><td>Breaking news</td><td>Mins-hours</td></tr>
-<tr><td><strong>World Elections</strong></td><td>$95M</td><td>News lag</td><td>Hours-days</td></tr>
-</table>
-</div>
-
-<!-- LIVE ALERTS -->
-<div id="page-alerts" class="page">
-<h2>Live Edge Alerts</h2>
-<p class="st">Scanner checks 200 markets against 10 RSS feeds + 12 Bluesky accounts every 15 minutes. Score 5+ triggers email.</p>
-<div id="alerts-list" class="loading">Loading alerts...</div>
-</div>
-
-<!-- MARKETS -->
-<div id="page-markets" class="page">
-<h2>Live Polymarket Markets</h2>
-<div id="markets-table" class="loading">Loading markets...</div>
-</div>
-
-<!-- CRYPTO -->
-<div id="page-crypto" class="page">
-<h2>Crypto Edge — Binance vs Polymarket</h2>
-<p class="st">Binance updates every second. Polymarket threshold markets lag behind. When Binance crosses a threshold, bet before Polymarket adjusts.</p>
-<div class="stats" id="crypto-prices">
-<div class="stat"><div class="sv or" id="c-btc">--</div><div class="sl">BTC (Binance)</div></div>
-<div class="stat"><div class="sv or" id="c-eth">--</div><div class="sl">ETH (Binance)</div></div>
-</div>
-<h3>Bitcoin Threshold Markets</h3>
-<div id="btc-markets" class="loading">Loading...</div>
-<h3>Ethereum Threshold Markets</h3>
-<div id="eth-markets" class="loading">Loading...</div>
-</div>
-
-<!-- MOVERS -->
-<div id="page-movers" class="page">
-<h2>Biggest Movers (24h) — Why Did They Move?</h2>
-<p class="st">Markets with the biggest price changes in the last 24 hours, excluding sports. For each mover, the scanner searches recent news to find the likely cause. <strong>If no news matches, it could be whale orders or insider activity — that's a signal too.</strong></p>
-<div id="movers-list" class="loading">Loading movers...</div>
-</div>
-
-<!-- WATCHLIST -->
-<div id="page-watchlist" class="page">
-<h2>Watchlist — Markets You're Tracking</h2>
-<p class="st">Markets you've flagged to keep an eye on. Prices update every 90 seconds. Watch for big moves or approaching deadlines.</p>
-<div id="watchlist-view" class="loading">Loading watchlist...</div>
-</div>
-
-<!-- OPPORTUNITIES -->
-<div id="page-opportunities" class="page">
-<h2>Live Opportunities — What to Bet On Right Now</h2>
-<p class="st">Auto-scanned every 15 minutes. These are markets where the scanner has found a potential edge — either time decay (deadline approaching, price hasn't converged) or crypto thresholds (Binance price near a Polymarket level).</p>
-
-<h3>Time Decay Opportunities</h3>
-<p class="st">Markets with deadlines approaching where the price hasn't fully converged to 0% or 100%. The closer the deadline with no resolution, the more predictable the profit.</p>
-<div id="opps-timedecay" class="loading">Loading...</div>
-
-<h3>Crypto Threshold Opportunities</h3>
-<p class="st">BTC or ETH is close to a Polymarket price threshold. If it crosses, the market will reprice — you can bet before that happens.</p>
-<div id="opps-crypto" class="loading">Loading...</div>
+<!-- PLAYS -->
+<div id="page-plays" class="page">
+<h2>The 4 Plays</h2>
+<p class="st">Each play type has its own entry rules, take-profit target, and stop-loss threshold. Rules are defined in <strong>polyedge.py</strong> and synced here every 15 minutes.</p>
+<div id="plays-detail" class="loading">Loading...</div>
 </div>
 
 <!-- POSITIONS -->
 <div id="page-positions" class="page">
-<h2>Paper Trading — Live P&L and Sell Signals</h2>
-<p class="st">Every position tracks live Polymarket prices and tells you when to sell. This is paper trading — proving the edge is real before risking money.</p>
-
-<div class="stats" id="pos-stats">
-<div class="stat"><div class="sv" id="ps-open">--</div><div class="sl">Open</div></div>
-<div class="stat"><div class="sv" id="ps-pnl">--</div><div class="sl">Open P&L</div></div>
-<div class="stat"><div class="sv" id="ps-closed">--</div><div class="sl">Closed</div></div>
-<div class="stat"><div class="sv" id="ps-realised">--</div><div class="sl">Realised P&L</div></div>
-<div class="stat"><div class="sv" id="ps-winrate">--</div><div class="sl">Win Rate</div></div>
+<h2>Positions</h2>
+<div class="filter-bar">
+<span class="fb active" onclick="filterPos(this,'all')">All</span>
+<span class="fb" onclick="filterPos(this,'open')">Open</span>
+<span class="fb" onclick="filterPos(this,'closed')">Closed</span>
+<span class="fb" onclick="filterPos(this,'NEWS_EDGE')">News Edge</span>
+<span class="fb" onclick="filterPos(this,'TIME_DECAY')">Time Decay</span>
+<span class="fb" onclick="filterPos(this,'CRYPTO')">Crypto</span>
+<span class="fb" onclick="filterPos(this,'BIG_MOVER')">Big Mover</span>
+<span class="fb" onclick="filterPos(this,'MANUAL')">Manual</span>
+<span class="fb" onclick="filterPos(this,'win')">Wins Only</span>
+<span class="fb" onclick="filterPos(this,'loss')">Losses Only</span>
+</div>
+<div id="positions-list" class="loading">Loading...</div>
 </div>
 
-<div class="ins" style="margin-bottom:15px">
-<strong>Sell Signals:</strong>
-<span class="up">TAKE PROFIT</span> — 15%+ in your favour, market repriced, sell now |
-<span style="color:#fbbf24">HOLD</span> — profitable but not at target, wait |
-<span class="dn">STOP LOSS</span> — 10%+ against you, cut losses |
-<span style="color:#60a5fa">TIME DECAY</span> — deadline within 3 days + profitable, take the sure money
+<!-- ALERTS -->
+<div id="page-alerts" class="page">
+<h2>Live News Alerts</h2>
+<p class="st">News headlines matched to Polymarket markets. Score 5+ = strong match. 2+ different sources = convergence alert (emails + auto-trades).</p>
+<div id="alerts-list" class="loading">Loading...</div>
 </div>
 
-<div id="positions-view" class="loading">Loading positions...</div>
-
-<h3>Closed Trades</h3>
-<div id="closed-view"></div>
+<!-- OPPORTUNITIES -->
+<div id="page-opportunities" class="page">
+<h2>Current Opportunities</h2>
+<p class="st">Markets that meet the criteria for Time Decay or Crypto plays right now. Not all get auto-traded — some may be too close to thresholds or already traded.</p>
+<div id="opps-list" class="loading">Loading...</div>
 </div>
 
-<!-- FORENSICS -->
-<div id="page-forensics" class="page">
-<h2>Forensic Research: News vs Market Movements</h2>
-<p class="st">Cross-referencing when news broke against when Polymarket repriced. The gap is the edge.</p>
-
-<h3>Event 1: US-Iran War — Feb 28, 2026</h3>
-<div class="ac">
-<div style="font-size:12px;line-height:1.8">
-<span style="color:#60a5fa;font-family:monospace">Feb 27, 20:38 UTC</span> — Trump orders Operation Epic Fury<br>
-<span style="color:#60a5fa;font-family:monospace">Feb 28, 06:35 UTC</span> — CENTCOM announces airstrikes<br>
-<span style="color:#60a5fa;font-family:monospace">Feb 28, 06:45 UTC</span> — Israeli AF strikes — Khamenei killed<br>
-<span style="color:#60a5fa;font-family:monospace">Mar 1</span> — $529M+ on Iran bets — Polymarket record
-</div></div>
-<div class="ins">Market-creation event. Ceasefire started at 61% — now 1.5%. Early NO buyers made massive returns.</div>
-
-<h3>Event 2: Trump-Xi Postponement</h3>
-<div class="ac">
-<div style="font-size:12px;line-height:1.8">
-<span style="color:#60a5fa;font-family:monospace">Mar 16, ~14:00 UTC</span> — CNBC: Trump says delay. <span class="mp">88.5%</span><br>
-<span style="color:#60a5fa;font-family:monospace">Mar 16, ~15:00 UTC</span> — WashPo confirms. <span class="mp">~85%</span><br>
-<span style="color:#ef4444;font-family:monospace">Mar 18, 00:00 UTC</span> — Polymarket crashes 24-36hrs later. <span class="dn">45.5%</span><br>
-<span style="color:#60a5fa;font-family:monospace">Mar 25, ~17:00 UTC</span> — WH confirms May 14-15. <span class="mp">34.5%</span><br>
-<span style="color:#ef4444;font-family:monospace">Mar 25, 18:00 UTC</span> — Crashes ~1hr later. <span class="dn">2.6%</span>
-</div></div>
-<div class="ins"><strong>Key:</strong> Stage 1 had a 24-36hr window. President said it on camera and Polymarket stayed at 88.5% for a full day. Stage 2 was faster (~1hr) but still tradeable.</div>
-
-<h3>Event 3: Iran Ceasefire — Steady Decline</h3>
-<div class="ac">
-<div style="font-size:12px;line-height:1.8">
-<span style="color:#60a5fa;font-family:monospace">Mar 3</span> — Launches at <span class="mp">52.5%</span><br>
-<span style="color:#60a5fa;font-family:monospace">Mar 5</span> — War intensifies. <span style="color:#fbbf24">25.5%</span><br>
-<span style="color:#60a5fa;font-family:monospace">Mar 8</span> — Settles. <span style="color:#fbbf24">24.5%</span><br>
-<span style="color:#60a5fa;font-family:monospace">Mar 25</span> — No talks. <span class="dn">19.5%</span><br>
-<span style="color:#60a5fa;font-family:monospace">Mar 31</span> — Deadline day. <span class="dn">0.4%</span>
-</div></div>
-<div class="ins"><strong>Time decay:</strong> Active war, no diplomatic channel. Anyone who bought NO at any point profited. Safest edge type.</div>
+<!-- MOVERS -->
+<div id="page-movers" class="page">
+<h2>Biggest 24h Movers</h2>
+<p class="st">Markets with the biggest price swings in 24h. Big movers >20% on >$500k volume trigger auto-trades.</p>
+<div id="movers-list" class="loading">Loading...</div>
 </div>
 
-<!-- TRADING GUIDE -->
-<div id="page-trading" class="page">
-<h2>How to Trade on Polymarket</h2>
-<p class="st">Polymarket is an exchange, not just a betting site. Buy shares, sell before resolution, pocket the difference.</p>
-
-<h3>Example Trade</h3>
-<div class="ac" style="font-family:monospace;font-size:12px;line-height:1.8">
-1. "Ceasefire by Mar 31?" at 24.5% — you think NO<br>
-2. Buy 132 NO shares at $0.755 = $100<br>
-3. Price drops to 1.5% over 3 weeks<br>
-4. Sell 132 NO shares at $0.985 = $130<br>
-5. Fee: 2% of $30 profit = $0.60<br>
-6. <strong>Net: $29.40 profit (29.4% return)</strong>
+<!-- SETTINGS -->
+<div id="page-settings" class="page">
+<h2>Current Settings</h2>
+<p class="st">Live snapshot of scanner configuration. To change: edit <strong>polyedge.py</strong> and reload launchd.</p>
+<div id="settings-content" class="loading">Loading...</div>
 </div>
 
-<h3>Fees</h3>
-<table>
-<tr><td><strong>Trading</strong></td><td>2% on profit only. Lose = pay nothing.</td></tr>
-<tr><td><strong>Deposit (crypto)</strong></td><td>Free</td></tr>
-<tr><td><strong>Deposit (card)</strong></td><td>~3-5% (MoonPay)</td></tr>
-<tr><td><strong>Withdrawal</strong></td><td>~$0.01 (Polygon gas)</td></tr>
-</table>
-
-<h3>Order Types</h3>
-<table>
-<tr><td><strong>Limit</strong></td><td>Set price, wait. Avoids spread. Default choice.</td></tr>
-<tr><td><strong>Market</strong></td><td>Instant fill. Use for breaking news speed.</td></tr>
-</table>
-
-<h3>Spreads</h3>
-<table>
-<tr><td>Top markets</td><td>1-2c spread</td><td>Easy exit</td></tr>
-<tr><td>Active ($50K+)</td><td>2-5c</td><td>Fine</td></tr>
-<tr><td>Medium</td><td>5-10c</td><td>Check depth first</td></tr>
-<tr><td>Low volume</td><td>10-25c+</td><td>Risk of being stuck</td></tr>
-</table>
-
-<h3>UK Access</h3>
-<div class="ins">UK users can access Polymarket. No IP block. Not FCA regulated. Profits likely tax-free (gambling). Grey area — could change.</div>
-
-<h3>Setup</h3>
-<table>
-<tr><td>Chain</td><td>Polygon (fast, cheap)</td></tr>
-<tr><td>Currency</td><td>USDC (stablecoin)</td></tr>
-<tr><td>Wallet</td><td>Auto-created. Email or MetaMask</td></tr>
-<tr><td>KYC</td><td>Not needed under $10K</td></tr>
-<tr><td>API</td><td>Fully allowed. py-clob-client (Python)</td></tr>
-</table>
-</div>
-
-<!-- HOW IT WORKS -->
-<div id="page-howto" class="page">
-<h2>How PolyEdge Works</h2>
-
-<h3>Step 1: Scanner Finds an Edge</h3>
-<div class="ac"><p class="st">Every 15 mins: pulls 200 markets, checks 10 RSS feeds + 12 Bluesky news accounts. Matches headlines to markets. Score 5+ = email alert.</p></div>
-
-<h3>Step 2: You Decide</h3>
-<div class="ac"><p class="st">
-<strong>Is the news genuinely new?</strong> Not a rehash.<br>
-<strong>Should it move this market?</strong> Direct impact, not tangential.<br>
-<strong>Has the market already moved?</strong> Check the price. If it crashed, you're late.<br>
-<strong>Enough liquidity?</strong> Over $100K volume = safe.
-</p></div>
-
-<h3>Step 3: You Buy</h3>
-<div class="eg" style="grid-template-columns:1fr 1fr">
-<div class="ins"><strong style="color:#00ff88">Event MORE likely</strong><br>Buy YES. E.g. "Visit by May 31?" — dates confirmed. Buy YES, sell when it rises.</div>
-<div class="ins ins-d"><strong style="color:#ef4444">Event LESS likely</strong><br>Buy NO. E.g. "Ceasefire by Mar 31?" — active war. Buy NO, sell as it drops.</div>
-</div>
-
-<h3>Step 4: Watch — Sell Signals</h3>
-<div class="eg" style="grid-template-columns:1fr 1fr">
-<div class="ins"><strong><span class="up">TAKE PROFIT</span></strong> — 15%+ in your favour. Market repriced. Sell.</div>
-<div class="ins ins-w"><strong><span style="color:#fbbf24">TIME DECAY</span></strong> — Deadline within 3 days + profitable. Take the sure money.</div>
-<div class="ins ins-d"><strong><span class="dn">STOP LOSS</span></strong> — 10%+ against you. You were wrong. Cut losses.</div>
-<div class="ins"><strong><span style="color:#60a5fa">HOLD</span></strong> — Profitable but not at target. Wait.</div>
-</div>
-
-<h3>Step 5: Sell</h3>
-<div class="ac"><p class="st">Place sell order on Polymarket. USDC back in wallet. Typical hold: 1 hour to 2 days. Target: 15-50% return. Fee: 2% of profit.</p></div>
-
-<h3>Golden Rules</h3>
-<div class="eg" style="grid-template-columns:1fr 1fr 1fr">
-<div class="ins">Only trade >$100K volume</div>
-<div class="ins">Use limit orders</div>
-<div class="ins">Bet on price movement, not outcome</div>
-<div class="ins">Paper trade first</div>
-<div class="ins">Time decay = safest</div>
-<div class="ins">10% stop loss always</div>
-</div>
-</div>
-
-<div class="footer">PolyEdge Intelligence | All data from free APIs | Zero cost</div>
+<div class="footer">PolyEdge — Auto-trading paper positions every 15 minutes. Edit polyedge.py and reload launchd to change rules.</div>
 
 <script>
-const GIST_URL='https://api.github.com/gists/291b8da0c6006afb5ee6851a16d4d7df';
-const GAMMA='https://gamma-api.polymarket.com';
-const BINANCE='https://api.binance.com/api/v3/ticker/price';
+let DATA = null;
 
-function showPage(n){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nl').forEach(t=>t.classList.remove('active'));
-  document.getElementById('page-'+n).classList.add('active');
-  document.querySelectorAll('.nl').forEach(t=>{if(t.textContent.toLowerCase().replace(/\s/g,'')==n.replace(/\s/g,''))t.classList.add('active')});
-  event.target.classList.add('active');
+async function loadData() {
+    try {
+        const r = await fetch('https://gist.githubusercontent.com/AdamParkerRank4AI/291b8da0c6006afb5ee6851a16d4d7df/raw/polyedge_data.json?_=' + Date.now());
+        DATA = await r.json();
+        render();
+    } catch (e) {
+        document.getElementById('scanner-status').textContent = 'OFFLINE';
+        document.getElementById('scanner-status').className = 'status-off';
+    }
 }
 
-function fp(p){return p!=null?(p*100).toFixed(1)+'%':'?'}
-function fv(v){v=parseFloat(v)||0;return v>=1e6?'$'+(v/1e6).toFixed(1)+'M':v>=1e3?'$'+(v/1e3).toFixed(0)+'K':'$'+v.toFixed(0)}
-
-async function loadGistData(){
-  try{
-    const r=await fetch(GIST_URL);const d=await r.json();
-    const content=JSON.parse(d.files['polyedge_data.json'].content);
-    const alerts=content.alerts||[];
-    const positions=content.positions||[];
-    const updated=content.last_updated||'?';
-
-    document.getElementById('scanner-status').textContent=content.scanner_status=='active'?'LIVE':'OFF';
-    document.getElementById('scanner-status').className=content.scanner_status=='active'?'status-on':'status-off';
-    document.getElementById('last-update').textContent=updated.substring(0,19).replace('T',' ')+' UTC';
-
-    const today=new Date().toISOString().substring(0,10);
-    const todayAlerts=alerts.filter(a=>(a.timestamp||'').substring(0,10)==today);
-    const highAlerts=alerts.filter(a=>Math.max(...(a.matches||[]).map(m=>m.score||0),0)>=5);
-
-    document.getElementById('s-today').textContent=todayAlerts.length;
-    document.getElementById('s-total').textContent=alerts.length;
-    document.getElementById('s-high').textContent=highAlerts.length;
-
-    // Alerts page
-    let ah='';
-    for(const a of alerts.slice().reverse().slice(0,50)){
-      const ts=(a.timestamp||'').substring(0,19).replace('T',' ');
-      const src=a.source||'?';
-      const hl=a.headline||'?';
-      const link=a.link||'';
-      const matches=a.matches||[];
-      const topScore=Math.max(...matches.map(m=>m.score||0),0);
-      const bc=topScore>=7?'b-r':topScore>=5?'b-o':'b-g';
-      let mh='';
-      for(const m of matches.slice(0,3)){
-        mh+='<div class="mr"><span class="mq">'+((m.question||'?').substring(0,60))+'</span><span class="mp">'+fp(m.yes_price)+'</span><span class="mv">'+fv(m.volume_24h)+'</span></div>';
-      }
-      const hlEl=link?'<a href="'+link+'" target="_blank">'+hl.substring(0,90)+'</a>':hl.substring(0,90);
-      ah+='<div class="ac"><div class="ah"><span class="at">'+ts+'</span><span class="badge '+bc+'">Score: '+topScore+'</span><span class="as">'+src+'</span></div><div class="ahl">'+hlEl+'</div>'+mh+'</div>';
-    }
-    document.getElementById('alerts-list').innerHTML=ah||'<p style="color:#4b5563;text-align:center;padding:30px">No alerts yet.</p>';
-
-    // Movers page
-    renderMovers(content.movers||[]);
-
-    // Watchlist page
-    renderWatchlist(content.watchlist||[]);
-
-    // Opportunities page
-    const opps=content.opportunities||[];
-    renderOpportunities(opps);
-
-    // Positions page
-    window._lastPositions=positions;
-    renderPositions(positions);
-  }catch(e){console.error('Gist load error:',e)}
+function showPage(p) {
+    document.querySelectorAll('.page').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.nav a.nl').forEach(x => x.classList.remove('active'));
+    document.getElementById('page-' + p).classList.add('active');
+    event.target.classList.add('active');
 }
 
-function renderMovers(movers){
-  let h='';
-  if(movers.length){
-    for(const m of movers){
-      const ch=(m.change_24h||0)*100;
-      const chColor=ch>0?'up':'dn';
-      const chStr=ch>0?'+'+ch.toFixed(1)+'%':ch.toFixed(1)+'%';
-      const cause=m.likely_cause||'Unknown';
-      const src=m.cause_source||'';
-      const link=m.cause_link||'';
-      const noNews=m.cause_score===0;
-
-      h+='<div class="ac" style="border-left:3px solid '+(ch>0?'#00ff88':'#ef4444')+'">';
-      h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
-      h+='<span style="font-size:14px;font-weight:500">'+((m.question||'?').substring(0,60))+'</span>';
-      h+='<span class="'+chColor+'" style="font-size:18px;font-weight:700">'+chStr+'</span>';
-      h+='</div>';
-      h+='<div style="display:flex;gap:15px;font-size:12px;color:#6b7280;margin-bottom:8px">';
-      h+='<span>YES: <span class="mp">'+fp(m.yes_price)+'</span></span>';
-      h+='<span>24h Vol: '+fv(m.volume_24h)+'</span>';
-      h+='</div>';
-
-      if(noNews){
-        h+='<div style="background:#1a1a00;border:1px solid #ffaa0044;padding:8px 10px;border-radius:4px;font-size:12px;color:#fbbf24">';
-        h+='<strong>No matching news found</strong> — this move may be driven by large orders, insider activity, or a news source we don\'t cover. Check Polymarket comments or X/Twitter for context.';
-        h+='</div>';
-      }else{
-        h+='<div style="background:#0f172a;padding:8px 10px;border-radius:4px;font-size:12px">';
-        h+='<span style="color:#9ca3af">Likely cause:</span> ';
-        if(link){h+='<a href="'+link+'" target="_blank" style="color:#60a5fa">'+cause.substring(0,80)+'</a>';}
-        else{h+='<span style="color:#e5e7eb">'+cause.substring(0,80)+'</span>';}
-        if(src){h+=' <span style="color:#4b5563">('+src+')</span>';}
-        h+='</div>';
-      }
-      h+='</div>';
-    }
-  }else{
-    h='<p style="color:#4b5563;padding:30px;text-align:center">No significant movers in the last 24 hours. Markets are quiet.</p>';
-  }
-  document.getElementById('movers-list').innerHTML=h;
+function getTradeType(pos) {
+    if (pos.trade_type) return pos.trade_type;
+    const r = pos.auto_reason || '';
+    if (r.includes('NEWS')) return 'NEWS_EDGE';
+    if (r.includes('TIME_DECAY')) return 'TIME_DECAY';
+    if (r.includes('CRYPTO')) return 'CRYPTO';
+    if (r.includes('BIG_MOVER')) return 'BIG_MOVER';
+    return 'MANUAL';
 }
 
-function renderWatchlist(watchlist){
-  let h='';
-  if(watchlist.length){
-    h='<table><tr><th>Market</th><th>YES</th><th>24h Change</th><th>24h Volume</th><th>End Date</th><th>Reason</th></tr>';
-    for(const w of watchlist){
-      const ch=(w.change_24h||0)*100;
-      const chColor=ch>0.5?'up':ch<-0.5?'dn':'fl';
-      const chStr=ch>0?'+'+ch.toFixed(1)+'%':ch<0?ch.toFixed(1)+'%':'--';
-      const endDate=w.end_date?(w.end_date).substring(0,10):'--';
-
-      // Days until deadline
-      let daysStr='';
-      if(w.end_date){
-        try{
-          const days=Math.ceil((new Date(w.end_date)-new Date())/(86400000));
-          if(days<=3)daysStr=' <span style="color:#ef4444;font-weight:700">('+days+'d!)</span>';
-          else if(days<=7)daysStr=' <span style="color:#fbbf24">('+days+'d)</span>';
-          else daysStr=' <span style="color:#4b5563">('+days+'d)</span>';
-        }catch(e){}
-      }
-
-      h+='<tr>';
-      h+='<td>'+((w.question||'?').substring(0,50))+'</td>';
-      h+='<td class="mp">'+fp(w.yes_price)+'</td>';
-      h+='<td class="'+chColor+'" style="font-weight:700">'+chStr+'</td>';
-      h+='<td style="color:#6b7280">'+fv(w.volume_24h)+'</td>';
-      h+='<td style="color:#6b7280">'+endDate+daysStr+'</td>';
-      h+='<td style="color:#9ca3af;font-size:11px">'+(w.reason||'')+'</td>';
-      h+='</tr>';
-    }
-    h+='</table>';
-  }else{
-    h='<p style="color:#4b5563;padding:30px;text-align:center">No markets on watchlist. Add markets by editing ~/polyedge/watchlist.json</p>';
-  }
-  document.getElementById('watchlist-view').innerHTML=h;
+function pnlOf(pos) {
+    if (pos.status !== 'closed' || !pos.exit_price) return 0;
+    return pos.shares * pos.exit_price - pos.stake;
 }
 
-function renderOpportunities(opps){
-  const td=opps.filter(o=>o.type=='TIME_DECAY');
-  const cr=opps.filter(o=>o.type=='CRYPTO_THRESHOLD');
-
-  let tdH='';
-  if(td.length){
-    tdH='<table><tr><th>Market</th><th>YES Price</th><th>Days Left</th><th>Suggested</th><th>Confidence</th><th>Volume</th><th>Why</th></tr>';
-    for(const o of td){
-      const conf=o.confidence;
-      const confColor=conf=='HIGH'?'#00ff88':conf=='MEDIUM'?'#fbbf24':'#6b7280';
-      const sideClass=o.suggested_side=='YES'?'b-g':'b-r';
-      tdH+='<tr>';
-      tdH+='<td>'+((o.question||'?').substring(0,50))+'</td>';
-      tdH+='<td class="mp">'+(o.yes_price*100).toFixed(1)+'%</td>';
-      tdH+='<td style="color:#fbbf24;font-weight:700">'+o.days_left+'d</td>';
-      tdH+='<td><span class="badge '+sideClass+'">'+o.suggested_side+'</span></td>';
-      tdH+='<td style="color:'+confColor+';font-weight:700">'+conf+'</td>';
-      tdH+='<td style="color:#6b7280">'+fv(o.volume)+'</td>';
-      tdH+='<td style="color:#9ca3af;font-size:11px">'+o.reason+'</td>';
-      tdH+='</tr>';
-    }
-    tdH+='</table>';
-  }else{
-    tdH='<p style="color:#4b5563;padding:20px;text-align:center">No time-decay opportunities right now. Markets may have already converged.</p>';
-  }
-  document.getElementById('opps-timedecay').innerHTML=tdH;
-
-  let crH='';
-  if(cr.length){
-    crH='<table><tr><th>Market</th><th>YES Price</th><th>Crypto</th><th>Live Price</th><th>Threshold</th><th>Distance</th><th>Above?</th></tr>';
-    for(const o of cr){
-      const aboveColor=o.above_threshold?'#00ff88':'#ef4444';
-      crH+='<tr>';
-      crH+='<td>'+((o.question||'?').substring(0,50))+'</td>';
-      crH+='<td class="mp">'+(o.yes_price*100).toFixed(1)+'%</td>';
-      crH+='<td style="color:#fbbf24;font-weight:700">'+o.crypto+'</td>';
-      crH+='<td style="color:#fbbf24">$'+o.crypto_price.toLocaleString()+'</td>';
-      crH+='<td>$'+o.threshold.toLocaleString()+'</td>';
-      crH+='<td>'+o.distance_pct.toFixed(1)+'%</td>';
-      crH+='<td style="color:'+aboveColor+';font-weight:700">'+(o.above_threshold?'YES':'NO')+'</td>';
-      crH+='</tr>';
-    }
-    crH+='</table>';
-  }else{
-    crH='<p style="color:#4b5563;padding:20px;text-align:center">No crypto threshold opportunities right now. BTC/ETH not near any active Polymarket levels.</p>';
-  }
-  document.getElementById('opps-crypto').innerHTML=crH;
+function openPnl(pos, signal) {
+    if (signal) return signal.pnl || 0;
+    return 0;
 }
 
-var _marketPrices={};
-
-function renderPositions(positions){
-  const open=positions.filter(p=>p.status=='open');
-  const closed=positions.filter(p=>p.status=='closed');
-  let totalPnl=0,totalRealised=0,wins=0;
-
-  // Open positions
-  let h='<table><tr><th>Market</th><th>Side</th><th>Entry</th><th>Now</th><th>P&L</th><th>Signal</th><th>Opened</th></tr>';
-  if(open.length){
-    for(const p of open){
-      const entry=p.entry_price||0;
-      const stake=p.stake||100;
-      const shares=entry>0?Math.floor(stake/entry):0;
-      const slug=p.slug||'';
-      let cur=entry;
-
-      // Get live price from cached market data
-      if(_marketPrices[slug]!==undefined){
-        const yesPrice=_marketPrices[slug];
-        cur=p.side=='YES'?yesPrice:(1-yesPrice);
-      }
-
-      const curValue=shares*cur;
-      const pnl=curValue-stake;
-      const pnlPct=stake>0?(pnl/stake*100):0;
-      totalPnl+=pnl;
-
-      // Sell signal
-      const movePct=entry>0?((cur-entry)/entry*100):0;
-      let signal,sigColor;
-      const endDate=p.end_date||'';
-      let daysLeft=999;
-      if(endDate){try{daysLeft=Math.ceil((new Date(endDate)-new Date())/(86400000));}catch(e){}}
-
-      if(movePct>=15){signal='TAKE PROFIT';sigColor='#00ff88';}
-      else if(movePct<=-10){signal='STOP LOSS';sigColor='#ef4444';}
-      else if(daysLeft<=3&&movePct>0){signal='TIME DECAY ('+daysLeft+'d)';sigColor='#60a5fa';}
-      else if(movePct>0){signal='HOLD';sigColor='#fbbf24';}
-      else{signal='WATCHING';sigColor='#6b7280';}
-
-      const pnlColor=pnl>=0?'up':'dn';
-      const borderColor=sigColor;
-      h+='<tr style="border-left:3px solid '+borderColor+'"><td>'+((p.question||'?').substring(0,50))+'</td>';
-      h+='<td><span class="badge '+(p.side=='YES'?'b-g':'b-r')+'">'+p.side+'</span></td>';
-      h+='<td>'+(entry*100).toFixed(1)+'c</td>';
-      h+='<td class="mp">'+(cur*100).toFixed(1)+'c</td>';
-      h+='<td class="'+pnlColor+'" style="font-weight:700">$'+pnl.toFixed(2)+' ('+pnlPct.toFixed(1)+'%)</td>';
-      h+='<td style="color:'+sigColor+';font-weight:700">'+signal+'</td>';
-      h+='<td style="color:#4b5563">'+(p.opened||'?').substring(0,10)+'</td></tr>';
-    }
-  }else{
-    h+='<tr><td colspan="7" style="color:#4b5563;text-align:center;padding:25px">No open positions. Paper trades will appear here when added from the scanner.</td></tr>';
-  }
-  h+='</table>';
-  document.getElementById('positions-view').innerHTML=h;
-
-  // Closed trades
-  let ch='';
-  if(closed.length){
-    ch='<table><tr><th>Market</th><th>Side</th><th>Entry</th><th>Exit</th><th>P&L</th><th>Return</th><th>Held</th></tr>';
-    for(const p of closed.slice(-20).reverse()){
-      const entry=p.entry_price||0;
-      const exit=p.exit_price||0;
-      const stake=p.stake||100;
-      const shares=entry>0?Math.floor(stake/entry):0;
-      const pnl=shares*(exit-entry);
-      const pnlPct=stake>0?(pnl/stake*100):0;
-      totalRealised+=pnl;
-      if(pnl>0)wins++;
-
-      // Days held
-      let held='?';
-      if(p.opened&&p.closed){
-        try{const d=Math.ceil((new Date(p.closed)-new Date(p.opened))/(86400000));held=d+'d';}catch(e){}
-      }
-
-      const pc=pnl>=0?'up':'dn';
-      ch+='<tr><td>'+((p.question||'?').substring(0,50))+'</td><td>'+p.side+'</td>';
-      ch+='<td>'+(entry*100).toFixed(1)+'c</td><td>'+(exit*100).toFixed(1)+'c</td>';
-      ch+='<td class="'+pc+'" style="font-weight:700">$'+pnl.toFixed(2)+'</td>';
-      ch+='<td class="'+pc+'" style="font-weight:700">'+pnlPct.toFixed(1)+'%</td>';
-      ch+='<td style="color:#4b5563">'+held+'</td></tr>';
-    }
-    ch+='</table>';
-  }
-  document.getElementById('closed-view').innerHTML=ch;
-
-  // Stats
-  const winRate=closed.length>0?Math.round(wins/closed.length*100):0;
-  document.getElementById('ps-open').textContent=open.length;
-  document.getElementById('ps-pnl').textContent='$'+totalPnl.toFixed(2);
-  document.getElementById('ps-pnl').className='sv '+(totalPnl>=0?'':'rd');
-  document.getElementById('ps-closed').textContent=closed.length;
-  document.getElementById('ps-realised').textContent='$'+totalRealised.toFixed(2);
-  document.getElementById('ps-realised').className='sv '+(totalRealised>=0?'':'rd');
-  document.getElementById('ps-winrate').textContent=closed.length>0?winRate+'%':'--';
+function computePlayStats() {
+    const stats = {NEWS_EDGE:{w:0,l:0,wp:0,lp:0,o:0}, TIME_DECAY:{w:0,l:0,wp:0,lp:0,o:0},
+                   CRYPTO:{w:0,l:0,wp:0,lp:0,o:0}, BIG_MOVER:{w:0,l:0,wp:0,lp:0,o:0},
+                   MANUAL:{w:0,l:0,wp:0,lp:0,o:0}};
+    const signalsById = {};
+    (DATA.position_signals || []).forEach(s => signalsById[s.id] = s);
+    (DATA.positions || []).forEach(p => {
+        const t = getTradeType(p);
+        if (!stats[t]) stats[t] = {w:0,l:0,wp:0,lp:0,o:0};
+        if (p.status === 'closed' && p.exit_price) {
+            const pnl = pnlOf(p);
+            if (pnl > 0) { stats[t].w++; stats[t].wp += pnl; }
+            else { stats[t].l++; stats[t].lp += pnl; }
+        } else if (p.status === 'open') {
+            stats[t].o++;
+        }
+    });
+    return stats;
 }
 
-async function loadMarkets(){
-  try{
-    const r=await fetch(GAMMA+'/markets?closed=false&active=true&limit=100&order=volume24hr&ascending=false');
-    const markets=await r.json();
-    document.getElementById('s-markets').textContent=markets.length;
+function renderOverview() {
+    const positions = DATA.positions || [];
+    const signals = DATA.position_signals || [];
+    let wins = 0, losses = 0, winPnL = 0, lossPnL = 0, openCount = 0;
+    positions.forEach(p => {
+        if (p.status === 'closed' && p.exit_price) {
+            const pnl = pnlOf(p);
+            if (pnl > 0) { wins++; winPnL += pnl; }
+            else { losses++; lossPnL += pnl; }
+        } else if (p.status === 'open') openCount++;
+    });
+    const netPnL = winPnL + lossPnL;
+    const winRate = (wins + losses) > 0 ? (wins / (wins + losses) * 100) : 0;
 
-    // Cache prices for position P&L
-    for(const m of markets){
-      const slug=m.slug||'';
-      const prices=JSON.parse(m.outcomePrices||'[]');
-      if(slug&&prices[0])_marketPrices[slug]=parseFloat(prices[0]);
-    }
-    // Re-render positions with live prices
-    if(window._lastPositions)renderPositions(window._lastPositions);
+    const pnlEl = document.getElementById('s-pnl');
+    pnlEl.textContent = '$' + (netPnL >= 0 ? '+' : '') + netPnL.toFixed(0);
+    pnlEl.className = 'sv ' + (netPnL >= 0 ? '' : 'rd');
+    document.getElementById('s-winrate').textContent = winRate.toFixed(0) + '%';
+    document.getElementById('s-wins').textContent = wins;
+    document.getElementById('s-losses').textContent = losses;
+    document.getElementById('s-open').textContent = openCount;
+    document.getElementById('s-markets').textContent = '500';
 
-    let h='<table><tr><th>Market</th><th>YES</th><th>24h Volume</th></tr>';
-    for(const m of markets){
-      const q=(m.question||'?').substring(0,60);
-      const prices=JSON.parse(m.outcomePrices||'[]');
-      const yes=prices[0]?fp(parseFloat(prices[0])):'?';
-      h+='<tr><td>'+q+'</td><td class="mp" style="font-size:14px">'+yes+'</td><td style="color:#6b7280">'+fv(m.volume24hr)+'</td></tr>';
-    }
-    h+='</table>';
-    document.getElementById('markets-table').innerHTML=h;
+    // Play cards
+    const stats = computePlayStats();
+    const settings = DATA.settings || {plays: {}};
+    const order = ['NEWS_EDGE', 'TIME_DECAY', 'CRYPTO', 'BIG_MOVER'];
+    const css = {NEWS_EDGE:'news', TIME_DECAY:'time', CRYPTO:'crypto', BIG_MOVER:'mover'};
+    const titles = {NEWS_EDGE:'NEWS EDGE', TIME_DECAY:'TIME DECAY', CRYPTO:'CRYPTO', BIG_MOVER:'BIG MOVER'};
 
-    // Crypto threshold markets
-    let btcH='<table><tr><th>Market</th><th>YES</th><th>Vol</th></tr>',ethH='<table><tr><th>Market</th><th>YES</th><th>Vol</th></tr>';
-    let btcC=0,ethC=0;
-    for(const m of markets){
-      const q=(m.question||'').toLowerCase();
-      const prices=JSON.parse(m.outcomePrices||'[]');
-      const yes=prices[0]?fp(parseFloat(prices[0])):'?';
-      if((q.includes('bitcoin'))&&(q.includes('hit')||q.includes('above')||q.includes('reach'))){
-        btcH+='<tr><td>'+m.question.substring(0,60)+'</td><td class="mp">'+yes+'</td><td style="color:#6b7280">'+fv(m.volume24hr)+'</td></tr>';btcC++;
-      }
-      if((q.includes('ethereum'))&&(q.includes('hit')||q.includes('above')||q.includes('reach'))){
-        ethH+='<tr><td>'+m.question.substring(0,60)+'</td><td class="mp">'+yes+'</td><td style="color:#6b7280">'+fv(m.volume24hr)+'</td></tr>';ethC++;
-      }
+    let html = '';
+    order.forEach(t => {
+        const s = stats[t] || {w:0,l:0,wp:0,lp:0,o:0};
+        const net = s.wp + s.lp;
+        const wr = (s.w + s.l) > 0 ? (s.w / (s.w + s.l) * 100) : 0;
+        const settingInfo = (settings.plays && settings.plays[t]) || {};
+        const enabled = settingInfo.enabled !== false;
+
+        html += `<div class="play-card ${css[t]}">
+            <div class="play-head">
+                <div class="play-title">${titles[t]}</div>
+                <span class="play-toggle ${enabled ? 'on' : 'off'}">${enabled ? 'ON' : 'OFF'}</span>
+            </div>
+            <div class="play-desc">${settingInfo.description || ''}</div>
+            <div class="play-stats">
+                <div class="ps"><div class="ps-v ${net >= 0 ? 'gr' : 'rd'}">$${net >= 0 ? '+' : ''}${net.toFixed(0)}</div><div class="ps-l">Net P&L</div></div>
+                <div class="ps"><div class="ps-v gr">${s.w}</div><div class="ps-l">Wins</div></div>
+                <div class="ps"><div class="ps-v rd">${s.l}</div><div class="ps-l">Losses</div></div>
+                <div class="ps"><div class="ps-v bl">${s.o}</div><div class="ps-l">Open</div></div>
+                <div class="ps"><div class="ps-v gy">${wr.toFixed(0)}%</div><div class="ps-l">Win Rate</div></div>
+            </div>
+        </div>`;
+    });
+    document.getElementById('plays-overview').innerHTML = html;
+
+    // Open positions mini table
+    const openPos = positions.filter(p => p.status === 'open');
+    const sigById = {};
+    signals.forEach(s => sigById[s.id] = s);
+
+    if (openPos.length === 0) {
+        document.getElementById('overview-open').innerHTML = '<p class="st">No open positions.</p>';
+    } else {
+        let rows = '<table><tr><th>Type</th><th>Market</th><th>Side</th><th>Entry</th><th>Now</th><th>P&L</th><th>Signal</th></tr>';
+        openPos.sort((a, b) => {
+            const sa = sigById[a.id] || {};
+            const sb = sigById[b.id] || {};
+            return (sb.pnl || 0) - (sa.pnl || 0);
+        });
+        openPos.forEach(p => {
+            const s = sigById[p.id] || {};
+            const t = getTradeType(p);
+            const tb = {NEWS_EDGE:'b-n',TIME_DECAY:'b-t',CRYPTO:'b-c',BIG_MOVER:'b-m',MANUAL:'b-g'}[t] || 'b-g';
+            const pnl = s.pnl || 0;
+            const cls = pnl > 0 ? 'up' : (pnl < 0 ? 'dn' : 'fl');
+            rows += `<tr>
+                <td><span class="badge ${tb}">${t.replace('_', ' ')}</span></td>
+                <td>${p.question.substring(0,60)}</td>
+                <td>${p.side}</td>
+                <td>${(p.entry_price * 100).toFixed(1)}¢</td>
+                <td>${s.current_price ? (s.current_price * 100).toFixed(1) + '¢' : '--'}</td>
+                <td class="${cls}">$${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}</td>
+                <td>${s.signal || '--'}</td>
+            </tr>`;
+        });
+        rows += '</table>';
+        document.getElementById('overview-open').innerHTML = rows;
     }
-    btcH+='</table>';ethH+='</table>';
-    document.getElementById('btc-markets').innerHTML=btcC?btcH:'<p style="color:#4b5563">No active BTC threshold markets</p>';
-    document.getElementById('eth-markets').innerHTML=ethC?ethH:'<p style="color:#4b5563">No active ETH threshold markets</p>';
-  }catch(e){console.error('Market load error:',e)}
 }
 
-async function loadCrypto(){
-  try{
-    const [br,er]=await Promise.all([fetch(BINANCE+'?symbol=BTCUSDT'),fetch(BINANCE+'?symbol=ETHUSDT')]);
-    const btc=parseFloat((await br.json()).price);
-    const eth=parseFloat((await er.json()).price);
-    document.getElementById('s-btc').textContent='$'+btc.toLocaleString(undefined,{maximumFractionDigits:0});
-    document.getElementById('s-eth').textContent='$'+eth.toLocaleString(undefined,{maximumFractionDigits:0});
-    document.getElementById('c-btc').textContent='$'+btc.toLocaleString(undefined,{maximumFractionDigits:2});
-    document.getElementById('c-eth').textContent='$'+eth.toLocaleString(undefined,{maximumFractionDigits:2});
-  }catch(e){console.error('Crypto error:',e)}
+function renderPlaysDetail() {
+    const stats = computePlayStats();
+    const settings = (DATA.settings || {}).plays || {};
+    const order = ['NEWS_EDGE', 'TIME_DECAY', 'CRYPTO', 'BIG_MOVER'];
+    const css = {NEWS_EDGE:'news', TIME_DECAY:'time', CRYPTO:'crypto', BIG_MOVER:'mover'};
+    const titles = {NEWS_EDGE:'NEWS EDGE', TIME_DECAY:'TIME DECAY', CRYPTO:'CRYPTO', BIG_MOVER:'BIG MOVER'};
+
+    let html = '<div class="plays-grid">';
+    order.forEach(t => {
+        const s = stats[t] || {w:0,l:0,wp:0,lp:0,o:0};
+        const net = s.wp + s.lp;
+        const wr = (s.w + s.l) > 0 ? (s.w / (s.w + s.l) * 100) : 0;
+        const cfg = settings[t] || {};
+        const enabled = cfg.enabled !== false;
+
+        let rules = '';
+        if (t === 'NEWS_EDGE') {
+            rules = `<strong>Trigger:</strong> Match score ≥ ${cfg.min_score || 5}, ${cfg.min_sources || 2}+ different news sources confirming<br>
+                <strong>Take profit:</strong> +${cfg.take_profit_pct || 5}%<br>
+                <strong>Stop loss:</strong> -${cfg.stop_loss_pct || 15}%<br>
+                <strong>Sources:</strong> 15 RSS + Federal Register + GDELT`;
+        } else if (t === 'TIME_DECAY') {
+            rules = `<strong>Entry:</strong> <${cfg.max_days || 7} days to deadline, min volume $${(cfg.min_volume || 50000).toLocaleString()}<br>
+                <strong>Lean:</strong> bet NO if price <40%, YES if >60%<br>
+                <strong>Take profit:</strong> +${cfg.take_profit_pct || 8}%<br>
+                <strong>Stop loss:</strong> -${cfg.stop_loss_pct || 20}%<br>
+                <strong>Skip:</strong> Multi-bin markets (tweet counts, ranges)`;
+        } else if (t === 'CRYPTO') {
+            rules = `<strong>Entry:</strong> Within ${cfg.min_distance_pct || 2}-${cfg.max_distance_pct || 5}% of threshold, price 5-95%<br>
+                <strong>Direction:</strong> bet YES if price above threshold, NO if below<br>
+                <strong>Take profit:</strong> +${cfg.take_profit_pct || 5}%<br>
+                <strong>Stop loss:</strong> -${cfg.stop_loss_pct || 15}%<br>
+                <strong>Skip:</strong> "Between X and Y" range markets`;
+        } else if (t === 'BIG_MOVER') {
+            rules = `<strong>Entry:</strong> >${cfg.min_change_pct || 20}% 24h move, min $${(cfg.min_volume || 500000).toLocaleString()} volume<br>
+                <strong>Direction:</strong> momentum — ride the move<br>
+                <strong>Take profit:</strong> +${cfg.take_profit_pct || 5}%<br>
+                <strong>Stop loss:</strong> -${cfg.stop_loss_pct || 15}%<br>
+                <strong>Skip:</strong> Sports, crypto, price >85% or <15%`;
+        }
+
+        html += `<div class="play-card ${css[t]}">
+            <div class="play-head">
+                <div class="play-title">${titles[t]}</div>
+                <span class="play-toggle ${enabled ? 'on' : 'off'}">${enabled ? 'ENABLED' : 'DISABLED'}</span>
+            </div>
+            <div class="play-desc">${cfg.description || ''}</div>
+            <div class="play-rules">${rules}</div>
+            <div class="play-stats">
+                <div class="ps"><div class="ps-v ${net >= 0 ? 'gr' : 'rd'}">$${net >= 0 ? '+' : ''}${net.toFixed(0)}</div><div class="ps-l">Net P&L</div></div>
+                <div class="ps"><div class="ps-v gr">${s.w}</div><div class="ps-l">Wins</div></div>
+                <div class="ps"><div class="ps-v rd">${s.l}</div><div class="ps-l">Losses</div></div>
+                <div class="ps"><div class="ps-v bl">${s.o}</div><div class="ps-l">Open</div></div>
+                <div class="ps"><div class="ps-v gy">${wr.toFixed(0)}%</div><div class="ps-l">Win Rate</div></div>
+            </div>
+        </div>`;
+    });
+    html += '</div>';
+    document.getElementById('plays-detail').innerHTML = html;
 }
 
-// Load everything
-loadGistData();loadMarkets();loadCrypto();
-// Refresh every 90 seconds
-setInterval(function(){loadGistData();loadMarkets();loadCrypto();},90000);
+let posFilter = 'all';
+function filterPos(el, f) {
+    document.querySelectorAll('#page-positions .fb').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    posFilter = f;
+    renderPositions();
+}
+
+function renderPositions() {
+    const positions = DATA.positions || [];
+    const signals = DATA.position_signals || [];
+    const sigById = {};
+    signals.forEach(s => sigById[s.id] = s);
+
+    let filtered = positions.slice();
+    if (posFilter === 'open') filtered = filtered.filter(p => p.status === 'open');
+    else if (posFilter === 'closed') filtered = filtered.filter(p => p.status === 'closed');
+    else if (posFilter === 'win') filtered = filtered.filter(p => p.status === 'closed' && pnlOf(p) > 0);
+    else if (posFilter === 'loss') filtered = filtered.filter(p => p.status === 'closed' && pnlOf(p) < 0);
+    else if (['NEWS_EDGE','TIME_DECAY','CRYPTO','BIG_MOVER','MANUAL'].includes(posFilter)) {
+        filtered = filtered.filter(p => getTradeType(p) === posFilter);
+    }
+
+    filtered.sort((a, b) => {
+        if (a.status === 'open' && b.status !== 'open') return -1;
+        if (b.status === 'open' && a.status !== 'open') return 1;
+        const da = new Date(a.closed || a.opened).getTime();
+        const db = new Date(b.closed || b.opened).getTime();
+        return db - da;
+    });
+
+    if (filtered.length === 0) {
+        document.getElementById('positions-list').innerHTML = '<p class="st">No positions matching filter.</p>';
+        return;
+    }
+
+    let html = '<table><tr><th>Status</th><th>Type</th><th>Market</th><th>Side</th><th>Entry</th><th>Exit/Now</th><th>Move</th><th>P&L</th><th>Signal</th></tr>';
+    filtered.forEach(p => {
+        const s = sigById[p.id] || {};
+        const t = getTradeType(p);
+        const tb = {NEWS_EDGE:'b-n',TIME_DECAY:'b-t',CRYPTO:'b-c',BIG_MOVER:'b-m',MANUAL:'b-g'}[t] || 'b-g';
+        const statusB = p.status === 'open' ? '<span class="badge b-o">OPEN</span>' :
+                        (pnlOf(p) > 0 ? '<span class="badge b-g">WIN</span>' : '<span class="badge b-r">LOSS</span>');
+        const pnl = p.status === 'closed' ? pnlOf(p) : (s.pnl || 0);
+        const cls = pnl > 0 ? 'up' : (pnl < 0 ? 'dn' : 'fl');
+        const priceNow = p.status === 'closed' ? (p.exit_price * 100).toFixed(1) :
+                         (s.current_price ? (s.current_price * 100).toFixed(1) : '--');
+        const entryP = p.entry_price * 100;
+        const exitP = p.status === 'closed' ? p.exit_price * 100 : (s.current_price ? s.current_price * 100 : null);
+        const move = exitP !== null ? ((exitP - entryP) / entryP * 100) : 0;
+        const sigText = p.status === 'closed' ? (p.close_reason || 'closed') : (s.signal || '--');
+
+        html += `<tr>
+            <td>${statusB}</td>
+            <td><span class="badge ${tb}">${t.replace('_', ' ')}</span></td>
+            <td>${p.question.substring(0,55)}</td>
+            <td>${p.side}</td>
+            <td>${entryP.toFixed(1)}¢</td>
+            <td>${priceNow}¢</td>
+            <td class="${move >= 0 ? 'up' : 'dn'}">${move >= 0 ? '+' : ''}${move.toFixed(1)}%</td>
+            <td class="${cls}">$${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}</td>
+            <td>${sigText}</td>
+        </tr>`;
+    });
+    html += '</table>';
+    document.getElementById('positions-list').innerHTML = html;
+}
+
+function renderAlerts() {
+    const alerts = DATA.alerts || [];
+    if (alerts.length === 0) {
+        document.getElementById('alerts-list').innerHTML = '<p class="st">No alerts yet.</p>';
+        return;
+    }
+    let html = '';
+    alerts.slice(0, 50).forEach(a => {
+        const ts = a.timestamp ? new Date(a.timestamp).toLocaleString() : '';
+        html += `<div class="ac">
+            <div class="ah">
+                <span class="at">${ts}</span>
+                <span class="as">· ${a.source || '?'}</span>
+            </div>
+            <div class="ahl">${a.headline || ''}</div>`;
+        (a.matches || []).slice(0, 3).forEach(m => {
+            const scoreBadge = m.score >= 7 ? 'b-g' : (m.score >= 5 ? 'b-o' : 'b-r');
+            html += `<div class="mr">
+                <span class="badge ${scoreBadge}">Score ${m.score}</span>
+                <span class="mq">${m.question}</span>
+                <span class="mp">${(m.yes_price * 100).toFixed(1)}%</span>
+                <span class="mv">$${((m.volume_24h || 0) / 1000).toFixed(0)}k</span>
+            </div>`;
+        });
+        html += '</div>';
+    });
+    document.getElementById('alerts-list').innerHTML = html;
+}
+
+function renderOpps() {
+    const opps = DATA.opportunities || [];
+    if (opps.length === 0) {
+        document.getElementById('opps-list').innerHTML = '<p class="st">No opportunities right now.</p>';
+        return;
+    }
+    let html = '<table><tr><th>Type</th><th>Market</th><th>Price</th><th>Days</th><th>Volume</th><th>Reason</th></tr>';
+    opps.forEach(o => {
+        const t = o.type === 'TIME_DECAY' ? 'b-t' : 'b-c';
+        html += `<tr>
+            <td><span class="badge ${t}">${o.type}</span></td>
+            <td>${o.question.substring(0,60)}</td>
+            <td>${(o.yes_price * 100).toFixed(1)}%</td>
+            <td>${o.days_left !== undefined ? o.days_left + 'd' : '-'}</td>
+            <td>$${((o.volume || 0) / 1e6).toFixed(1)}M</td>
+            <td>${o.reason || ''}</td>
+        </tr>`;
+    });
+    html += '</table>';
+    document.getElementById('opps-list').innerHTML = html;
+}
+
+function renderMovers() {
+    const movers = DATA.movers || [];
+    if (movers.length === 0) {
+        document.getElementById('movers-list').innerHTML = '<p class="st">No big movers right now.</p>';
+        return;
+    }
+    let html = '<table><tr><th>Market</th><th>Price</th><th>24h Change</th><th>Volume</th><th>Likely Cause</th></tr>';
+    movers.forEach(m => {
+        const ch = m.change_24h * 100;
+        html += `<tr>
+            <td>${m.question.substring(0,60)}</td>
+            <td>${(m.yes_price * 100).toFixed(1)}%</td>
+            <td class="${ch >= 0 ? 'up' : 'dn'}">${ch >= 0 ? '+' : ''}${ch.toFixed(1)}%</td>
+            <td>$${((m.volume_24h || 0) / 1000).toFixed(0)}k</td>
+            <td>${m.likely_cause ? m.likely_cause.substring(0,55) : '--'}</td>
+        </tr>`;
+    });
+    html += '</table>';
+    document.getElementById('movers-list').innerHTML = html;
+}
+
+function renderSettings() {
+    const s = DATA.settings || {};
+    const g = s.global || {};
+    let html = '<h3>Global Settings</h3><div class="settings-box">';
+    html += `<div class="settings-row"><span class="settings-label">Max Open Positions</span><span class="settings-value">${g.max_open_positions || '?'}</span></div>`;
+    html += `<div class="settings-row"><span class="settings-label">Stake Per Trade</span><span class="settings-value">$${g.stake_per_trade || '?'}</span></div>`;
+    html += `<div class="settings-row"><span class="settings-label">Scan Interval</span><span class="settings-value">${g.scan_interval_mins || '?'} mins</span></div>`;
+    html += `<div class="settings-row"><span class="settings-label">Auto-Trading</span><span class="settings-value">${g.auto_trade ? 'ON' : 'OFF'}</span></div>`;
+    html += `<div class="settings-row"><span class="settings-label">Auto-Close on TP/SL</span><span class="settings-value">${g.auto_close ? 'ON' : 'OFF'}</span></div>`;
+    html += '</div>';
+
+    const plays = s.plays || {};
+    Object.keys(plays).forEach(k => {
+        const p = plays[k];
+        html += `<h3>${k.replace('_', ' ')}</h3><div class="settings-box">`;
+        Object.keys(p).forEach(pk => {
+            if (pk === 'description') return;
+            html += `<div class="settings-row"><span class="settings-label">${pk}</span><span class="settings-value">${JSON.stringify(p[pk])}</span></div>`;
+        });
+        html += '</div>';
+    });
+
+    document.getElementById('settings-content').innerHTML = html;
+}
+
+function render() {
+    if (!DATA) return;
+    const lu = DATA.last_updated ? new Date(DATA.last_updated) : null;
+    if (lu) document.getElementById('last-update').textContent = 'Updated ' + lu.toLocaleTimeString();
+    document.getElementById('scanner-status').textContent = DATA.scanner_status === 'active' ? 'ACTIVE' : 'IDLE';
+    renderOverview();
+    renderPlaysDetail();
+    renderPositions();
+    renderAlerts();
+    renderOpps();
+    renderMovers();
+    renderSettings();
+}
+
+loadData();
+setInterval(loadData, 60000);
 </script>
 </body>
 </html>
-<!-- deployed -->
