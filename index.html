@@ -965,6 +965,49 @@ function renderJustMissed() {
     html += renderSection('Converged but untraded (watchlist or price-range filter blocked)', jm.just_missed_diff_market, '#ffaa00');
     html += renderSection('Would have lost badly (looser rules = bleed)', jm.would_have_lost, '#ef4444');
 
+    // Pattern analysis — who's right, what's reliable
+    const p = jm.patterns || {};
+    if (p.by_source && p.by_source.length) {
+        html += '<h3 style="border-left:3px solid #00d4ff;padding-left:10px;margin-top:24px">Patterns — by News Source</h3>';
+        html += '<p class="st">Which sources drove winning vs losing calls. Green = trustworthy signal. Red = noise/whiplash.</p>';
+        html += '<table><tr><th>Source</th><th>Total</th><th>Winners</th><th>Losers</th><th>Flat</th><th>Accuracy</th><th>Net Sim P&L</th><th>Max Score</th></tr>';
+        p.by_source.forEach(s => {
+            const pnlCls = s.net_sim_pnl > 0 ? 'up' : (s.net_sim_pnl < 0 ? 'dn' : 'fl');
+            const accCls = s.accuracy_pct >= 60 ? 'up' : (s.accuracy_pct < 40 ? 'dn' : 'fl');
+            html += `<tr>
+                <td><span class="badge b-n">${escapeHtml(s.source)}</span></td>
+                <td>${s.total}</td>
+                <td class="up">${s.winners}</td>
+                <td class="dn">${s.losers}</td>
+                <td>${s.flat}</td>
+                <td class="${accCls}"><strong>${s.accuracy_pct}%</strong></td>
+                <td class="${pnlCls}"><strong>${s.net_sim_pnl >= 0 ? '+' : ''}$${s.net_sim_pnl.toFixed(2)}</strong></td>
+                <td>${s.max_score_seen}</td>
+            </tr>`;
+        });
+        html += '</table>';
+    }
+
+    if (p.by_topic && p.by_topic.length) {
+        html += '<h3 style="border-left:3px solid #00d4ff;padding-left:10px;margin-top:24px">Patterns — by Topic</h3>';
+        html += '<p class="st">Which topic clusters produced wins vs losses.</p>';
+        html += '<table><tr><th>Topic</th><th>Total</th><th>Winners</th><th>Losers</th><th>Flat</th><th>Accuracy</th><th>Net Sim P&L</th></tr>';
+        p.by_topic.forEach(s => {
+            const pnlCls = s.net_sim_pnl > 0 ? 'up' : (s.net_sim_pnl < 0 ? 'dn' : 'fl');
+            const accCls = s.accuracy_pct >= 60 ? 'up' : (s.accuracy_pct < 40 ? 'dn' : 'fl');
+            html += `<tr>
+                <td><strong>${escapeHtml(s.topic)}</strong></td>
+                <td>${s.total}</td>
+                <td class="up">${s.winners}</td>
+                <td class="dn">${s.losers}</td>
+                <td>${s.flat}</td>
+                <td class="${accCls}"><strong>${s.accuracy_pct}%</strong></td>
+                <td class="${pnlCls}"><strong>${s.net_sim_pnl >= 0 ? '+' : ''}$${s.net_sim_pnl.toFixed(2)}</strong></td>
+            </tr>`;
+        });
+        html += '</table>';
+    }
+
     el.innerHTML = html;
 }
 
