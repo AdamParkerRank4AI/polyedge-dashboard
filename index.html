@@ -88,12 +88,14 @@ tr:hover{background:#111827}
 <!-- OVERVIEW -->
 <div id="page-overview" class="page active">
 <div class="stats">
+<div class="stat"><div class="sv" id="s-staked">--</div><div class="sl">Total Bet</div></div>
+<div class="stat"><div class="sv" id="s-returned">--</div><div class="sl">Total Back</div></div>
 <div class="stat"><div class="sv" id="s-pnl">--</div><div class="sl">Net P&L</div></div>
+<div class="stat"><div class="sv bl" id="s-roi">--</div><div class="sl">ROI on Bet</div></div>
 <div class="stat"><div class="sv bl" id="s-winrate">--</div><div class="sl">Win Rate</div></div>
 <div class="stat"><div class="sv" id="s-wins">--</div><div class="sl">Wins</div></div>
 <div class="stat"><div class="sv rd" id="s-losses">--</div><div class="sl">Losses</div></div>
-<div class="stat"><div class="sv or" id="s-open">--</div><div class="sl">Open Positions</div></div>
-<div class="stat"><div class="sv gy" id="s-markets">--</div><div class="sl">Markets Scanned</div></div>
+<div class="stat"><div class="sv or" id="s-open">--</div><div class="sl">Open</div></div>
 </div>
 
 <h2>The Plays — Live P&L by Type</h2>
@@ -225,20 +227,23 @@ function openPnl(pos, signal) {
 }
 
 function computePlayStats() {
-    const stats = {NEWS_EDGE:{w:0,l:0,wp:0,lp:0,o:0}, TIME_DECAY:{w:0,l:0,wp:0,lp:0,o:0},
-                   CRYPTO:{w:0,l:0,wp:0,lp:0,o:0}, BIG_MOVER:{w:0,l:0,wp:0,lp:0,o:0},
-                   MANUAL:{w:0,l:0,wp:0,lp:0,o:0}};
-    const signalsById = {};
-    (DATA.position_signals || []).forEach(s => signalsById[s.id] = s);
+    // per-play: w/l, open count, total staked on closed, total returned on closed, win/loss P&L
+    const empty = () => ({w:0, l:0, o:0, staked:0, returned:0, wp:0, lp:0, openStake:0});
+    const stats = {NEWS_EDGE:empty(), TIME_DECAY:empty(), CRYPTO:empty(), BIG_MOVER:empty(), MANUAL:empty()};
     (DATA.positions || []).forEach(p => {
         const t = getTradeType(p);
-        if (!stats[t]) stats[t] = {w:0,l:0,wp:0,lp:0,o:0};
+        if (!stats[t]) stats[t] = empty();
+        const stake = Number(p.stake) || 0;
         if (p.status === 'closed' && p.exit_price) {
-            const pnl = pnlOf(p);
+            const ret = (Number(p.shares) || 0) * Number(p.exit_price);
+            const pnl = ret - stake;
+            stats[t].staked += stake;
+            stats[t].returned += ret;
             if (pnl > 0) { stats[t].w++; stats[t].wp += pnl; }
             else { stats[t].l++; stats[t].lp += pnl; }
         } else if (p.status === 'open') {
             stats[t].o++;
+            stats[t].openStake += stake;
         }
     });
     return stats;
@@ -248,24 +253,42 @@ function renderOverview() {
     const positions = DATA.positions || [];
     const signals = DATA.position_signals || [];
     let wins = 0, losses = 0, winPnL = 0, lossPnL = 0, openCount = 0;
+    let totalStaked = 0, totalReturned = 0, openStake = 0;
     positions.forEach(p => {
         if (p.status === 'closed' && p.exit_price) {
-            const pnl = pnlOf(p);
+            const stake = Number(p.stake) || 0;
+            const ret = (Number(p.shares) || 0) * Number(p.exit_price);
+            totalStaked += stake;
+            totalReturned += ret;
+            const pnl = ret - stake;
             if (pnl > 0) { wins++; winPnL += pnl; }
             else { losses++; lossPnL += pnl; }
-        } else if (p.status === 'open') openCount++;
+        } else if (p.status === 'open') {
+            openCount++;
+            openStake += Number(p.stake) || 0;
+        }
     });
     const netPnL = winPnL + lossPnL;
     const winRate = (wins + losses) > 0 ? (wins / (wins + losses) * 100) : 0;
+    const roi = totalStaked > 0 ? (netPnL / totalStaked * 100) : 0;
+
+    const stakedEl = document.getElementById('s-staked');
+    if (stakedEl) stakedEl.textContent = '$' + totalStaked.toLocaleString(undefined, {maximumFractionDigits:0});
+    const returnedEl = document.getElementById('s-returned');
+    if (returnedEl) returnedEl.textContent = '$' + totalReturned.toLocaleString(undefined, {maximumFractionDigits:0});
 
     const pnlEl = document.getElementById('s-pnl');
     pnlEl.textContent = '$' + (netPnL >= 0 ? '+' : '') + netPnL.toFixed(0);
     pnlEl.className = 'sv ' + (netPnL >= 0 ? '' : 'rd');
+    const roiEl = document.getElementById('s-roi');
+    if (roiEl) {
+        roiEl.textContent = (roi >= 0 ? '+' : '') + roi.toFixed(1) + '%';
+        roiEl.className = 'sv ' + (roi >= 0 ? 'bl' : 'rd');
+    }
     document.getElementById('s-winrate').textContent = winRate.toFixed(0) + '%';
     document.getElementById('s-wins').textContent = wins;
     document.getElementById('s-losses').textContent = losses;
-    document.getElementById('s-open').textContent = openCount;
-    document.getElementById('s-markets').textContent = '500';
+    document.getElementById('s-open').textContent = openCount + ' ($' + openStake.toLocaleString() + ')';
 
     // Play cards
     const stats = computePlayStats();
@@ -276,11 +299,14 @@ function renderOverview() {
 
     let html = '';
     order.forEach(t => {
-        const s = stats[t] || {w:0,l:0,wp:0,lp:0,o:0};
+        const s = stats[t] || {w:0,l:0,wp:0,lp:0,o:0,staked:0,returned:0,openStake:0};
         const net = s.wp + s.lp;
         const wr = (s.w + s.l) > 0 ? (s.w / (s.w + s.l) * 100) : 0;
+        const roi = s.staked > 0 ? (net / s.staked * 100) : 0;
         const settingInfo = (settings.plays && settings.plays[t]) || {};
         const enabled = settingInfo.enabled !== false;
+        const tp = settingInfo.take_profit_pct != null ? settingInfo.take_profit_pct + '%' : '—';
+        const sl = settingInfo.stop_loss_pct != null ? settingInfo.stop_loss_pct + '%' : '—';
 
         html += `<div class="play-card ${css[t]}">
             <div class="play-head">
@@ -288,8 +314,12 @@ function renderOverview() {
                 <span class="play-toggle ${enabled ? 'on' : 'off'}">${enabled ? 'ON' : 'OFF'}</span>
             </div>
             <div class="play-desc">${settingInfo.description || ''}</div>
+            <div class="play-desc" style="color:#6b7280">TP ${tp} • SL ${sl}${s.o > 0 ? ' • $' + s.openStake.toLocaleString() + ' in open' : ''}</div>
             <div class="play-stats">
+                <div class="ps"><div class="ps-v gy">$${s.staked.toLocaleString()}</div><div class="ps-l">Bet (closed)</div></div>
+                <div class="ps"><div class="ps-v ${s.returned >= s.staked ? 'gr' : 'rd'}">$${s.returned.toFixed(0)}</div><div class="ps-l">Back</div></div>
                 <div class="ps"><div class="ps-v ${net >= 0 ? 'gr' : 'rd'}">$${net >= 0 ? '+' : ''}${net.toFixed(0)}</div><div class="ps-l">Net P&L</div></div>
+                <div class="ps"><div class="ps-v ${roi >= 0 ? 'bl' : 'rd'}">${roi >= 0 ? '+' : ''}${roi.toFixed(1)}%</div><div class="ps-l">ROI</div></div>
                 <div class="ps"><div class="ps-v gr">${s.w}</div><div class="ps-l">Wins</div></div>
                 <div class="ps"><div class="ps-v rd">${s.l}</div><div class="ps-l">Losses</div></div>
                 <div class="ps"><div class="ps-v bl">${s.o}</div><div class="ps-l">Open</div></div>
