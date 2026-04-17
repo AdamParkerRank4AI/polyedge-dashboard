@@ -80,6 +80,8 @@ tr:hover{background:#111827}
 <a class="nl" onclick="showPage('alerts')">Alerts</a>
 <a class="nl" onclick="showPage('opportunities')">Opportunities</a>
 <a class="nl" onclick="showPage('movers')">Movers</a>
+<a class="nl" onclick="showPage('negrisk')">NegRisk</a>
+<a class="nl" onclick="showPage('newslag')">News Lag</a>
 <a class="nl" onclick="showPage('whatif')">What If</a>
 <a class="nl" onclick="showPage('settings')">Settings</a>
 <span class="nav-right">Scanner: <span id="scanner-status" class="status-on">CHECKING...</span> | <span id="last-update">--</span></span>
@@ -149,6 +151,20 @@ tr:hover{background:#111827}
 <h2>Biggest 24h Movers</h2>
 <p class="st">Markets with the biggest price swings in 24h. Big movers >20% on >$500k volume trigger auto-trades.</p>
 <div id="movers-list" class="loading">Loading...</div>
+</div>
+
+<!-- NEG RISK -->
+<div id="page-negrisk" class="page">
+<h2>NegRisk Arbitrage</h2>
+<p class="st">Multi-outcome events where sum of YES prices != $1. Buy all YES (if sum &lt; 1) or all NO (if sum &gt; 1) for a guaranteed return after fees. Scanner runs every 15 min. Log at <code>data/neg_risk_opportunities.jsonl</code>.</p>
+<div id="negrisk-content" class="loading">Loading...</div>
+</div>
+
+<!-- NEWS LAG -->
+<div id="page-newslag" class="page">
+<h2>News → Price Lag</h2>
+<p class="st">Every headline that matched a Polymarket market, captured with its published time and the Polymarket YES price at the moment of match. Data at <code>data/news_timing.jsonl</code>.</p>
+<div id="newslag-content" class="loading">Loading...</div>
 </div>
 
 <!-- WHAT IF -->
@@ -685,6 +701,84 @@ function renderSettings() {
     document.getElementById('settings-content').innerHTML = html;
 }
 
+function renderNegRisk() {
+    const el = document.getElementById('negrisk-content');
+    const arbs = (DATA && DATA.neg_risk_arbs) || [];
+    if (!arbs.length) {
+        el.innerHTML = '<p class="st">No arbitrage candidates this scan. Scanner requires sum(YES) to be more than 2% off $1.00 on events with &gt;$50k 24h volume.</p>';
+        return;
+    }
+    let html = '<p class="st"><strong>' + arbs.length + '</strong> live arbitrage candidate' + (arbs.length === 1 ? '' : 's') + '. Click an event to expand.</p>';
+    html += '<table><tr><th></th><th>Event</th><th>Outcomes</th><th>Sum YES</th><th>Edge</th><th>Direction</th><th>24h Vol</th></tr>';
+    arbs.forEach((a, i) => {
+        const rid = 'nr-' + i;
+        const edgeCls = a.edge_pct >= 5 ? 'up' : (a.edge_pct >= 3 ? 'bl' : 'gy');
+        const dirBadge = a.direction === 'BUY_YES_ALL' ? 'b-g' : 'b-n';
+        html += `<tr style="cursor:pointer" onclick="togglePos('${rid}')">
+            <td style="width:20px;color:#6b7280" id="${rid}-caret">▸</td>
+            <td><strong>${escapeHtml(a.event_title || 'Event ' + a.event_id)}</strong></td>
+            <td>${a.num_outcomes}</td>
+            <td>${a.sum_yes}</td>
+            <td class="${edgeCls}"><strong>${a.edge_pct}%</strong> (+$${a.edge_per_100_invested}/$100)</td>
+            <td><span class="badge ${dirBadge}">${a.direction.replace('_', ' ')}</span></td>
+            <td>$${(a.volume_24h || 0).toLocaleString()}</td>
+        </tr>`;
+        let detail = '<div style="padding:12px 20px;background:#050810;border-left:3px solid #b066ff">';
+        detail += '<table style="margin:0"><tr><th>Outcome</th><th>YES price</th><th>24h Vol</th><th>Polymarket</th></tr>';
+        (a.outcomes || []).forEach(o => {
+            const url = o.slug ? 'https://polymarket.com/market/' + o.slug : '';
+            detail += `<tr>
+                <td>${escapeHtml(o.question)}</td>
+                <td>${o.yes_price}</td>
+                <td>$${(o.volume_24h || 0).toLocaleString()}</td>
+                <td>${url ? `<a href="${url}" target="_blank">open</a>` : '—'}</td>
+            </tr>`;
+        });
+        detail += '</table>';
+        if (a.event_slug) {
+            detail += `<div style="margin-top:8px"><a href="https://polymarket.com/event/${a.event_slug}" target="_blank">→ Event on Polymarket</a></div>`;
+        }
+        detail += '</div>';
+        html += `<tr id="${rid}-detail" style="display:none"><td colspan="7" style="padding:0">${detail}</td></tr>`;
+    });
+    html += '</table>';
+    el.innerHTML = html;
+}
+
+function renderNewsLag() {
+    const el = document.getElementById('newslag-content');
+    // news_timing.jsonl isn't in the gist (it's append-only on disk). Show a summary
+    // built from the current scan's alerts + position news headlines. For rich lag
+    // analysis, build_scenarios will aggregate the JSONL periodically.
+    if (!DATA || !DATA.alerts) {
+        el.innerHTML = '<p class="st">No news data yet.</p>';
+        return;
+    }
+    const alerts = DATA.alerts;
+    const recent = alerts.slice(0, 50);
+    let html = `<p class="st">Showing the most recent ${recent.length} alerts from this scan window. Each row: when the headline was published, when PolyEdge saw it, the matched market and the Polymarket price at the moment of match.</p>`;
+    html += '<table><tr><th>Published</th><th>Source</th><th>Headline</th><th>Matched Markets</th></tr>';
+    recent.forEach(a => {
+        const pub = a.published ? new Date(a.published).toLocaleString() : '—';
+        const src = escapeHtml(a.source || '?');
+        const hl = escapeHtml(a.headline || '');
+        const lnk = a.link ? `<a href="${a.link}" target="_blank">${hl}</a>` : hl;
+        const matchList = (a.matches || []).filter(m => (m.score || 0) >= 5).slice(0, 5).map(m =>
+            `<div style="margin:2px 0"><strong>${(m.yes_price * 100).toFixed(1)}¢</strong> ${escapeHtml((m.question||'').substring(0,60))} <span class="st">(score ${m.score})</span></div>`
+        ).join('');
+        if (!matchList) return;
+        html += `<tr>
+            <td>${pub}</td>
+            <td><span class="badge b-n">${src}</span></td>
+            <td>${lnk}</td>
+            <td>${matchList}</td>
+        </tr>`;
+    });
+    html += '</table>';
+    html += `<p class="st" style="margin-top:16px">Full append-only log: <code>~/polyedge/data/news_timing.jsonl</code> — every match captured with published time, seen time, and Polymarket price snapshot. Use this for lag analysis: did PolyEdge beat the market move?</p>`;
+    el.innerHTML = html;
+}
+
 function renderWhatIf() {
     const el = document.getElementById('whatif-content');
     if (!DATA || !DATA.scenarios) {
@@ -759,6 +853,8 @@ function render() {
     renderAlerts();
     renderOpps();
     renderMovers();
+    renderNegRisk();
+    renderNewsLag();
     renderWhatIf();
     renderSettings();
 }
