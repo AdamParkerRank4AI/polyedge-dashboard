@@ -308,6 +308,13 @@ function renderOverview() {
         const tp = settingInfo.take_profit_pct != null ? settingInfo.take_profit_pct + '%' : '—';
         const sl = settingInfo.stop_loss_pct != null ? settingInfo.stop_loss_pct + '%' : '—';
 
+        // Free-roll variant: lookup simulation data for this play
+        const freeRollCfg = (DATA.settings && DATA.settings.free_roll) || {};
+        const frEnabled = freeRollCfg.enabled;
+        const frThreshold = freeRollCfg.bank_threshold_by_play && freeRollCfg.bank_threshold_by_play[t];
+        const frSim = ((DATA.scenarios && DATA.scenarios.free_roll_simulation
+                        && DATA.scenarios.free_roll_simulation.by_play) || []).find(x => x.play === t);
+
         html += `<div class="play-card ${css[t]}">
             <div class="play-head">
                 <div class="play-title">${titles[t]}</div>
@@ -324,8 +331,29 @@ function renderOverview() {
                 <div class="ps"><div class="ps-v rd">${s.l}</div><div class="ps-l">Losses</div></div>
                 <div class="ps"><div class="ps-v bl">${s.o}</div><div class="ps-l">Open</div></div>
                 <div class="ps"><div class="ps-v gy">${wr.toFixed(0)}%</div><div class="ps-l">Win Rate</div></div>
-            </div>
-        </div>`;
+            </div>`;
+
+        // Free-roll sibling card under the main play
+        if (frThreshold != null) {
+            const sim = frSim || {banked_trades:0, actual_pnl:0, freeroll_pnl:0, delta:0};
+            const deltaCls = sim.delta > 0 ? 'gr' : (sim.delta < 0 ? 'rd' : 'gy');
+            const deltaSign = sim.delta >= 0 ? '+' : '';
+            html += `<div style="margin-top:10px;padding:10px;background:#05080f;border-left:3px solid #b066ff;border-radius:4px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                    <div style="font-size:12px;color:#b066ff;font-weight:700">↳ FREE-ROLL VARIANT</div>
+                    <span class="play-toggle ${frEnabled ? 'on' : 'off'}">${frEnabled ? 'LIVE' : 'OFF'}</span>
+                </div>
+                <div class="play-desc" style="color:#9ca3af">Bank stake at +${frThreshold}%, let remainder ride. No TP, no SL after banking.</div>
+                <div class="play-stats" style="margin-top:6px">
+                    <div class="ps"><div class="ps-v gy">${sim.banked_trades}</div><div class="ps-l">Would've banked</div></div>
+                    <div class="ps"><div class="ps-v gy">$${sim.actual_pnl.toFixed(0)}</div><div class="ps-l">Actual P&L</div></div>
+                    <div class="ps"><div class="ps-v ${sim.freeroll_pnl >= 0 ? 'gr' : 'rd'}">$${sim.freeroll_pnl.toFixed(0)}</div><div class="ps-l">Free-Roll P&L</div></div>
+                    <div class="ps"><div class="ps-v ${deltaCls}">${deltaSign}$${sim.delta.toFixed(0)}</div><div class="ps-l">Δ vs Actual</div></div>
+                </div>
+            </div>`;
+        }
+
+        html += `</div>`;
     });
     document.getElementById('plays-overview').innerHTML = html;
 
