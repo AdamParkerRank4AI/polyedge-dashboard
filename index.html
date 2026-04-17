@@ -743,6 +743,27 @@ function renderSettings() {
         html += '</div>';
     });
 
+    // Sources + weights panel
+    const src = s.sources || {};
+    if (src.rss_feeds) {
+        html += `<h3>News Sources (${src.rss_feed_count || src.rss_feeds.length} feeds)</h3>`;
+        html += `<p class="st">${src.description || ''}</p>`;
+        html += '<table><tr><th>Source</th><th>Weight</th><th>Effect</th></tr>';
+        const weights = src.source_weights || {};
+        src.rss_feeds.forEach(name => {
+            const w = weights[name] != null ? weights[name] : (src.weight_default || 1.0);
+            let cls = 'fl', effect = 'neutral';
+            if (w >= 1.2) { cls = 'up'; effect = 'BOOSTED'; }
+            else if (w < 1.0) { cls = 'dn'; effect = 'MUTED'; }
+            html += `<tr>
+                <td><span class="badge b-n">${escapeHtml(name)}</span></td>
+                <td class="${cls}"><strong>${w.toFixed(1)}x</strong></td>
+                <td class="${cls}">${effect}</td>
+            </tr>`;
+        });
+        html += '</table>';
+    }
+
     document.getElementById('settings-content').innerHTML = html;
 }
 
