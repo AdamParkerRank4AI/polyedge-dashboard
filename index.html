@@ -80,6 +80,7 @@ tr:hover{background:#111827}
 <a class="nl" onclick="showPage('alerts')">Alerts</a>
 <a class="nl" onclick="showPage('opportunities')">Opportunities</a>
 <a class="nl" onclick="showPage('movers')">Movers</a>
+<a class="nl" onclick="showPage('whatif')">What If</a>
 <a class="nl" onclick="showPage('settings')">Settings</a>
 <span class="nav-right">Scanner: <span id="scanner-status" class="status-on">CHECKING...</span> | <span id="last-update">--</span></span>
 </div>
@@ -146,6 +147,13 @@ tr:hover{background:#111827}
 <h2>Biggest 24h Movers</h2>
 <p class="st">Markets with the biggest price swings in 24h. Big movers >20% on >$500k volume trigger auto-trades.</p>
 <div id="movers-list" class="loading">Loading...</div>
+</div>
+
+<!-- WHAT IF -->
+<div id="page-whatif" class="page">
+<h2>What If — Scenario Analysis</h2>
+<p class="st">Historical P&amp;L recomputed under different rules. Forward rule changes (surgical BIG_MOVER, wider stops, NEWS_EDGE scope) are live — historical trades stay untouched so you can compare like-for-like.</p>
+<div id="whatif-content" class="loading">Loading...</div>
 </div>
 
 <!-- SETTINGS -->
@@ -534,6 +542,69 @@ function renderSettings() {
     document.getElementById('settings-content').innerHTML = html;
 }
 
+function renderWhatIf() {
+    const el = document.getElementById('whatif-content');
+    if (!DATA || !DATA.scenarios) {
+        el.innerHTML = '<p class="st">No scenario data yet. Run <code>python3 ~/polyedge/build_scenarios.py</code> to generate.</p>';
+        return;
+    }
+    const s = DATA.scenarios;
+    const gen = s.generated_at ? new Date(s.generated_at).toLocaleString() : '';
+    const bTotal = s.baseline.total;
+    const fmtD = (v, ref) => {
+        const d = v - ref;
+        const cls = d > 0 ? 'status-on' : d < 0 ? 'status-off' : '';
+        return `<span class="${cls}">${d >= 0 ? '+' : ''}$${d.toFixed(2)}</span>`;
+    };
+    const fmt$ = v => (v >= 0 ? '+$' : '-$') + Math.abs(v).toFixed(2);
+    const clr = v => v >= 0 ? 'status-on' : 'status-off';
+
+    let html = `<p class="st">Scenario snapshot generated ${gen}</p>`;
+
+    // Headline scenarios
+    html += '<table><tr><th>Scenario</th><th>Total P&amp;L</th><th>Δ vs Baseline</th><th>Description</th></tr>';
+    html += `<tr><td><strong>Baseline</strong> (as traded)</td><td class="${clr(bTotal)}">${fmt$(bTotal)}</td><td>—</td><td>${s.baseline.desc}</td></tr>`;
+    html += `<tr><td><strong>A:</strong> ${s.scenario_A.label}</td><td class="${clr(s.scenario_A.total)}">${fmt$(s.scenario_A.total)}</td><td>${fmtD(s.scenario_A.total, bTotal)}</td><td>${s.scenario_A.desc}<br><span class="st">Removed ${s.scenario_A.removed_trades} historical trades worth ${fmt$(s.scenario_A.removed_pnl)}</span></td></tr>`;
+    html += `<tr><td><strong>B:</strong> ${s.scenario_B.label}</td><td class="${clr(s.scenario_B.total)}">${fmt$(s.scenario_B.total)}</td><td>${fmtD(s.scenario_B.total, bTotal)}</td><td>${s.scenario_B.desc}<br><span class="st">${s.scenario_B.recoveries} SL hits that would have recovered</span></td></tr>`;
+    html += `<tr><td><strong>C:</strong> ${s.scenario_C.label}</td><td class="${clr(s.scenario_C.total)}">${fmt$(s.scenario_C.total)}</td><td>${fmtD(s.scenario_C.total, bTotal)}</td><td>A and B combined — the "we applied all lessons from day 1" case.</td></tr>`;
+    html += '</table>';
+
+    // BIG_MOVER bucket breakdown
+    html += '<h3>BIG_MOVER Buckets (why surgical, not kill)</h3>';
+    html += '<p class="st">Green = kept by new filter. Red = excluded going forward. Shows P&amp;L contribution per sub-type on historical trades.</p>';
+    html += '<table><tr><th>Status</th><th>Bucket</th><th>N</th><th>W/L</th><th>WR%</th><th>Staked</th><th>P&amp;L</th><th>ROI%</th></tr>';
+    for (const b of s.big_mover_buckets) {
+        const status = b.excluded_now
+            ? '<span class="status-off">✗ excluded</span>'
+            : '<span class="status-on">✓ kept</span>';
+        html += `<tr><td>${status}</td><td><strong>${b.bucket}</strong></td><td>${b.n}</td><td>${b.w}/${b.l}</td><td>${b.win_rate_pct}%</td><td>$${b.staked.toLocaleString()}</td><td class="${clr(b.pnl)}">${fmt$(b.pnl)}</td><td class="${clr(b.roi_pct)}">${b.roi_pct >= 0 ? '+' : ''}${b.roi_pct}%</td></tr>`;
+    }
+    html += '</table>';
+
+    // SL counterfactual detail
+    if (s.scenario_B.top_recoveries && s.scenario_B.top_recoveries.length) {
+        html += '<h3>Stop-Loss Counterfactuals — trades killed by old tight stops</h3>';
+        html += '<p class="st">Each row: a trade that was stopped out under the old 5%/8% stops. "Now" is live Polymarket price. "Hold" is what you&apos;d have if you&apos;d held. Δ is the cost of the tight stop.</p>';
+        html += '<table><tr><th>Play</th><th>Side</th><th>Entry</th><th>SL Exit</th><th>Now</th><th>State</th><th>Actual</th><th>Hold</th><th>Δ</th><th>Market</th></tr>';
+        for (const r of s.scenario_B.top_recoveries) {
+            const state = r.resolved ? '<span class="status-off">resolved</span>' : '<span class="status-on">open</span>';
+            html += `<tr><td>${r.type}</td><td>${r.side}</td><td>${(r.entry || 0).toFixed(2)}</td><td>${(r.actual_exit || 0).toFixed(2)}</td><td>${r.now_price.toFixed(3)}</td><td>${state}</td><td class="${clr(r.actual_pnl)}">${fmt$(r.actual_pnl)}</td><td class="${clr(r.hyp_pnl)}">${fmt$(r.hyp_pnl)}</td><td class="${clr(r.delta)}"><strong>${fmt$(r.delta)}</strong></td><td>${r.q}</td></tr>`;
+        }
+        html += '</table>';
+    }
+
+    // Forward-changes log
+    html += '<h3>Forward Rule Changes (applied, not retroactive)</h3>';
+    html += '<ul>';
+    html += '<li><strong>Apr 15:</strong> Stop losses widened — BIG_MOVER/CRYPTO/NEWS 5% → 15%, TIME_DECAY 8% → 20%. Applies to new trades only.</li>';
+    html += '<li><strong>Apr 17:</strong> Sports filter consolidated (one <code>SPORTS_EXCLUDE</code> list, 80+ keywords) and applied to all 4 trade paths including NEWS_EDGE which had none.</li>';
+    html += '<li><strong>Apr 17:</strong> NEWS_EDGE scope fix — paper trades now open on any converged news match, not just watchlist. First re-scan opened 2 new Iran trades after 19-day silence.</li>';
+    html += '<li><strong>Apr 17:</strong> BIG_MOVER surgical — excludes Iran/Israel/Lebanon/Peru/Venezuela markets and moves over 40%. Working buckets (Musk tweets, oil, token launches, Hungarian elections, crypto) kept.</li>';
+    html += '</ul>';
+
+    el.innerHTML = html;
+}
+
 function render() {
     if (!DATA) return;
     const lu = DATA.last_updated ? new Date(DATA.last_updated) : null;
@@ -545,6 +616,7 @@ function render() {
     renderAlerts();
     renderOpps();
     renderMovers();
+    renderWhatIf();
     renderSettings();
 }
 
