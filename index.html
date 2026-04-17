@@ -18,8 +18,11 @@ a{color:#60a5fa;text-decoration:none}a:hover{text-decoration:underline}
 h2{color:#00aaff;font-size:22px;font-weight:900;margin:24px 0 12px;border-bottom:2px solid #334155;padding-bottom:8px;letter-spacing:0.3px}
 h3{color:#ffaa00;font-size:17px;font-weight:800;margin:18px 0 10px}
 .st{color:#e2e8f0;font-size:14px;font-weight:500;line-height:1.6;margin-bottom:14px}
-.stats{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.stats{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:stretch}
 .stat{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:12px 16px;flex:1;text-align:center;min-width:120px}
+.stat-label{background:#0a1020;border:1px solid #1e293b;border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;letter-spacing:1.5px;writing-mode:horizontal-tb;min-width:120px;text-transform:uppercase}
+.stat-label.standard{color:#00ff88;border-color:#00ff88}
+.stat-label.freeroll{color:#b066ff;border-color:#b066ff}
 .sv{font-size:30px;font-weight:900;color:#00ff88}.sv.or{color:#ffaa00}.sv.bl{color:#60a5fa}.sv.rd{color:#ef4444}.sv.gy{color:#e2e8f0}
 .sl{font-size:11px;color:#e2e8f0;font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:1px}
 .plays-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:14px 0}
@@ -94,6 +97,7 @@ tr:hover{background:#111827}
 <!-- OVERVIEW -->
 <div id="page-overview" class="page active">
 <div class="stats">
+<div class="stat-label standard">STANDARD</div>
 <div class="stat"><div class="sv" id="s-staked">--</div><div class="sl">Total Bet</div></div>
 <div class="stat"><div class="sv" id="s-returned">--</div><div class="sl">Total Back</div></div>
 <div class="stat"><div class="sv" id="s-pnl">--</div><div class="sl">Net P&L</div></div>
@@ -102,6 +106,17 @@ tr:hover{background:#111827}
 <div class="stat"><div class="sv" id="s-wins">--</div><div class="sl">Wins</div></div>
 <div class="stat"><div class="sv rd" id="s-losses">--</div><div class="sl">Losses</div></div>
 <div class="stat"><div class="sv or" id="s-open">--</div><div class="sl">Open</div></div>
+</div>
+<div class="stats">
+<div class="stat-label freeroll">FREEROLL</div>
+<div class="stat"><div class="sv" id="f-staked">--</div><div class="sl">Total Bet</div></div>
+<div class="stat"><div class="sv" id="f-returned">--</div><div class="sl">Total Back</div></div>
+<div class="stat"><div class="sv" id="f-pnl">--</div><div class="sl">Net P&L</div></div>
+<div class="stat"><div class="sv bl" id="f-roi">--</div><div class="sl">ROI on Bet</div></div>
+<div class="stat"><div class="sv bl" id="f-winrate">--</div><div class="sl">Win Rate</div></div>
+<div class="stat"><div class="sv" id="f-wins">--</div><div class="sl">Wins</div></div>
+<div class="stat"><div class="sv rd" id="f-losses">--</div><div class="sl">Losses</div></div>
+<div class="stat"><div class="sv or" id="f-open">--</div><div class="sl">Open</div></div>
 </div>
 
 <h2>The Plays — Live P&L by Type</h2>
@@ -332,6 +347,30 @@ function renderOverview() {
     document.getElementById('s-wins').textContent = wins;
     document.getElementById('s-losses').textContent = losses;
     document.getElementById('s-open').textContent = openCount + ' ($' + openStake.toLocaleString() + ')';
+
+    // FREEROLL row — reuse the by_play simulation and aggregate
+    const frSimAll = ((DATA.scenarios && DATA.scenarios.free_roll_simulation
+                        && DATA.scenarios.free_roll_simulation.by_play) || []);
+    const frActual = frSimAll.reduce((s, r) => s + (r.actual_pnl || 0), 0);
+    const frTotal = frSimAll.reduce((s, r) => s + (r.freeroll_pnl || 0), 0);
+    // Total Bet unchanged; Total Back = stake + freeroll P&L
+    const fr_back = totalStaked + frTotal;
+    const fr_roi = totalStaked > 0 ? (frTotal / totalStaked * 100) : 0;
+    // Free-Roll doesn't change win/loss counts (same trades, different exits), so we
+    // recompute wins/losses on the sim outcomes per-play aggregate.
+    // For simplicity: banked wins on freeroll = closed wins (same trades); we show per-trade-count loss count same.
+    const setF = (id, val, cls) => {
+        const el = document.getElementById(id);
+        if (el) { el.textContent = val; if (cls) el.className = 'sv ' + cls; }
+    };
+    setF('f-staked', '$' + totalStaked.toLocaleString(undefined, {maximumFractionDigits:0}));
+    setF('f-returned', '$' + fr_back.toLocaleString(undefined, {maximumFractionDigits:0}));
+    setF('f-pnl', '$' + (frTotal >= 0 ? '+' : '') + frTotal.toFixed(0), frTotal >= 0 ? '' : 'rd');
+    setF('f-roi', (fr_roi >= 0 ? '+' : '') + fr_roi.toFixed(1) + '%', fr_roi >= 0 ? 'bl' : 'rd');
+    setF('f-winrate', winRate.toFixed(0) + '%', 'bl');
+    setF('f-wins', wins);
+    setF('f-losses', losses, 'rd');
+    setF('f-open', openCount + ' ($' + openStake.toLocaleString() + ')', 'or');
 
     // Simulation headline comparison — baseline vs each what-if scenario
     const simEl = document.getElementById('sim-comparison');
