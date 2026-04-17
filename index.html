@@ -196,6 +196,24 @@ function getTradeType(pos) {
     return 'MANUAL';
 }
 
+function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function togglePos(rowId) {
+    const d = document.getElementById(rowId + '-detail');
+    const c = document.getElementById(rowId + '-caret');
+    if (!d) return;
+    if (d.style.display === 'none') {
+        d.style.display = '';
+        if (c) c.textContent = '▾';
+    } else {
+        d.style.display = 'none';
+        if (c) c.textContent = '▸';
+    }
+}
+
 function pnlOf(pos) {
     if (pos.status !== 'closed' || !pos.exit_price) return 0;
     return pos.shares * pos.exit_price - pos.stake;
@@ -413,8 +431,27 @@ function renderPositions() {
         return;
     }
 
-    let html = '<table><tr><th>Status</th><th>Type</th><th>Market</th><th>Side</th><th>Entry</th><th>Exit/Now</th><th>Move</th><th>P&L</th><th>Signal</th></tr>';
-    filtered.forEach(p => {
+    // Build a slug → recent alerts map so NEWS_EDGE rows can show the triggering headlines
+    const alertsBySlug = {};
+    (DATA.alerts || []).forEach(a => {
+        (a.matches || []).forEach(m => {
+            const sl = m.slug;
+            if (!sl) return;
+            if (!alertsBySlug[sl]) alertsBySlug[sl] = [];
+            alertsBySlug[sl].push({
+                headline: a.headline,
+                source: a.source,
+                published: a.published || a.timestamp,
+                link: a.link,
+                score: m.score,
+                keywords: m.keywords || [],
+            });
+        });
+    });
+
+    let html = '<p class="st">Click any row to expand full trade detail.</p>';
+    html += '<table><tr><th></th><th>Status</th><th>Type</th><th>Market</th><th>Side</th><th>Entry</th><th>Exit/Now</th><th>Move</th><th>P&L</th><th>Signal</th></tr>';
+    filtered.forEach((p, idx) => {
         const s = sigById[p.id] || {};
         const t = getTradeType(p);
         const tb = {NEWS_EDGE:'b-n',TIME_DECAY:'b-t',CRYPTO:'b-c',BIG_MOVER:'b-m',MANUAL:'b-g'}[t] || 'b-g';
@@ -429,10 +466,12 @@ function renderPositions() {
         const move = exitP !== null ? ((exitP - entryP) / entryP * 100) : 0;
         const sigText = p.status === 'closed' ? (p.close_reason || 'closed') : (s.signal || '--');
 
-        html += `<tr>
+        const rowId = `pos-row-${idx}`;
+        html += `<tr style="cursor:pointer" onclick="togglePos('${rowId}')">
+            <td style="width:20px;color:#6b7280" id="${rowId}-caret">▸</td>
             <td>${statusB}</td>
             <td><span class="badge ${tb}">${t.replace('_', ' ')}</span></td>
-            <td>${p.question.substring(0,55)}</td>
+            <td>${escapeHtml(p.question).substring(0,55)}</td>
             <td>${p.side}</td>
             <td>${entryP.toFixed(1)}¢</td>
             <td>${priceNow}¢</td>
@@ -440,6 +479,52 @@ function renderPositions() {
             <td class="${cls}">$${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}</td>
             <td>${sigText}</td>
         </tr>`;
+
+        // Expandable detail row
+        const pmUrl = p.slug ? `https://polymarket.com/market/${p.slug}` : null;
+        const opened = p.opened ? new Date(p.opened).toLocaleString() : '—';
+        const closed = p.closed ? new Date(p.closed).toLocaleString() : '—';
+        const stopLoss = p.stop_loss != null ? `${p.stop_loss}%` : '—';
+        const takeProfit = p.target_profit != null ? `${p.target_profit}%` : '—';
+        const endDate = p.end_date || '—';
+        const autoReason = p.auto_reason || '—';
+        const closeReason = p.close_reason || (p.status === 'closed' ? 'resolved' : '—');
+        const shares = p.shares || 0;
+        const stake = p.stake || 0;
+
+        let detail = `<div style="padding:12px 20px;background:#050810;border-left:3px solid #00ff88">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;font-size:12px">
+                <div><div class="st">Market</div><div>${escapeHtml(p.question)}</div></div>
+                <div><div class="st">Polymarket</div>${pmUrl ? `<a href="${pmUrl}" target="_blank">${p.slug}</a>` : p.slug || '—'}</div>
+                <div><div class="st">Opened</div><div>${opened}</div></div>
+                <div><div class="st">${p.status==='closed'?'Closed':'Expires'}</div><div>${p.status==='closed'?closed:endDate}</div></div>
+                <div><div class="st">Stake / Shares</div><div>$${stake} &bull; ${shares}</div></div>
+                <div><div class="st">Take Profit / Stop Loss</div><div>${takeProfit} / ${stopLoss}</div></div>
+                <div style="grid-column:1/-1"><div class="st">Entry Logic (auto_reason)</div><div style="color:#d1d5db">${escapeHtml(autoReason)}</div></div>
+                ${p.status==='closed' ? `<div style="grid-column:1/-1"><div class="st">Close Reason</div><div style="color:#d1d5db">${escapeHtml(closeReason)}</div></div>`:''}`;
+
+        // News edge extras — triggering headlines
+        const alerts = alertsBySlug[p.slug] || [];
+        if (t === 'NEWS_EDGE' && alerts.length) {
+            alerts.sort((a, b) => (b.score||0) - (a.score||0));
+            detail += `<div style="grid-column:1/-1"><div class="st">Triggering Headlines (score ≥ ${Math.min(...alerts.map(a=>a.score||0))})</div>`;
+            alerts.slice(0, 8).forEach(a => {
+                const kw = (a.keywords || []).join(', ');
+                const src = escapeHtml(a.source || '?');
+                const hl = escapeHtml(a.headline || '');
+                detail += `<div style="margin:6px 0;padding:8px;background:#0a1020;border-radius:4px">
+                    <div><span class="badge b-n">${src}</span> <strong>score ${a.score||0}</strong> ${a.published ? '<span class="st">' + new Date(a.published).toLocaleString() + '</span>' : ''}</div>
+                    <div style="margin-top:4px">${a.link ? `<a href="${a.link}" target="_blank">${hl}</a>` : hl}</div>
+                    ${kw ? `<div class="st" style="margin-top:4px">keywords: ${escapeHtml(kw)}</div>` : ''}
+                </div>`;
+            });
+            detail += '</div>';
+        } else if (t === 'NEWS_EDGE') {
+            detail += `<div style="grid-column:1/-1"><div class="st">Triggering Headlines</div><div style="color:#6b7280">No headline history in current alert cache (position may be older than the retained log window).</div></div>`;
+        }
+
+        detail += '</div></div>';
+        html += `<tr id="${rowId}-detail" style="display:none"><td colspan="10" style="padding:0">${detail}</td></tr>`;
     });
     html += '</table>';
     document.getElementById('positions-list').innerHTML = html;
