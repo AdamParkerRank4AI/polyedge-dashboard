@@ -106,6 +106,8 @@ tr:hover{background:#111827}
 <h2>The Plays — Live P&L by Type</h2>
 <div class="plays-grid" id="plays-overview"></div>
 
+<div id="sim-comparison"></div>
+
 <h2>Currently Open Positions</h2>
 <div id="overview-open" class="loading">Loading...</div>
 </div>
@@ -329,6 +331,48 @@ function renderOverview() {
     document.getElementById('s-wins').textContent = wins;
     document.getElementById('s-losses').textContent = losses;
     document.getElementById('s-open').textContent = openCount + ' ($' + openStake.toLocaleString() + ')';
+
+    // Simulation headline comparison — baseline vs each what-if scenario
+    const simEl = document.getElementById('sim-comparison');
+    if (simEl) {
+        const scen = (DATA && DATA.scenarios) || {};
+        const rows = [
+            {label: 'ACTUAL', total: scen.baseline ? scen.baseline.total : netPnL, desc: 'As traded'},
+        ];
+        if (scen.scenario_A) rows.push({label: 'Surgical BIG_MOVER', total: scen.scenario_A.total, desc: scen.scenario_A.label, delta: scen.scenario_A.delta});
+        if (scen.scenario_B) rows.push({label: 'Wider stops retro', total: scen.scenario_B.total, desc: scen.scenario_B.label, delta: scen.scenario_B.delta});
+        if (scen.scenario_C) rows.push({label: 'A + B combined', total: scen.scenario_C.total, desc: scen.scenario_C.label, delta: scen.scenario_C.delta});
+        // Free-Roll aggregate
+        if (scen.free_roll_simulation && scen.free_roll_simulation.by_play) {
+            const frActual = scen.free_roll_simulation.by_play.reduce((s, r) => s + r.actual_pnl, 0);
+            const frTotal = scen.free_roll_simulation.by_play.reduce((s, r) => s + r.freeroll_pnl, 0);
+            rows.push({label: 'Free-Roll all plays', total: frTotal, desc: 'Bank at TP, let rest ride', delta: frTotal - frActual});
+        }
+        if (scen.let_run_simulation && scen.let_run_simulation.by_play) {
+            const lrActual = scen.let_run_simulation.by_play.reduce((s, r) => s + r.actual_pnl, 0);
+            const lrTotal = scen.let_run_simulation.by_play.reduce((s, r) => s + r.letrun_pnl, 0);
+            rows.push({label: 'Let Run (no TP/SL)', total: lrTotal, desc: 'Hold every trade to resolution', delta: lrTotal - lrActual});
+        }
+
+        const baselineTotal = rows[0].total;
+        let html = '<h3 style="margin-top:28px">Simulation Comparison</h3>';
+        html += '<p class="st">Same bet, different rules. Totals are closed realized P&L plus open positions marked-to-market at current Polymarket prices.</p>';
+        html += '<table><tr><th>Scenario</th><th>P&L</th><th>Δ vs Actual</th><th>Description</th></tr>';
+        rows.forEach(r => {
+            const cls = r.total >= 0 ? 'up' : 'dn';
+            const delta = (r.delta == null) ? 0 : r.delta;
+            const dCls = delta > 0 ? 'up' : (delta < 0 ? 'dn' : 'fl');
+            const dStr = r.label === 'ACTUAL' ? '—' : (delta >= 0 ? '+' : '') + '$' + delta.toFixed(0);
+            html += `<tr>
+                <td><strong>${escapeHtml(r.label)}</strong></td>
+                <td class="${cls}"><strong>${r.total >= 0 ? '+' : ''}$${r.total.toFixed(0)}</strong></td>
+                <td class="${dCls}"><strong>${dStr}</strong></td>
+                <td class="st" style="margin:0">${escapeHtml(r.desc || '')}</td>
+            </tr>`;
+        });
+        html += '</table>';
+        simEl.innerHTML = html;
+    }
 
     // Play cards
     const stats = computePlayStats();
