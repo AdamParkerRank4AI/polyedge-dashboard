@@ -81,6 +81,8 @@ tr:hover{background:#111827}
 <a class="nl" onclick="showPage('opportunities')">Opportunities</a>
 <a class="nl" onclick="showPage('movers')">Movers</a>
 <a class="nl" onclick="showPage('negrisk')">NegRisk</a>
+<a class="nl" onclick="showPage('llm')">LLM Edges</a>
+<a class="nl" onclick="showPage('whales')">Whales</a>
 <a class="nl" onclick="showPage('newslag')">News Lag</a>
 <a class="nl" onclick="showPage('whatif')">What If</a>
 <a class="nl" onclick="showPage('settings')">Settings</a>
@@ -158,6 +160,20 @@ tr:hover{background:#111827}
 <h2>NegRisk Arbitrage</h2>
 <p class="st">Multi-outcome events where sum of YES prices != $1. Buy all YES (if sum &lt; 1) or all NO (if sum &gt; 1) for a guaranteed return after fees. Scanner runs every 15 min. Log at <code>data/neg_risk_opportunities.jsonl</code>.</p>
 <div id="negrisk-content" class="loading">Loading...</div>
+</div>
+
+<!-- LLM EDGES -->
+<div id="page-llm" class="page">
+<h2>LLM Probability Edges</h2>
+<p class="st">Claude estimates the true probability of each liquid, non-extreme market. When its estimate diverges from the market price by 15 percentage points or more, we flag an edge. Capped at 5 calls per scan (~$0.03/day).</p>
+<div id="llm-content" class="loading">Loading...</div>
+</div>
+
+<!-- WHALES -->
+<div id="page-whales" class="page">
+<h2>Whale Tracker</h2>
+<p class="st">Every $5,000+ trade on Polymarket, logged with wallet address and trader handle. Leaderboard ranks wallets by total notional traded. Research says copy-trading whales has turned $313 into $438,000 in documented cases.</p>
+<div id="whales-content" class="loading">Loading...</div>
 </div>
 
 <!-- NEWS LAG -->
@@ -701,6 +717,101 @@ function renderSettings() {
     document.getElementById('settings-content').innerHTML = html;
 }
 
+function renderLLMEdges() {
+    const el = document.getElementById('llm-content');
+    const edges = (DATA && DATA.llm_edges) || [];
+    if (!edges.length) {
+        el.innerHTML = '<p class="st">No LLM edge candidates this scan. Estimator only fires on liquid markets (>$100k 24h vol), non-extreme price (0.15-0.85), and |edge| > 15pp.</p>';
+        return;
+    }
+    let html = `<p class="st"><strong>${edges.length}</strong> market(s) where Claude's probability estimate diverges from market price.</p>`;
+    html += '<table><tr><th></th><th>Direction</th><th>Market</th><th>Market Price</th><th>LLM Est</th><th>Edge</th><th>Confidence</th></tr>';
+    edges.forEach((e, i) => {
+        const rid = 'llm-' + i;
+        const edgeCls = Math.abs(e.edge) >= 0.25 ? 'up' : 'bl';
+        const dirBadge = e.direction === 'YES' ? 'b-g' : 'b-n';
+        html += `<tr style="cursor:pointer" onclick="togglePos('${rid}')">
+            <td style="width:20px;color:#6b7280" id="${rid}-caret">▸</td>
+            <td><span class="badge ${dirBadge}">${e.direction}</span></td>
+            <td>${escapeHtml(e.question)}</td>
+            <td>${(e.market_price * 100).toFixed(1)}¢</td>
+            <td>${(e.llm_probability * 100).toFixed(1)}¢</td>
+            <td class="${edgeCls}"><strong>${e.edge >= 0 ? '+' : ''}${(e.edge * 100).toFixed(1)}pp</strong></td>
+            <td>${e.confidence}</td>
+        </tr>`;
+        const url = e.slug ? 'https://polymarket.com/market/' + e.slug : '';
+        const detail = `<div style="padding:12px 20px;background:#050810;border-left:3px solid #00d4ff">
+            <div class="st" style="margin-bottom:6px">LLM reasoning:</div>
+            <div style="color:#d1d5db;margin-bottom:10px">${escapeHtml(e.reasoning || '—')}</div>
+            ${url ? `<a href="${url}" target="_blank">→ Open market on Polymarket</a>` : ''}
+            <div class="st" style="margin-top:8px">Estimated ${e.estimated_at ? new Date(e.estimated_at).toLocaleString() : '—'}</div>
+        </div>`;
+        html += `<tr id="${rid}-detail" style="display:none"><td colspan="7" style="padding:0">${detail}</td></tr>`;
+    });
+    html += '</table>';
+    el.innerHTML = html;
+}
+
+function renderWhales() {
+    const el = document.getElementById('whales-content');
+    const w = (DATA && DATA.whales) || {};
+    const top = w.top_whales || [];
+    const latest = w.latest_whale_trades || [];
+
+    let html = `<div class="stats" style="margin-bottom:16px">
+        <div class="stat"><div class="sv">${w.trades_this_scan || 0}</div><div class="sl">Whale trades this scan</div></div>
+        <div class="stat"><div class="sv gr">${w.new_trades_logged || 0}</div><div class="sl">New logged</div></div>
+        <div class="stat"><div class="sv bl">${top.length}</div><div class="sl">Tracked whales</div></div>
+    </div>`;
+
+    html += '<h3>Top Whales by Total Notional</h3>';
+    if (!top.length) {
+        html += '<p class="st">No whale data yet. Log fills as trades come in.</p>';
+    } else {
+        html += '<table><tr><th>Rank</th><th>Wallet</th><th>Trader</th><th>Trades</th><th>Total Notional</th><th>Avg Trade</th><th>Markets</th><th>Last Seen</th></tr>';
+        top.forEach((wl, i) => {
+            const addr = wl.wallet || '';
+            const short = addr ? addr.slice(0,6) + '...' + addr.slice(-4) : '—';
+            const polyProf = addr ? 'https://polymarket.com/profile/' + addr : '';
+            const last = wl.last_seen ? new Date(wl.last_seen).toLocaleString() : '—';
+            html += `<tr>
+                <td>${i+1}</td>
+                <td>${polyProf ? `<a href="${polyProf}" target="_blank">${short}</a>` : short}</td>
+                <td>${escapeHtml(wl.name || '—')}</td>
+                <td>${wl.trades}</td>
+                <td><strong>$${wl.total_notional.toLocaleString()}</strong></td>
+                <td>$${wl.avg_notional.toLocaleString()}</td>
+                <td>${wl.unique_markets}</td>
+                <td>${last}</td>
+            </tr>`;
+        });
+        html += '</table>';
+    }
+
+    html += '<h3 style="margin-top:20px">Latest Whale Trades</h3>';
+    if (!latest.length) {
+        html += '<p class="st">No whale trades in the latest poll.</p>';
+    } else {
+        html += '<table><tr><th>Time</th><th>Notional</th><th>Side</th><th>Price</th><th>Trader</th><th>Market</th></tr>';
+        latest.forEach(t => {
+            const when = t.ts_iso ? new Date(t.ts_iso).toLocaleTimeString() : '—';
+            const sideBadge = t.side === 'BUY' ? 'b-g' : 'b-n';
+            const url = t.slug ? 'https://polymarket.com/market/' + t.slug : '';
+            html += `<tr>
+                <td>${when}</td>
+                <td><strong>$${t.notional.toLocaleString()}</strong></td>
+                <td><span class="badge ${sideBadge}">${t.side} ${t.outcome || ''}</span></td>
+                <td>${(t.price * 100).toFixed(1)}¢</td>
+                <td>${escapeHtml(t.name || '—')}</td>
+                <td>${url ? `<a href="${url}" target="_blank">${escapeHtml((t.title||'').substring(0,55))}</a>` : escapeHtml((t.title||'').substring(0,55))}</td>
+            </tr>`;
+        });
+        html += '</table>';
+    }
+
+    el.innerHTML = html;
+}
+
 function renderNegRisk() {
     const el = document.getElementById('negrisk-content');
     const arbs = (DATA && DATA.neg_risk_arbs) || [];
@@ -854,6 +965,8 @@ function render() {
     renderOpps();
     renderMovers();
     renderNegRisk();
+    renderLLMEdges();
+    renderWhales();
     renderNewsLag();
     renderWhatIf();
     renderSettings();
