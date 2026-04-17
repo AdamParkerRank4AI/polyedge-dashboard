@@ -84,6 +84,7 @@ tr:hover{background:#111827}
 <a class="nl" onclick="showPage('llm')">LLM Edges</a>
 <a class="nl" onclick="showPage('whales')">Whales</a>
 <a class="nl" onclick="showPage('newslag')">News Lag</a>
+<a class="nl" onclick="showPage('missed')">Just Missed</a>
 <a class="nl" onclick="showPage('whatif')">What If</a>
 <a class="nl" onclick="showPage('settings')">Settings</a>
 <span class="nav-right">Scanner: <span id="scanner-status" class="status-on">CHECKING...</span> | <span id="last-update">--</span></span>
@@ -181,6 +182,13 @@ tr:hover{background:#111827}
 <h2>News → Price Lag</h2>
 <p class="st">Every headline that matched a Polymarket market, captured with its published time and the Polymarket YES price at the moment of match. Data at <code>data/news_timing.jsonl</code>.</p>
 <div id="newslag-content" class="loading">Loading...</div>
+</div>
+
+<!-- JUST MISSED -->
+<div id="page-missed" class="page">
+<h2>Just Missed — What We Didn&apos;t Catch</h2>
+<p class="st">Three categories: (1) Solo sources — 1 headline matched a market with score ≥5 but convergence required 2 (if we&apos;d widened the rule, we&apos;d have caught these). (2) Converged but didn&apos;t trade — 2+ sources hit but the market filter blocked (volume, price extreme, watchlist). (3) Would have lost badly — markets where looser rules would have burned us. Simulated P&L uses current live Polymarket price.</p>
+<div id="missed-content" class="loading">Loading...</div>
 </div>
 
 <!-- WHAT IF -->
@@ -911,6 +919,55 @@ function renderNewsLag() {
     el.innerHTML = html;
 }
 
+function renderJustMissed() {
+    const el = document.getElementById('missed-content');
+    const jm = DATA && DATA.scenarios && DATA.scenarios.just_missed;
+    if (!jm || !jm.totals) {
+        el.innerHTML = '<p class="st">No just-missed data yet. Runs with each scenarios build.</p>';
+        return;
+    }
+    const tot = jm.totals || {};
+    let html = `<div class="stats" style="margin-bottom:16px">
+        <div class="stat"><div class="sv gr">$+${(tot.potential_profit_1src || 0).toFixed(0)}</div><div class="sl">Potential profit (1-source missed)</div></div>
+        <div class="stat"><div class="sv gr">$+${(tot.potential_profit_diff_mkt || 0).toFixed(0)}</div><div class="sl">Potential profit (converged, untraded)</div></div>
+        <div class="stat"><div class="sv rd">$${(tot.potential_loss_would_lost || 0).toFixed(0)}</div><div class="sl">Would-have-lost (looser rules)</div></div>
+    </div>`;
+
+    function renderSection(title, rows, accent) {
+        if (!rows || !rows.length) return `<h3>${title}</h3><p class="st">None.</p>`;
+        let s = `<h3 style="border-left:3px solid ${accent};padding-left:10px">${title}</h3>`;
+        s += '<table><tr><th>Score</th><th>Srcs</th><th>Market</th><th>Entry</th><th>Now</th><th>Sim P&L</th><th>Headline</th></tr>';
+        rows.forEach(r => {
+            const pnl = r.sim_pnl_if_traded;
+            const pnlCls = pnl == null ? 'gy' : (pnl > 0 ? 'up' : 'dn');
+            const pnlTxt = pnl == null ? '—' : `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}`;
+            const entryTxt = r.price_at_alert != null ? r.price_at_alert.toFixed(2) : '—';
+            const nowTxt = r.current_price != null ? r.current_price.toFixed(3) : '—';
+            const hlText = r.headline || '';
+            const hlLinked = r.link ? `<a href="${r.link}" target="_blank">${escapeHtml(hlText)}</a>` : escapeHtml(hlText);
+            const pmUrl = r.slug ? 'https://polymarket.com/market/' + r.slug : '';
+            const mkt = pmUrl ? `<a href="${pmUrl}" target="_blank">${escapeHtml((r.question||'').substring(0,55))}</a>` : escapeHtml((r.question||'').substring(0,55));
+            s += `<tr>
+                <td><strong>${r.max_score}</strong></td>
+                <td>${r.sources_count}</td>
+                <td>${mkt}</td>
+                <td>${entryTxt}</td>
+                <td>${nowTxt}</td>
+                <td class="${pnlCls}"><strong>${pnlTxt}</strong></td>
+                <td>${hlLinked.substring(0,120)}</td>
+            </tr>`;
+        });
+        s += '</table>';
+        return s;
+    }
+
+    html += renderSection('Solo-source misses (1 headline, we need 2+)', jm.just_missed_1_source, '#b066ff');
+    html += renderSection('Converged but untraded (watchlist or price-range filter blocked)', jm.just_missed_diff_market, '#ffaa00');
+    html += renderSection('Would have lost badly (looser rules = bleed)', jm.would_have_lost, '#ef4444');
+
+    el.innerHTML = html;
+}
+
 function renderWhatIf() {
     const el = document.getElementById('whatif-content');
     if (!DATA || !DATA.scenarios) {
@@ -989,6 +1046,7 @@ function render() {
     renderLLMEdges();
     renderWhales();
     renderNewsLag();
+    renderJustMissed();
     renderWhatIf();
     renderSettings();
 }
