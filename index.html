@@ -375,12 +375,33 @@ function renderOverview() {
                     <div style="font-size:12px;color:#b066ff;font-weight:700">↳ FREE-ROLL VARIANT</div>
                     <span class="play-toggle ${frEnabled ? 'on' : 'off'}">${frEnabled ? 'LIVE' : 'OFF'}</span>
                 </div>
-                <div class="play-desc" style="color:#cbd5e1">Bank stake at +${frThreshold}%, let remainder ride. No TP, no SL after banking.</div>
+                <div class="play-desc" style="color:#cbd5e1">Bank stake at +${frThreshold}% (= play's TP), let remainder ride. No TP, no SL after banking.</div>
                 <div class="play-stats" style="margin-top:6px">
                     <div class="ps"><div class="ps-v gy">${sim.banked_trades}</div><div class="ps-l">Would've banked</div></div>
                     <div class="ps"><div class="ps-v gy">$${sim.actual_pnl.toFixed(0)}</div><div class="ps-l">Actual P&L</div></div>
                     <div class="ps"><div class="ps-v ${sim.freeroll_pnl >= 0 ? 'gr' : 'rd'}">$${sim.freeroll_pnl.toFixed(0)}</div><div class="ps-l">Free-Roll P&L</div></div>
                     <div class="ps"><div class="ps-v ${deltaCls}">${deltaSign}$${sim.delta.toFixed(0)}</div><div class="ps-l">Δ vs Actual</div></div>
+                </div>
+            </div>`;
+        }
+
+        // Let-Run sibling card — no TP, no SL, hold to resolution
+        const lrSim = ((DATA.scenarios && DATA.scenarios.let_run_simulation
+                        && DATA.scenarios.let_run_simulation.by_play) || []).find(x => x.play === t);
+        if (lrSim) {
+            const lrDeltaCls = lrSim.delta > 0 ? 'gr' : (lrSim.delta < 0 ? 'rd' : 'gy');
+            const lrDeltaSign = lrSim.delta >= 0 ? '+' : '';
+            html += `<div style="margin-top:10px;padding:10px;background:#05080f;border-left:3px solid #ffaa00;border-radius:4px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                    <div style="font-size:12px;color:#ffaa00;font-weight:700">↳ LET RUN VARIANT</div>
+                    <span class="play-toggle off">SIM</span>
+                </div>
+                <div class="play-desc" style="color:#cbd5e1">No TP, no SL. Every trade opens and holds to resolution (or current live price for unresolved markets). Pure conviction.</div>
+                <div class="play-stats" style="margin-top:6px">
+                    <div class="ps"><div class="ps-v gy">${lrSim.trades}</div><div class="ps-l">Trades</div></div>
+                    <div class="ps"><div class="ps-v gy">$${lrSim.actual_pnl.toFixed(0)}</div><div class="ps-l">Actual P&L</div></div>
+                    <div class="ps"><div class="ps-v ${lrSim.letrun_pnl >= 0 ? 'gr' : 'rd'}">$${lrSim.letrun_pnl.toFixed(0)}</div><div class="ps-l">Let Run P&L</div></div>
+                    <div class="ps"><div class="ps-v ${lrDeltaCls}">${lrDeltaSign}$${lrSim.delta.toFixed(0)}</div><div class="ps-l">Δ vs Actual</div></div>
                 </div>
             </div>`;
         }
