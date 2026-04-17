@@ -6,22 +6,22 @@
 <title>PolyEdge</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background:#06080c;color:#e0e0e0;font-size:13px}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background:#06080c;color:#f1f5f9;font-size:15px;font-weight:500}
 a{color:#60a5fa;text-decoration:none}a:hover{text-decoration:underline}
 .nav{background:#0a1020;border-bottom:1px solid #1a2a44;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
 .nav-brand{color:#00ff88;font-size:20px;font-weight:800;padding:14px 15px 14px 0;border-right:1px solid #1a2a44;margin-right:5px}
-.nav a.nl{color:#cbd5e1;padding:12px 14px;font-size:13px;font-weight:500;border-bottom:2px solid transparent;cursor:pointer}
+.nav a.nl{color:#e2e8f0;padding:12px 16px;font-size:14px;font-weight:700;border-bottom:2px solid transparent;cursor:pointer}
 .nav a.nl:hover{color:#d1d5db;text-decoration:none}.nav a.nl.active{color:#00ff88;border-bottom-color:#00ff88}
-.nav-right{margin-left:auto;font-size:11px;color:#374151}
+.nav-right{margin-left:auto;font-size:11px;color:#cbd5e1}
 .status-on{color:#00ff88;font-weight:700}.status-off{color:#ef4444;font-weight:700}
 .page{display:none;padding:20px 25px;max-width:1400px;margin:0 auto}.page.active{display:block}
-h2{color:#00aaff;font-size:17px;margin:22px 0 10px;border-bottom:1px solid #1e293b;padding-bottom:6px}
-h3{color:#ffaa00;font-size:14px;margin:14px 0 8px}
-.st{color:#e5e7eb;font-size:13px;line-height:1.5;margin-bottom:12px}
+h2{color:#00aaff;font-size:22px;font-weight:900;margin:24px 0 12px;border-bottom:2px solid #334155;padding-bottom:8px;letter-spacing:0.3px}
+h3{color:#ffaa00;font-size:17px;font-weight:800;margin:18px 0 10px}
+.st{color:#e2e8f0;font-size:14px;font-weight:500;line-height:1.6;margin-bottom:14px}
 .stats{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
 .stat{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:12px 16px;flex:1;text-align:center;min-width:120px}
-.sv{font-size:24px;font-weight:700;color:#00ff88}.sv.or{color:#ffaa00}.sv.bl{color:#60a5fa}.sv.rd{color:#ef4444}.sv.gy{color:#cbd5e1}
-.sl{font-size:9px;color:#4b5563;margin-top:2px;text-transform:uppercase;letter-spacing:1px}
+.sv{font-size:30px;font-weight:900;color:#00ff88}.sv.or{color:#ffaa00}.sv.bl{color:#60a5fa}.sv.rd{color:#ef4444}.sv.gy{color:#e2e8f0}
+.sl{font-size:11px;color:#e2e8f0;font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:1px}
 .plays-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:14px 0}
 .play-card{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:16px;position:relative;overflow:hidden}
 .play-card.news{border-left:4px solid #00ff88}
@@ -29,44 +29,45 @@ h3{color:#ffaa00;font-size:14px;margin:14px 0 8px}
 .play-card.crypto{border-left:4px solid #fbbf24}
 .play-card.mover{border-left:4px solid #a78bfa}
 .play-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.play-title{font-size:15px;font-weight:700;color:#e5e7eb}
-.play-toggle{font-size:10px;padding:3px 9px;border-radius:12px;font-weight:700}
+.play-title{font-size:18px;font-weight:900;color:#ffffff;letter-spacing:0.5px}
+.play-toggle{font-size:11px;padding:4px 11px;border-radius:12px;font-weight:800}
 .play-toggle.on{background:#064e3b;color:#6ee7b7}
 .play-toggle.off{background:#7f1d1d;color:#fca5a5}
-.play-desc{font-size:12px;color:#e5e7eb;margin-bottom:10px;line-height:1.5}
-.play-rules{font-size:11px;color:#94a3b8;margin-bottom:10px;line-height:1.6;padding:8px;background:#0a1020;border-radius:6px}
+.play-desc{font-size:13px;color:#e2e8f0;font-weight:500;margin-bottom:10px;line-height:1.5}
+.play-rules{font-size:12px;color:#e2e8f0;margin-bottom:10px;line-height:1.6;padding:10px;background:#0a1020;border-radius:6px}
 .play-rules strong{color:#d1d5db}
 .play-stats{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
 .ps{background:#0a1020;padding:6px 8px;border-radius:6px;flex:1;text-align:center;min-width:60px}
-.ps-v{font-size:15px;font-weight:700}
-.ps-v.gr{color:#00ff88}.ps-v.rd{color:#ef4444}.ps-v.bl{color:#60a5fa}.ps-v.gy{color:#94a3b8}
-.ps-l{font-size:8px;color:#4b5563;text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.ps-v{font-size:17px;font-weight:800}
+.ps-v.gr{color:#00ff88}.ps-v.rd{color:#ef4444}.ps-v.bl{color:#60a5fa}.ps-v.gy{color:#cbd5e1}
+.ps-l{font-size:10px;color:#e2e8f0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
 .ac{background:#111827;border:1px solid #1e293b;border-radius:8px;padding:12px;margin-bottom:8px}
 .ac:hover{border-color:#334155}
 .ah{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11px}
-.at{color:#4b5563;font-family:monospace}.as{color:#94a3b8}
+.at{color:#cbd5e1;font-family:monospace}.as{color:#cbd5e1}
 .ahl{font-size:13px;font-weight:500;margin-bottom:6px}
-.badge{padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;display:inline-block}
+.badge{padding:3px 9px;border-radius:10px;font-size:11px;font-weight:800;display:inline-block}
 .b-r{background:#7f1d1d;color:#fca5a5}.b-o{background:#78350f;color:#fcd34d}.b-g{background:#064e3b;color:#6ee7b7}
 .b-n{background:#064e3b;color:#6ee7b7}.b-t{background:#0c4a6e;color:#7dd3fc}.b-c{background:#78350f;color:#fcd34d}.b-m{background:#4c1d95;color:#c4b5fd}
 .mr{display:flex;align-items:center;gap:8px;padding:4px 7px;background:#0f172a;border-radius:4px;margin:2px 0;font-size:11px}
 .mq{flex:1;color:#d1d5db}.mp{color:#00ff88;font-weight:700;min-width:45px;text-align:right}
-.mv{color:#94a3b8;min-width:50px;text-align:right}
+.mv{color:#cbd5e1;min-width:50px;text-align:right}
 table{width:100%;border-collapse:collapse;margin:10px 0}
-th{text-align:left;color:#4b5563;font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:7px;border-bottom:1px solid #1e293b}
+th{text-align:left;color:#f1f5f9;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:9px;border-bottom:2px solid #334155}
+td{padding:9px 7px;border-bottom:1px solid #1e293b}
 td{padding:7px;border-bottom:1px solid #111827;font-size:12px}
 tr:hover{background:#111827}
-.up{color:#00ff88}.dn{color:#ef4444}.fl{color:#374151}
+.up{color:#00ff88}.dn{color:#ef4444}.fl{color:#cbd5e1}
 .filter-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
 .fb{background:#1e293b;color:#cbd5e1;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid transparent}
 .fb:hover{background:#334155}
 .fb.active{background:#064e3b;color:#6ee7b7;border-color:#00ff88}
-.loading{text-align:center;padding:40px;color:#4b5563}
+.loading{text-align:center;padding:40px;color:#cbd5e1}
 .footer{text-align:center;padding:25px;color:#1e293b;font-size:11px}
 .settings-box{background:#111827;border:1px solid #1e293b;border-radius:8px;padding:14px;margin:10px 0}
 .settings-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #1e293b;font-size:12px}
 .settings-row:last-child{border-bottom:none}
-.settings-label{color:#cbd5e1}.settings-value{color:#00ff88;font-weight:600;font-family:monospace}
+.settings-label{color:#e2e8f0;font-weight:600;font-size:14px}.settings-value{color:#00ff88;font-weight:700;font-family:monospace;font-size:14px}
 @media(max-width:768px){.nav{padding:0 10px}.page{padding:15px}.stats{gap:6px}.stat{padding:8px 10px}.sv{font-size:18px}}
 </style>
 </head>
@@ -405,7 +406,7 @@ function renderOverview() {
                 <span class="play-toggle ${enabled ? 'on' : 'off'}">${enabled ? 'ON' : 'OFF'}</span>
             </div>
             <div class="play-desc">${settingInfo.description || ''}</div>
-            <div class="play-desc" style="color:#94a3b8">TP ${tp} • SL ${sl}${s.o > 0 ? ' • $' + s.openStake.toLocaleString() + ' in open' : ''}</div>
+            <div class="play-desc" style="color:#cbd5e1">TP ${tp} • SL ${sl}${s.o > 0 ? ' • $' + s.openStake.toLocaleString() + ' in open' : ''}</div>
             <div class="play-stats">
                 <div class="ps"><div class="ps-v gy">$${s.staked.toLocaleString()}</div><div class="ps-l">Bet (closed)</div></div>
                 <div class="ps"><div class="ps-v ${s.returned >= s.staked ? 'gr' : 'rd'}">$${s.returned.toFixed(0)}</div><div class="ps-l">Back</div></div>
@@ -554,7 +555,7 @@ function renderPlaysDetail() {
             </div>
             <div class="play-desc">${cfg.description || ''}</div>
             <div class="play-rules">${rules}</div>
-            <div style="font-size:11px;color:#94a3b8;margin-bottom:6px;font-weight:700;letter-spacing:0.5px">ACTUAL (as traded)</div>
+            <div style="font-size:11px;color:#cbd5e1;margin-bottom:6px;font-weight:700;letter-spacing:0.5px">ACTUAL (as traded)</div>
             <div class="play-stats">
                 <div class="ps"><div class="ps-v ${net >= 0 ? 'gr' : 'rd'}">$${net >= 0 ? '+' : ''}${net.toFixed(0)}</div><div class="ps-l">Net P&L</div></div>
                 <div class="ps"><div class="ps-v gr">${s.w}</div><div class="ps-l">Wins</div></div>
@@ -679,7 +680,7 @@ function renderPositions() {
 
         const rowId = `pos-row-${idx}`;
         html += `<tr style="cursor:pointer" onclick="togglePos('${rowId}')">
-            <td style="width:20px;color:#94a3b8" id="${rowId}-caret">▸</td>
+            <td style="width:20px;color:#cbd5e1" id="${rowId}-caret">▸</td>
             <td>${statusB}</td>
             <td><span class="badge ${tb}">${t.replace('_', ' ')}</span></td>
             <td>${escapeHtml(p.question).substring(0,55)}</td>
@@ -731,7 +732,7 @@ function renderPositions() {
             });
             detail += '</div>';
         } else if (t === 'NEWS_EDGE') {
-            detail += `<div style="grid-column:1/-1"><div class="st">Triggering Headlines</div><div style="color:#94a3b8">No headline history in current alert cache (position may be older than the retained log window).</div></div>`;
+            detail += `<div style="grid-column:1/-1"><div class="st">Triggering Headlines</div><div style="color:#cbd5e1">No headline history in current alert cache (position may be older than the retained log window).</div></div>`;
         }
 
         detail += '</div></div>';
@@ -873,7 +874,7 @@ function renderLLMEdges() {
         const edgeCls = Math.abs(e.edge) >= 0.25 ? 'up' : 'bl';
         const dirBadge = e.direction === 'YES' ? 'b-g' : 'b-n';
         html += `<tr style="cursor:pointer" onclick="togglePos('${rid}')">
-            <td style="width:20px;color:#94a3b8" id="${rid}-caret">▸</td>
+            <td style="width:20px;color:#cbd5e1" id="${rid}-caret">▸</td>
             <td><span class="badge ${dirBadge}">${e.direction}</span></td>
             <td>${escapeHtml(e.question)}</td>
             <td>${(e.market_price * 100).toFixed(1)}¢</td>
@@ -968,7 +969,7 @@ function renderNegRisk() {
         const edgeCls = a.edge_pct >= 5 ? 'up' : (a.edge_pct >= 3 ? 'bl' : 'gy');
         const dirBadge = a.direction === 'BUY_YES_ALL' ? 'b-g' : 'b-n';
         html += `<tr style="cursor:pointer" onclick="togglePos('${rid}')">
-            <td style="width:20px;color:#94a3b8" id="${rid}-caret">▸</td>
+            <td style="width:20px;color:#cbd5e1" id="${rid}-caret">▸</td>
             <td><strong>${escapeHtml(a.event_title || 'Event ' + a.event_id)}</strong></td>
             <td>${a.num_outcomes}</td>
             <td>${a.sum_yes}</td>
