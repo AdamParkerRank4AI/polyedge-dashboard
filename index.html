@@ -1635,6 +1635,95 @@ function renderWhatIf() {
     }
 
     // Forward-changes log
+    // Score sensitivity
+    if (s.score_sensitivity && s.score_sensitivity.by_threshold) {
+        html += '<h3>NEWS_EDGE Score Threshold Sensitivity</h3>';
+        html += '<p class="st">P&L on closed NEWS_EDGE trades if we had required different minimum match scores. Base case = score≥5 (current rule).</p>';
+        html += '<table><tr><th>Min Score</th><th>Kept trades</th><th>Dropped</th><th>Kept P&L</th><th>Foregone P&L</th></tr>';
+        s.score_sensitivity.by_threshold.forEach(r => {
+            html += `<tr>
+                <td><strong>${r.min_score}${r.min_score===5?' (base)':''}</strong></td>
+                <td>${r.kept_trades}</td>
+                <td>${r.dropped_trades}</td>
+                <td class="${r.kept_pnl >= 0 ? 'up' : 'dn'}"><strong>$${r.kept_pnl >= 0 ? '+' : ''}${r.kept_pnl.toFixed(2)}</strong></td>
+                <td class="${r.dropped_pnl_foregone >= 0 ? 'up' : 'dn'}">$${r.dropped_pnl_foregone >= 0 ? '+' : ''}${r.dropped_pnl_foregone.toFixed(2)}</td>
+            </tr>`;
+        });
+        html += '</table>';
+    }
+
+    // Kelly sizing
+    if (s.kelly_sizing && s.kelly_sizing.by_play) {
+        const k = s.kelly_sizing;
+        html += '<h3>Kelly Sizing Simulation (quarter-Kelly)</h3>';
+        html += `<p class="st">${escapeHtml(k.description)} Total actual $${(k.total_actual).toFixed(0)} → Kelly $${(k.total_kelly).toFixed(0)} (<span class="${k.delta>=0?'up':'dn'}"><strong>${k.delta>=0?'+':''}$${k.delta.toFixed(0)}</strong></span>).</p>`;
+        html += '<table><tr><th>Play</th><th>N</th><th>WR</th><th>Avg Win</th><th>Avg Loss</th><th>Full Kelly</th><th>Multiplier</th><th>Actual P&L</th><th>Kelly P&L</th><th>Δ</th></tr>';
+        k.by_play.forEach(r => {
+            html += `<tr>
+                <td><strong>${escapeHtml(r.play)}</strong></td>
+                <td>${r.n}</td>
+                <td>${r.win_rate_pct}%</td>
+                <td>$${r.avg_win}</td>
+                <td>$${r.avg_loss}</td>
+                <td>${(r.full_kelly*100).toFixed(1)}%</td>
+                <td><strong>${r.quarter_kelly_multiplier.toFixed(2)}×</strong></td>
+                <td class="${r.actual_pnl>=0?'up':'dn'}">$${r.actual_pnl>=0?'+':''}${r.actual_pnl.toFixed(0)}</td>
+                <td class="${r.kelly_pnl>=0?'up':'dn'}">$${r.kelly_pnl>=0?'+':''}${r.kelly_pnl.toFixed(0)}</td>
+                <td class="${r.delta>=0?'up':'dn'}"><strong>${r.delta>=0?'+':''}$${r.delta.toFixed(0)}</strong></td>
+            </tr>`;
+        });
+        html += '</table>';
+    }
+
+    // Hold time
+    if (s.hold_time && s.hold_time.buckets) {
+        html += '<h3>Hold Time Analysis</h3>';
+        html += '<p class="st">Win rate and P&L by how long trades were held before closing. Identifies whether fast exits or held-out trades win more.</p>';
+        html += '<table><tr><th>Hold Time</th><th>N</th><th>Wins</th><th>WR</th><th>Staked</th><th>P&L</th><th>ROI</th></tr>';
+        s.hold_time.buckets.forEach(r => {
+            html += `<tr>
+                <td><strong>${r.bucket}</strong></td>
+                <td>${r.n}</td>
+                <td class="up">${r.wins}</td>
+                <td class="${r.win_rate_pct>=60?'up':(r.win_rate_pct<40?'dn':'fl')}"><strong>${r.win_rate_pct}%</strong></td>
+                <td>$${r.staked.toLocaleString()}</td>
+                <td class="${r.pnl>=0?'up':'dn'}"><strong>$${r.pnl>=0?'+':''}${r.pnl.toFixed(0)}</strong></td>
+                <td class="${r.roi_pct>=0?'bl':'dn'}">${r.roi_pct>=0?'+':''}${r.roi_pct.toFixed(2)}%</td>
+            </tr>`;
+        });
+        html += '</table>';
+    }
+
+    // FedWatch divergence
+    const fw = DATA.fedwatch || {};
+    if (fw && fw.source === 'cme' && fw.probabilities) {
+        const p = fw.probabilities;
+        html += '<h3>CME FedWatch vs Polymarket</h3>';
+        html += `<p class="st">CME's Fed Funds futures imply these probabilities for the next Fed decision (${fw.next_meeting_date || 'date TBD'}). Polymarket typically lags by ~1.44 days.</p>`;
+        html += '<table><tr><th>Outcome</th><th>CME Implied</th></tr>';
+        ['hike','hold','cut'].forEach(b => {
+            if (p[b] != null) html += `<tr><td><strong>${b.toUpperCase()}</strong></td><td>${(p[b]*100).toFixed(1)}%</td></tr>`;
+        });
+        html += '</table>';
+        if (fw.divergences && fw.divergences.length) {
+            html += '<p class="st" style="margin-top:10px">Polymarket markets priced ≥5pp away from CME:</p>';
+            html += '<table><tr><th>Market</th><th>Polymarket</th><th>CME</th><th>Gap</th><th>Direction</th></tr>';
+            fw.divergences.forEach(d => {
+                const cls = Math.abs(d.gap_pct) >= 10 ? 'up' : 'bl';
+                html += `<tr>
+                    <td>${escapeHtml((d.question||'').substring(0,50))}</td>
+                    <td>${(d.polymarket_yes*100).toFixed(1)}%</td>
+                    <td>${(d.cme_probability*100).toFixed(1)}%</td>
+                    <td class="${cls}"><strong>${d.gap_pct>=0?'+':''}${d.gap_pct}pp</strong></td>
+                    <td><span class="badge b-n">${d.direction}</span></td>
+                </tr>`;
+            });
+            html += '</table>';
+        }
+    } else if (fw && fw.error) {
+        html += `<h3>CME FedWatch</h3><p class="st" style="color:#ef4444">⚠ ${escapeHtml(fw.error)}</p>`;
+    }
+
     html += '<h3>Forward Rule Changes (applied, not retroactive)</h3>';
     html += '<ul>';
     html += '<li><strong>Apr 15:</strong> Stop losses widened — BIG_MOVER/CRYPTO/NEWS 5% → 15%, TIME_DECAY 8% → 20%. Applies to new trades only.</li>';
