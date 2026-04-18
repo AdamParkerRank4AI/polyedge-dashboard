@@ -84,6 +84,7 @@ tr:hover{background:#111827}
 <a class="nl" onclick="showPage('alerts')">Alerts</a>
 <a class="nl" onclick="showPage('opportunities')">Opportunities</a>
 <a class="nl" onclick="showPage('movers')">Movers</a>
+<a class="nl" onclick="showPage('ideas')">Strategy Ideas</a>
 <a class="nl" onclick="showPage('lab')">Lab</a>
 <a class="nl" onclick="showPage('negrisk')">NegRisk</a>
 <a class="nl" onclick="showPage('llm')">LLM Edges</a>
@@ -184,6 +185,13 @@ tr:hover{background:#111827}
 <h2>Biggest 24h Movers</h2>
 <p class="st">Markets with the biggest price swings in 24h. Big movers >20% on >$500k volume trigger auto-trades.</p>
 <div id="movers-list" class="loading">Loading...</div>
+</div>
+
+<!-- STRATEGY IDEAS -->
+<div id="page-ideas" class="page">
+<h2>Strategy Ideas</h2>
+<p class="st">Dynamically ranked ideas based on what's actually working in your portfolio right now. Rebuilds every scan.</p>
+<div id="ideas-content" class="loading">Loading...</div>
 </div>
 
 <!-- LAB -->
@@ -956,6 +964,185 @@ function renderSettings() {
     document.getElementById('settings-content').innerHTML = html;
 }
 
+function renderIdeas() {
+    const el = document.getElementById('ideas-content');
+    if (!DATA) { el.innerHTML = '<p class="st">Loading...</p>'; return; }
+
+    const positions = (DATA.positions || []).filter(p => !p.lab);
+    const stats = computePlayStats();
+    const scen = DATA.scenarios || {};
+    const jm = (scen.just_missed || {});
+    const patterns = jm.patterns || {};
+    const ideas = [];
+
+    // --- Tile-generator helpers ---
+    const makeIdea = (rank, tier, title, evidence, action, colorHex) => ({
+        rank, tier, title, evidence, action, color: colorHex,
+    });
+
+    // 1. TOP PLAYS — by ROI on closed
+    const playRows = [];
+    Object.keys(stats).forEach(t => {
+        const s = stats[t];
+        const total = s.w + s.l;
+        if (total < 3) return;
+        const net = s.wp + s.lp;
+        const roi = s.staked > 0 ? (net / s.staked * 100) : 0;
+        const wr = total > 0 ? (s.w / total * 100) : 0;
+        playRows.push({t, net, roi, wr, n: total});
+    });
+    playRows.sort((a, b) => b.roi - a.roi);
+
+    if (playRows.length) {
+        const top = playRows[0];
+        ideas.push(makeIdea(1, 'WINNING', `Double down on ${top.t}`,
+            `ROI ${top.roi.toFixed(1)}% over ${top.n} closed trades (${top.wr.toFixed(0)}% WR, $${top.net.toFixed(0)} net). Best-performing play in the portfolio.`,
+            `Consider 2x stake when this play fires. Also mirror its rules for new market types.`,
+            '#00ff88'));
+        const bottom = playRows[playRows.length - 1];
+        if (bottom.roi < 2 && bottom !== top) {
+            ideas.push(makeIdea(2, 'UNDERPERFORMING', `Tighten or pause ${bottom.t}`,
+                `Only ${bottom.roi.toFixed(1)}% ROI on ${bottom.n} trades. Dragging the portfolio.`,
+                `Raise entry threshold or cut the play entirely and redirect capital to ${top.t}.`,
+                '#ef4444'));
+        }
+    }
+
+    // 2. FREE-ROLL opportunities
+    const fr = scen.free_roll_simulation && scen.free_roll_simulation.by_play;
+    if (fr) {
+        const bestFr = fr.slice().sort((a, b) => b.delta - a.delta)[0];
+        if (bestFr && bestFr.delta > 50) {
+            ideas.push(makeIdea(ideas.length + 1, 'SIMULATION', `Free-Roll is the upgrade for ${bestFr.play}`,
+                `If we'd banked at +${bestFr.bank_threshold_pct}% and let the rest ride, +$${bestFr.delta.toFixed(0)} more across ${bestFr.banked_trades} banked trades.`,
+                `Free-Roll is already LIVE — the delta will materialise on new trades automatically. No action needed, monitor impact over 1-2 weeks.`,
+                '#b066ff'));
+        }
+    }
+
+    // 3. LET RUN opportunities (where TP is actively hurting us)
+    const lr = scen.let_run_simulation && scen.let_run_simulation.by_play;
+    if (lr) {
+        lr.forEach(r => {
+            if (r.delta > 100) {
+                ideas.push(makeIdea(ideas.length + 1, 'TUNING', `${r.play} may need wider TP`,
+                    `Holding every trade to resolution would have added +$${r.delta.toFixed(0)}. Current TP is cashing out too early.`,
+                    `Consider widening ${r.play} TP by 5-10pp OR enabling let-run on specific sub-buckets.`,
+                    '#ffaa00'));
+            } else if (r.delta < -200) {
+                ideas.push(makeIdea(ideas.length + 1, 'CONFIRMED', `${r.play} rules are correct`,
+                    `Letting every trade run would have LOST an extra $${Math.abs(r.delta).toFixed(0)}. TP/SL are doing their job.`,
+                    `Don't touch the rules here. They're saving you money.`,
+                    '#60a5fa'));
+            }
+        });
+    }
+
+    // 4. TOP SOURCE PATTERNS
+    if (patterns.by_source && patterns.by_source.length) {
+        const topSrc = patterns.by_source[0];
+        if (topSrc.net_sim_pnl > 500) {
+            ideas.push(makeIdea(ideas.length + 1, 'SIGNAL', `${topSrc.source} is your best source`,
+                `${topSrc.winners} winners / ${topSrc.losers} losers, net $${topSrc.net_sim_pnl.toFixed(0)} simulated. ${topSrc.accuracy_pct}% accuracy.`,
+                `Already weighted up. Consider flagging ${topSrc.source} hits for email even at lower score threshold.`,
+                '#00ff88'));
+        }
+        const noise = patterns.by_source.filter(s => s.net_sim_pnl < -100);
+        noise.forEach(s => {
+            ideas.push(makeIdea(ideas.length + 1, 'NOISE', `Drop or mute ${s.source}`,
+                `${s.losers} losers vs ${s.winners} winners, net $${s.net_sim_pnl.toFixed(0)}. Signal quality too low.`,
+                `Currently muted to ${(0.3).toFixed(1)}x. Consider fully removing if next 2 weeks stay negative.`,
+                '#ef4444'));
+        });
+    }
+
+    // 5. TOP TOPIC — concentrate on the winning theme
+    if (patterns.by_topic && patterns.by_topic.length) {
+        const topTopic = patterns.by_topic[0];
+        if (topTopic.net_sim_pnl > 500) {
+            ideas.push(makeIdea(ideas.length + 1, 'CONCENTRATION', `${topTopic.topic} is the goldmine`,
+                `$${topTopic.net_sim_pnl.toFixed(0)} net across ${topTopic.total} trades. The dominant profitable topic.`,
+                `Add related markets to watchlist proactively. As ${topTopic.topic} news cycle cools, scout the next analog (China/Taiwan, Russia/Ukraine, Fed).`,
+                '#ffaa00'));
+        }
+    }
+
+    // 6. LAB feedback — if lab is outperforming, promote concepts
+    const labPos = (DATA.positions || []).filter(p => p.lab && p.exit_price);
+    if (labPos.length >= 5) {
+        const labStaked = labPos.reduce((s, p) => s + (p.stake || 0), 0);
+        const labRet = labPos.reduce((s, p) => s + ((p.shares||0) * (p.exit_price||0)), 0);
+        const labRoi = labStaked > 0 ? ((labRet - labStaked) / labStaked * 100) : 0;
+        if (labRoi > 5) {
+            ideas.push(makeIdea(ideas.length + 1, 'PROMOTE', `Lab is working — promote to main`,
+                `${labPos.length} closed lab trades at ${labRoi.toFixed(1)}% ROI. The experiment is producing edge.`,
+                `Promote best lab categories (celebrity / sports contrarian) to main pot with $100 stakes.`,
+                '#00ff88'));
+        } else if (labRoi < -5) {
+            ideas.push(makeIdea(ideas.length + 1, 'ARCHIVE', `Lab is leaking — consider closing`,
+                `${labPos.length} closed trades at ${labRoi.toFixed(1)}% ROI. Confirmed these categories don't produce edge for us.`,
+                `Either raise the lab entry bar (lower min-volume, stricter price range) or cut the lab scanners.`,
+                '#ef4444'));
+        }
+    }
+
+    // 7. NegRisk — flag current live arbs
+    if (DATA.neg_risk_arbs && DATA.neg_risk_arbs.length) {
+        const top = DATA.neg_risk_arbs[0];
+        if (top.edge_pct >= 5) {
+            ideas.push(makeIdea(ideas.length + 1, 'LIVE ARB', `NegRisk opportunity right now`,
+                `${top.event_title} sum ${top.sum_yes} = ${top.edge_pct}% edge. ${top.direction} across ${top.num_outcomes} outcomes.`,
+                `When SA creds arrive, this is a risk-free arb trade. Check liquidity on every leg before executing.`,
+                '#b066ff'));
+        }
+    }
+
+    // --- NEW: LLM edges live now ---
+    if (DATA.llm_edges && DATA.llm_edges.length) {
+        const strongEdge = DATA.llm_edges.filter(e => Math.abs(e.edge) >= 0.25);
+        if (strongEdge.length) {
+            ideas.push(makeIdea(ideas.length + 1, 'LLM', `Claude flagged ${strongEdge.length} high-divergence market${strongEdge.length===1?'':'s'}`,
+                `Biggest: ${strongEdge[0].question} — market ${(strongEdge[0].market_price*100).toFixed(0)}¢, Claude estimates ${(strongEdge[0].llm_probability*100).toFixed(0)}¢.`,
+                `Check Claude's reasoning under the LLM Edges tab. If it matches your view, size up.`,
+                '#60a5fa'));
+        }
+    }
+
+    // --- SCORE SENSITIVITY idea (if convergence candidates keep getting filtered) ---
+    if (jm.totals && jm.totals.potential_profit_1src > 500) {
+        ideas.push(makeIdea(ideas.length + 1, 'FILTER', `Loosen solo-source convergence`,
+            `$${jm.totals.potential_profit_1src.toFixed(0)} in foregone profit from single-source alerts blocked by 2-source rule.`,
+            `Consider: allow solo-source trades from BOOSTED sources (NPR 1.6x, BBC 1.4-1.5x) only. Keep 2-source rule for untrusted sources.`,
+            '#ffaa00'));
+    }
+
+    // --- Render ---
+    if (!ideas.length) {
+        el.innerHTML = '<p class="st">No strong ideas yet — need more closed trades + scenarios data. Come back after a few days of runtime.</p>';
+        return;
+    }
+
+    // Sort: winning + live arbs first, then tuning, then confirmed, then noise
+    const order = {'WINNING':1, 'LIVE ARB':2, 'SIMULATION':3, 'SIGNAL':4, 'CONCENTRATION':5, 'LLM':6, 'PROMOTE':7, 'TUNING':8, 'FILTER':9, 'CONFIRMED':10, 'UNDERPERFORMING':11, 'NOISE':12, 'ARCHIVE':13};
+    ideas.sort((a, b) => (order[a.tier] || 99) - (order[b.tier] || 99));
+
+    let html = `<p class="st">Rebuilt every scan. ${ideas.length} active ideas.</p>`;
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px">';
+    ideas.forEach((idea, i) => {
+        html += `<div style="background:#111827;border:1px solid #1e293b;border-left:5px solid ${idea.color};border-radius:10px;padding:14px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <div style="font-size:11px;font-weight:800;color:${idea.color};letter-spacing:1px">${idea.tier}</div>
+                <div class="st" style="margin:0;font-size:11px">#${i+1}</div>
+            </div>
+            <div style="font-size:16px;font-weight:800;color:#f1f5f9;margin-bottom:8px">${escapeHtml(idea.title)}</div>
+            <div style="font-size:13px;color:#e2e8f0;margin-bottom:10px;line-height:1.5"><strong style="color:#cbd5e1">Evidence:</strong> ${escapeHtml(idea.evidence)}</div>
+            <div style="font-size:13px;color:#e2e8f0;line-height:1.5;padding-top:10px;border-top:1px dashed #334155"><strong style="color:${idea.color}">Action:</strong> ${escapeHtml(idea.action)}</div>
+        </div>`;
+    });
+    html += '</div>';
+    el.innerHTML = html;
+}
+
 function renderLab() {
     const el = document.getElementById('lab-content');
     const labPos = (DATA.positions || []).filter(p => p.lab);
@@ -1399,6 +1586,7 @@ function render() {
     renderAlerts();
     renderOpps();
     renderMovers();
+    renderIdeas();
     renderLab();
     renderNegRisk();
     renderLLMEdges();
