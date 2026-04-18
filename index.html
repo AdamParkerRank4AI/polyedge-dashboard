@@ -71,7 +71,31 @@ tr:hover{background:#111827}
 .settings-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #1e293b;font-size:12px}
 .settings-row:last-child{border-bottom:none}
 .settings-label{color:#e2e8f0;font-weight:600;font-size:14px}.settings-value{color:#00ff88;font-weight:700;font-family:monospace;font-size:14px}
-@media(max-width:768px){.nav{padding:0 10px}.page{padding:15px}.stats{gap:6px}.stat{padding:8px 10px}.sv{font-size:18px}}
+@media(max-width:1024px){
+  .stats{flex-wrap:wrap}.stat{min-width:140px;flex:1 1 140px}
+  table{font-size:12px}
+  th,td{padding:6px 5px}
+}
+@media(max-width:768px){
+  body{font-size:13px}
+  .nav{padding:0 8px;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:none}
+  .nav::-webkit-scrollbar{display:none}
+  .nav a.nl{padding:10px 10px;font-size:12px;white-space:nowrap;flex-shrink:0}
+  .nav-brand{font-size:16px;padding-right:8px;margin-right:2px}
+  .nav-right{display:none}
+  .page{padding:12px}
+  .stats{gap:6px}
+  .stat{padding:8px 10px;min-width:45%;flex:1 1 45%}
+  .stat-label{min-width:100%;padding:8px;font-size:12px}
+  .sv{font-size:22px}
+  .sl{font-size:10px}
+  h2{font-size:18px}
+  h3{font-size:14px}
+  .play-card{padding:12px}
+  .play-stats{grid-template-columns:repeat(2,1fr)}
+  table{display:block;overflow-x:auto;white-space:nowrap}
+  th,td{padding:6px 4px;font-size:11px}
+}
 </style>
 </head>
 <body>
