@@ -85,6 +85,7 @@ tr:hover{background:#111827}
 <a class="nl" onclick="showPage('opportunities')">Opportunities</a>
 <a class="nl" onclick="showPage('movers')">Movers</a>
 <a class="nl" onclick="showPage('ideas')">Strategy Ideas</a>
+<a class="nl" onclick="showPage('audit')">Daily Audit</a>
 <a class="nl" onclick="showPage('lab')">Lab</a>
 <a class="nl" onclick="showPage('negrisk')">NegRisk</a>
 <a class="nl" onclick="showPage('llm')">LLM Edges</a>
@@ -185,6 +186,13 @@ tr:hover{background:#111827}
 <h2>Biggest 24h Movers</h2>
 <p class="st">Markets with the biggest price swings in 24h. Big movers >20% on >$500k volume trigger auto-trades.</p>
 <div id="movers-list" class="loading">Loading...</div>
+</div>
+
+<!-- DAILY AUDIT -->
+<div id="page-audit" class="page">
+<h2>Daily Strategy Audit</h2>
+<p class="st">Claude reviews the full portfolio once a day and produces a strategic audit: portfolio health, new strategy ideas grounded in the last 24h of data, alternative ways of positioning, and early-warning watch-outs. Runs via launchd at 09:00 UK time.</p>
+<div id="audit-content" class="loading">Loading...</div>
 </div>
 
 <!-- STRATEGY IDEAS -->
@@ -964,6 +972,71 @@ function renderSettings() {
     document.getElementById('settings-content').innerHTML = html;
 }
 
+function renderAudit() {
+    const el = document.getElementById('audit-content');
+    const a = DATA && DATA.daily_audit;
+    if (!a) {
+        el.innerHTML = '<p class="st">No audit yet — runs daily at 09:00 UK. Trigger manually with <code>python3 ~/polyedge/run_daily_audit.py</code>.</p>';
+        return;
+    }
+    let html = `<div style="background:#0a1020;border-left:4px solid #60a5fa;border-radius:8px;padding:14px 18px;margin-bottom:20px">
+        <div class="st" style="margin:0;color:#60a5fa;font-weight:700">Generated ${fmtDate(a.generated_at)} · ${fmtDate(a.generated_at, {rel:true})}</div>
+        <div style="margin-top:8px;font-size:15px;color:#f1f5f9;line-height:1.6;font-weight:500">${escapeHtml(a.health_summary || '—')}</div>
+    </div>`;
+
+    if (a.error) {
+        html += `<p style="color:#ef4444;font-weight:700">⚠️ ${escapeHtml(a.error)}</p>`;
+    }
+
+    // Ideas as tiles
+    if (a.ideas && a.ideas.length) {
+        html += '<h3>Strategy Ideas (today)</h3>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px">';
+        const tierColor = {NEW:'#00ff88', TUNING:'#ffaa00', PIVOT:'#b066ff', WATCH:'#ef4444'};
+        a.ideas.forEach((idea, i) => {
+            const c = tierColor[idea.tier] || '#60a5fa';
+            const effortBadge = idea.effort ? `<span style="font-size:10px;color:#cbd5e1;background:#1e293b;padding:2px 6px;border-radius:4px;margin-left:6px">${idea.effort}</span>` : '';
+            html += `<div style="background:#111827;border:1px solid #1e293b;border-left:5px solid ${c};border-radius:10px;padding:14px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                    <div style="font-size:11px;font-weight:800;color:${c};letter-spacing:1px">${escapeHtml(idea.tier || 'IDEA')}${effortBadge}</div>
+                    <div class="st" style="margin:0;font-size:11px">#${i+1}</div>
+                </div>
+                <div style="font-size:16px;font-weight:800;color:#f1f5f9;margin-bottom:8px">${escapeHtml(idea.title || '')}</div>
+                <div style="font-size:13px;color:#e2e8f0;margin-bottom:10px;line-height:1.5"><strong style="color:#cbd5e1">Evidence:</strong> ${escapeHtml(idea.evidence || '')}</div>
+                <div style="font-size:13px;color:#e2e8f0;line-height:1.5;padding-top:10px;border-top:1px dashed #334155"><strong style="color:${c}">Action:</strong> ${escapeHtml(idea.action || '')}</div>
+            </div>`;
+        });
+        html += '</div>';
+    }
+
+    // Alternative positioning
+    if (a.alternative_positioning && a.alternative_positioning.length) {
+        html += '<h3 style="margin-top:24px">Alternative Positioning</h3>';
+        html += '<table><tr><th>Play</th><th>Current Approach</th><th>Alternative</th><th>Why</th></tr>';
+        a.alternative_positioning.forEach(p => {
+            html += `<tr>
+                <td><strong>${escapeHtml(p.play || '?')}</strong></td>
+                <td>${escapeHtml(p.current_approach || '')}</td>
+                <td style="color:#b066ff;font-weight:600">${escapeHtml(p.alternative || '')}</td>
+                <td>${escapeHtml(p.why || '')}</td>
+            </tr>`;
+        });
+        html += '</table>';
+    }
+
+    // Watch-outs
+    if (a.watch_outs && a.watch_outs.length) {
+        html += '<h3 style="margin-top:24px;color:#ef4444">Watch-Outs</h3>';
+        html += '<ul style="color:#f1f5f9;line-height:1.7;font-size:14px">';
+        a.watch_outs.forEach(w => {
+            html += `<li style="margin-bottom:6px">${escapeHtml(w)}</li>`;
+        });
+        html += '</ul>';
+    }
+
+    el.innerHTML = html;
+}
+
 function renderIdeas() {
     const el = document.getElementById('ideas-content');
     if (!DATA) { el.innerHTML = '<p class="st">Loading...</p>'; return; }
@@ -1586,6 +1659,7 @@ function render() {
     renderAlerts();
     renderOpps();
     renderMovers();
+    renderAudit();
     renderIdeas();
     renderLab();
     renderNegRisk();
