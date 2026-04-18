@@ -1720,8 +1720,94 @@ function renderWhatIf() {
             });
             html += '</table>';
         }
+    } else if (fw && fw.source === 'fred' && fw.fred_data) {
+        const fr = fw.fred_data;
+        const arrow = fr.change_1m_pp > 0 ? '↑' : (fr.change_1m_pp < 0 ? '↓' : '→');
+        html += '<h3>Fed Funds Rate (FRED fallback)</h3>';
+        html += `<p class="st">${escapeHtml(fw.note||'')}</p>`;
+        html += `<div class="stats" style="margin-bottom:14px">
+            <div class="stat"><div class="sv">${fr.current_rate_upper_pct.toFixed(2)}%</div><div class="sl">Current Upper</div></div>
+            <div class="stat"><div class="sv gy">${fr.rate_1m_ago_pct.toFixed(2)}%</div><div class="sl">1 Month Ago</div></div>
+            <div class="stat"><div class="sv ${fr.change_1m_pp>0?'':'rd'}">${arrow} ${fr.change_1m_pp>0?'+':''}${fr.change_1m_pp}pp</div><div class="sl">1M Change</div></div>
+            <div class="stat"><div class="sv gy" style="font-size:13px">${fr.as_of}</div><div class="sl">As Of</div></div>
+        </div>`;
     } else if (fw && fw.error) {
         html += `<h3>CME FedWatch</h3><p class="st" style="color:#ef4444">⚠ ${escapeHtml(fw.error)}</p>`;
+    }
+
+    // Risk metrics
+    if (s.risk_metrics) {
+        const r = s.risk_metrics;
+        html += '<h3>Portfolio Risk Metrics</h3>';
+        html += `<p class="st">${escapeHtml(r.description)}</p>`;
+        html += `<div class="stats" style="margin-bottom:14px">
+            <div class="stat"><div class="sv ${r.equity_final>=0?'':'rd'}">$${r.equity_final>=0?'+':''}${r.equity_final.toFixed(0)}</div><div class="sl">Equity Curve Final</div></div>
+            <div class="stat"><div class="sv gr">$${r.equity_peak.toFixed(0)}</div><div class="sl">Equity Peak</div></div>
+            <div class="stat"><div class="sv rd">-$${r.max_drawdown_dollars.toFixed(0)}</div><div class="sl">Max Drawdown</div></div>
+            <div class="stat"><div class="sv rd">${r.max_drawdown_pct_of_peak.toFixed(1)}%</div><div class="sl">Max DD %</div></div>
+            <div class="stat"><div class="sv bl">${r.sharpe_like_ratio.toFixed(2)}</div><div class="sl">Sharpe-like</div></div>
+            <div class="stat"><div class="sv">${r.trade_return_mean_pct.toFixed(2)}%</div><div class="sl">Avg Return/Trade</div></div>
+            <div class="stat"><div class="sv or">${r.trade_return_stdev_pct.toFixed(2)}%</div><div class="sl">Return Std Dev</div></div>
+        </div>`;
+        if (r.concentration_by_play && r.concentration_by_play.length) {
+            html += '<p class="st">Concentration on closed stake:</p>';
+            html += '<table><tr><th>Play</th><th>Staked</th><th>% of Total</th><th>P&L</th></tr>';
+            r.concentration_by_play.forEach(c => {
+                html += `<tr><td><strong>${escapeHtml(c.play)}</strong></td><td>$${c.staked.toLocaleString()}</td><td>${c.share_pct}%</td><td class="${c.pnl>=0?'up':'dn'}"><strong>$${c.pnl>=0?'+':''}${c.pnl.toFixed(0)}</strong></td></tr>`;
+            });
+            html += '</table>';
+        }
+        if (r.current_open_exposure && r.current_open_exposure.length) {
+            html += `<p class="st">Current open exposure ($${r.total_open_stake.toLocaleString()} total):</p>`;
+            html += '<table><tr><th>Play</th><th>Stake</th><th>% of Open</th></tr>';
+            r.current_open_exposure.forEach(e => {
+                html += `<tr><td><strong>${escapeHtml(e.play)}</strong></td><td>$${e.stake.toLocaleString()}</td><td>${e.share_pct}%</td></tr>`;
+            });
+            html += '</table>';
+        }
+    }
+
+    // Closed autopsy
+    if (s.closed_autopsy) {
+        const a = s.closed_autopsy;
+        html += '<h3>Closed-Trade Autopsy</h3>';
+        html += `<p class="st">${escapeHtml(a.description)} ${a.wins_count} wins vs ${a.losses_count} losses.</p>`;
+        html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
+        html += '<div><h3 style="color:#00ff88;font-size:15px;margin-top:0">Wins</h3>';
+        html += '<p class="st">By close reason:</p><table><tr><th>Reason</th><th>N</th><th>P&L</th></tr>';
+        a.close_reason_wins.forEach(r => {
+            html += `<tr><td>${escapeHtml(r.key)}</td><td>${r.n}</td><td class="up"><strong>$${r.pnl>=0?'+':''}${r.pnl.toFixed(0)}</strong></td></tr>`;
+        });
+        html += '</table>';
+        html += '<p class="st">By entry price:</p><table><tr><th>Entry</th><th>N</th><th>P&L</th></tr>';
+        a.entry_price_wins.forEach(r => {
+            html += `<tr><td>${escapeHtml(r.key)}</td><td>${r.n}</td><td class="up"><strong>$${r.pnl>=0?'+':''}${r.pnl.toFixed(0)}</strong></td></tr>`;
+        });
+        html += '</table></div>';
+        html += '<div><h3 style="color:#ef4444;font-size:15px;margin-top:0">Losses</h3>';
+        html += '<p class="st">By close reason:</p><table><tr><th>Reason</th><th>N</th><th>P&L</th></tr>';
+        a.close_reason_losses.forEach(r => {
+            html += `<tr><td>${escapeHtml(r.key)}</td><td>${r.n}</td><td class="dn"><strong>$${r.pnl.toFixed(0)}</strong></td></tr>`;
+        });
+        html += '</table>';
+        html += '<p class="st">By entry price:</p><table><tr><th>Entry</th><th>N</th><th>P&L</th></tr>';
+        a.entry_price_losses.forEach(r => {
+            html += `<tr><td>${escapeHtml(r.key)}</td><td>${r.n}</td><td class="dn"><strong>$${r.pnl.toFixed(0)}</strong></td></tr>`;
+        });
+        html += '</table></div></div>';
+        // Biggest winners/losers
+        html += '<h3 style="color:#00ff88;font-size:15px;margin-top:20px">Top 5 Wins</h3>';
+        html += '<table><tr><th>Market</th><th>Type</th><th>Side</th><th>Entry→Exit</th><th>P&L</th><th>Closed</th></tr>';
+        a.top_5_wins.forEach(w => {
+            html += `<tr><td>${escapeHtml(w.question)}</td><td>${w.type||''}</td><td>${w.side||''}</td><td>${(w.entry*100).toFixed(1)}→${(w.exit*100).toFixed(1)}¢</td><td class="up"><strong>$${w.pnl>=0?'+':''}${w.pnl.toFixed(0)}</strong></td><td class="st">${fmtDate(w.closed, {rel:true})}</td></tr>`;
+        });
+        html += '</table>';
+        html += '<h3 style="color:#ef4444;font-size:15px;margin-top:20px">Top 5 Losses</h3>';
+        html += '<table><tr><th>Market</th><th>Type</th><th>Side</th><th>Entry→Exit</th><th>P&L</th><th>Closed</th></tr>';
+        a.top_5_losses.forEach(w => {
+            html += `<tr><td>${escapeHtml(w.question)}</td><td>${w.type||''}</td><td>${w.side||''}</td><td>${(w.entry*100).toFixed(1)}→${(w.exit*100).toFixed(1)}¢</td><td class="dn"><strong>$${w.pnl.toFixed(0)}</strong></td><td class="st">${fmtDate(w.closed, {rel:true})}</td></tr>`;
+        });
+        html += '</table>';
     }
 
     html += '<h3>Forward Rule Changes (applied, not retroactive)</h3>';
