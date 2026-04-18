@@ -1735,6 +1735,36 @@ function renderWhatIf() {
         html += `<h3>CME FedWatch</h3><p class="st" style="color:#ef4444">⚠ ${escapeHtml(fw.error)}</p>`;
     }
 
+    // Deribit options-implied probabilities
+    const deri = DATA.deribit || {};
+    if (deri && deri.spot_btc) {
+        html += '<h3>Deribit Options-Implied Probabilities (BTC + ETH)</h3>';
+        html += `<p class="st">BTC option chain (${deri.option_chain_size?.BTC || 0} strikes) and ETH chain (${deri.option_chain_size?.ETH || 0} strikes) compared to Polymarket "above $X" threshold markets. Implied probability derived from call option delta at matching strike + expiry.</p>`;
+        html += `<div class="stats" style="margin-bottom:14px">
+            <div class="stat"><div class="sv">$${deri.spot_btc.toLocaleString()}</div><div class="sl">BTC Spot</div></div>
+            <div class="stat"><div class="sv">$${(deri.spot_eth||0).toFixed(2)}</div><div class="sl">ETH Spot</div></div>
+            <div class="stat"><div class="sv bl">${(deri.divergences||[]).length}</div><div class="sl">Divergences ≥8pp</div></div>
+        </div>`;
+        if (deri.divergences && deri.divergences.length) {
+            html += '<table><tr><th>Market</th><th>Currency</th><th>Strike</th><th>Polymarket</th><th>Deribit</th><th>Gap</th><th>Direction</th></tr>';
+            deri.divergences.forEach(d => {
+                const cls = Math.abs(d.gap_pct) >= 15 ? 'up' : 'bl';
+                html += `<tr>
+                    <td>${escapeHtml((d.question||'').substring(0,50))}</td>
+                    <td>${d.currency}</td>
+                    <td>$${d.strike.toLocaleString()}</td>
+                    <td>${(d.polymarket_yes*100).toFixed(1)}%</td>
+                    <td>${(d.deribit_implied*100).toFixed(1)}%</td>
+                    <td class="${cls}"><strong>${d.gap_pct>=0?'+':''}${d.gap_pct}pp</strong></td>
+                    <td><span class="badge b-n">${d.direction}</span></td>
+                </tr>`;
+            });
+            html += '</table>';
+        } else {
+            html += '<p class="st">No significant Polymarket / Deribit divergences right now.</p>';
+        }
+    }
+
     // Risk metrics
     if (s.risk_metrics) {
         const r = s.risk_metrics;
@@ -1750,10 +1780,11 @@ function renderWhatIf() {
             <div class="stat"><div class="sv or">${r.trade_return_stdev_pct.toFixed(2)}%</div><div class="sl">Return Std Dev</div></div>
         </div>`;
         if (r.concentration_by_play && r.concentration_by_play.length) {
-            html += '<p class="st">Concentration on closed stake:</p>';
-            html += '<table><tr><th>Play</th><th>Staked</th><th>% of Total</th><th>P&L</th></tr>';
+            html += '<p class="st">Per-play breakdown (sorted by Sharpe):</p>';
+            html += '<table><tr><th>Play</th><th>Trades</th><th>Staked</th><th>% Total</th><th>P&L</th><th>Avg Return</th><th>Std Dev</th><th>Sharpe</th></tr>';
             r.concentration_by_play.forEach(c => {
-                html += `<tr><td><strong>${escapeHtml(c.play)}</strong></td><td>$${c.staked.toLocaleString()}</td><td>${c.share_pct}%</td><td class="${c.pnl>=0?'up':'dn'}"><strong>$${c.pnl>=0?'+':''}${c.pnl.toFixed(0)}</strong></td></tr>`;
+                const sc = c.sharpe >= 0.3 ? 'up' : (c.sharpe <= -0.3 ? 'dn' : 'fl');
+                html += `<tr><td><strong>${escapeHtml(c.play)}</strong></td><td>${c.trades}</td><td>$${c.staked.toLocaleString()}</td><td>${c.share_pct}%</td><td class="${c.pnl>=0?'up':'dn'}"><strong>$${c.pnl>=0?'+':''}${c.pnl.toFixed(0)}</strong></td><td>${c.avg_return_pct}%</td><td>${c.stdev_return_pct}%</td><td class="${sc}"><strong>${c.sharpe}</strong></td></tr>`;
             });
             html += '</table>';
         }
@@ -1808,6 +1839,51 @@ function renderWhatIf() {
             html += `<tr><td>${escapeHtml(w.question)}</td><td>${w.type||''}</td><td>${w.side||''}</td><td>${(w.entry*100).toFixed(1)}→${(w.exit*100).toFixed(1)}¢</td><td class="dn"><strong>$${w.pnl.toFixed(0)}</strong></td><td class="st">${fmtDate(w.closed, {rel:true})}</td></tr>`;
         });
         html += '</table>';
+    }
+
+    // Time patterns
+    if (s.time_patterns) {
+        const tp = s.time_patterns;
+        html += '<h3>Timing Patterns</h3>';
+        html += `<p class="st">${escapeHtml(tp.description)}</p>`;
+        if (tp.by_day_of_week && tp.by_day_of_week.length) {
+            html += '<p class="st"><strong>By day of week (trade opened, UTC):</strong></p>';
+            html += '<table><tr><th>Day</th><th>N</th><th>WR</th><th>P&L</th><th>ROI</th></tr>';
+            tp.by_day_of_week.forEach(r => {
+                html += `<tr><td><strong>${r.day}</strong></td><td>${r.n}</td><td class="${r.win_rate_pct>=60?'up':(r.win_rate_pct<40?'dn':'fl')}"><strong>${r.win_rate_pct}%</strong></td><td class="${r.pnl>=0?'up':'dn'}"><strong>$${r.pnl>=0?'+':''}${r.pnl.toFixed(0)}</strong></td><td class="${r.roi_pct>=0?'bl':'dn'}">${r.roi_pct>=0?'+':''}${r.roi_pct.toFixed(2)}%</td></tr>`;
+            });
+            html += '</table>';
+        }
+        if (tp.by_hour_utc && tp.by_hour_utc.length) {
+            html += '<p class="st" style="margin-top:14px"><strong>By hour-of-day (UTC):</strong></p>';
+            html += '<table><tr><th>Hour UTC</th><th>N</th><th>WR</th><th>P&L</th><th>ROI</th></tr>';
+            tp.by_hour_utc.forEach(r => {
+                html += `<tr><td><strong>${String(r.hour_utc).padStart(2,'0')}:00</strong></td><td>${r.n}</td><td class="${r.win_rate_pct>=60?'up':(r.win_rate_pct<40?'dn':'fl')}"><strong>${r.win_rate_pct}%</strong></td><td class="${r.pnl>=0?'up':'dn'}"><strong>$${r.pnl>=0?'+':''}${r.pnl.toFixed(0)}</strong></td><td class="${r.roi_pct>=0?'bl':'dn'}">${r.roi_pct>=0?'+':''}${r.roi_pct.toFixed(2)}%</td></tr>`;
+            });
+            html += '</table>';
+        }
+    }
+
+    // Play correlation
+    if (s.play_correlation && s.play_correlation.pairs) {
+        const pc = s.play_correlation;
+        html += '<h3>Play Correlation Matrix</h3>';
+        html += `<p class="st">${escapeHtml(pc.description)}</p>`;
+        if (pc.pairs.length) {
+            html += '<table><tr><th>Play A</th><th>Play B</th><th>Active Days</th><th>Correlation</th><th>Interpretation</th></tr>';
+            pc.pairs.forEach(r => {
+                let interp = "orthogonal";
+                let cls = "fl";
+                if (r.correlation >= 0.5) { interp = "WIN/LOSE TOGETHER"; cls = "dn"; }
+                else if (r.correlation >= 0.2) { interp = "mildly correlated"; cls = "fl"; }
+                else if (r.correlation <= -0.3) { interp = "HEDGE"; cls = "up"; }
+                else if (r.correlation <= -0.1) { interp = "mildly anti-correlated"; cls = "bl"; }
+                html += `<tr><td><strong>${escapeHtml(r.play_a)}</strong></td><td><strong>${escapeHtml(r.play_b)}</strong></td><td>${r.days_active}</td><td class="${cls}"><strong>${r.correlation}</strong></td><td class="${cls}">${interp}</td></tr>`;
+            });
+            html += '</table>';
+        } else {
+            html += '<p class="st">Not enough overlapping days yet to compute correlations.</p>';
+        }
     }
 
     html += '<h3>Forward Rule Changes (applied, not retroactive)</h3>';
