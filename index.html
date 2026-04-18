@@ -92,6 +92,7 @@ tr:hover{background:#111827}
 <a class="nl" onclick="showPage('whales')">Whales</a>
 <a class="nl" onclick="showPage('newslag')">News Lag</a>
 <a class="nl" onclick="showPage('missed')">Just Missed</a>
+<a class="nl" onclick="showPage('backtest')">Backtest</a>
 <a class="nl" onclick="showPage('whatif')">What If</a>
 <a class="nl" onclick="showPage('settings')">Settings</a>
 <span class="nav-right">Scanner: <span id="scanner-status" class="status-on">CHECKING...</span> | <span id="last-update">--</span></span>
@@ -242,6 +243,13 @@ tr:hover{background:#111827}
 <h2>Just Missed — What We Didn&apos;t Catch</h2>
 <p class="st">Three categories: (1) Solo sources — 1 headline matched a market with score ≥5 but convergence required 2 (if we&apos;d widened the rule, we&apos;d have caught these). (2) Converged but didn&apos;t trade — 2+ sources hit but the market filter blocked (volume, price extreme, watchlist). (3) Would have lost badly — markets where looser rules would have burned us. Simulated P&L uses current live Polymarket price.</p>
 <div id="missed-content" class="loading">Loading...</div>
+</div>
+
+<!-- BACKTEST -->
+<div id="page-backtest" class="page">
+<h2>Backtest Harness</h2>
+<p class="st">Replays historical trades with alternative rule sets and shows what P&L they would have produced. Use to test hypotheses (drop a play, exclude a day of week, raise a score threshold) before making rule changes live. Auto-runs after every scan.</p>
+<div id="backtest-content" class="loading">Loading...</div>
 </div>
 
 <!-- WHAT IF -->
@@ -1491,6 +1499,35 @@ function renderNewsLag() {
     el.innerHTML = html;
 }
 
+function renderBacktest() {
+    const el = document.getElementById('backtest-content');
+    const bt = DATA && DATA.backtest;
+    if (!bt || !bt.results) {
+        el.innerHTML = '<p class="st">No backtest results yet. Runs automatically after each scan.</p>';
+        return;
+    }
+    let html = `<p class="st">Generated ${fmtDate(bt.generated_at)} · ${fmtDate(bt.generated_at, {rel:true})}. Baseline P&L: <strong>$${bt.baseline_pnl>=0?'+':''}${bt.baseline_pnl.toFixed(0)}</strong>. Rule sets sorted by P&L.</p>`;
+    html += '<table><tr><th>Rule Set</th><th>P&L</th><th>Δ vs Actual</th><th>ROI</th><th>Win Rate</th><th>Trades</th><th>Sharpe</th></tr>';
+    bt.results.forEach(r => {
+        const dCls = r.delta_vs_baseline > 0 ? 'up' : (r.delta_vs_baseline < 0 ? 'dn' : 'fl');
+        const pnlCls = r.pnl >= 0 ? 'up' : 'dn';
+        const sharpeCls = r.sharpe >= 0.2 ? 'up' : (r.sharpe <= -0.2 ? 'dn' : 'fl');
+        const isBase = r.name.includes('Baseline');
+        html += `<tr${isBase ? ' style="background:#0a1020"' : ''}>
+            <td><strong>${escapeHtml(r.name)}</strong></td>
+            <td class="${pnlCls}"><strong>$${r.pnl>=0?'+':''}${r.pnl.toFixed(0)}</strong></td>
+            <td class="${dCls}"><strong>${isBase ? '—' : (r.delta_vs_baseline>=0?'+':'') + '$' + r.delta_vs_baseline.toFixed(0)}</strong></td>
+            <td class="${r.roi_pct>=0?'bl':'dn'}">${r.roi_pct>=0?'+':''}${r.roi_pct.toFixed(2)}%</td>
+            <td>${r.win_rate_pct}%</td>
+            <td>${r.trades}</td>
+            <td class="${sharpeCls}"><strong>${r.sharpe>=0?'+':''}${r.sharpe}</strong></td>
+        </tr>`;
+    });
+    html += '</table>';
+    html += '<p class="st" style="margin-top:14px">Rule sets defined in <code>~/polyedge/backtest.py</code>. Add more variants in <code>RULE_SETS</code> then re-run.</p>';
+    el.innerHTML = html;
+}
+
 function renderJustMissed() {
     const el = document.getElementById('missed-content');
     const jm = DATA && DATA.scenarios && DATA.scenarios.just_missed;
@@ -1918,6 +1955,7 @@ function render() {
     renderWhales();
     renderNewsLag();
     renderJustMissed();
+    renderBacktest();
     renderWhatIf();
     renderSettings();
 }
