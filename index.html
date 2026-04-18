@@ -84,6 +84,7 @@ tr:hover{background:#111827}
 <a class="nl" onclick="showPage('alerts')">Alerts</a>
 <a class="nl" onclick="showPage('opportunities')">Opportunities</a>
 <a class="nl" onclick="showPage('movers')">Movers</a>
+<a class="nl" onclick="showPage('lab')">Lab</a>
 <a class="nl" onclick="showPage('negrisk')">NegRisk</a>
 <a class="nl" onclick="showPage('llm')">LLM Edges</a>
 <a class="nl" onclick="showPage('whales')">Whales</a>
@@ -172,6 +173,13 @@ tr:hover{background:#111827}
 <h2>Biggest 24h Movers</h2>
 <p class="st">Markets with the biggest price swings in 24h. Big movers >20% on >$500k volume trigger auto-trades.</p>
 <div id="movers-list" class="loading">Loading...</div>
+</div>
+
+<!-- LAB -->
+<div id="page-lab" class="page">
+<h2>Lab — Experimental Plays</h2>
+<p class="st">Celebrity, music, awards and sports markets. Half-size stakes ($50), separate P&amp;L from the main pot. These trades don&apos;t affect the Overview or Plays numbers. Here to collect data on whether these categories produce edge.</p>
+<div id="lab-content" class="loading">Loading...</div>
 </div>
 
 <!-- NEG RISK -->
@@ -288,7 +296,8 @@ function computePlayStats() {
     // per-play: w/l, open count, total staked on closed, total returned on closed, win/loss P&L
     const empty = () => ({w:0, l:0, o:0, staked:0, returned:0, wp:0, lp:0, openStake:0});
     const stats = {NEWS_EDGE:empty(), TIME_DECAY:empty(), CRYPTO:empty(), BIG_MOVER:empty(), MANUAL:empty()};
-    (DATA.positions || []).forEach(p => {
+    // Skip lab trades from main play stats
+    (DATA.positions || []).filter(p => !p.lab).forEach(p => {
         const t = getTradeType(p);
         if (!stats[t]) stats[t] = empty();
         const stake = Number(p.stake) || 0;
@@ -308,7 +317,9 @@ function computePlayStats() {
 }
 
 function renderOverview() {
-    const positions = DATA.positions || [];
+    // Main portfolio EXCLUDES lab trades. Lab positions tracked separately.
+    const allPositions = DATA.positions || [];
+    const positions = allPositions.filter(p => !p.lab);
     const signals = DATA.position_signals || [];
     let wins = 0, losses = 0, winPnL = 0, lossPnL = 0, openCount = 0;
     let totalStaked = 0, totalReturned = 0, openStake = 0;
@@ -899,6 +910,88 @@ function renderSettings() {
     document.getElementById('settings-content').innerHTML = html;
 }
 
+function renderLab() {
+    const el = document.getElementById('lab-content');
+    const labPos = (DATA.positions || []).filter(p => p.lab);
+    if (!labPos.length) {
+        el.innerHTML = '<p class="st">No lab positions yet. Scanner fires on next launchd run (every 15 min) when it finds celebrity/sports markets that meet criteria.</p>';
+        return;
+    }
+    let staked = 0, ret = 0, wins = 0, losses = 0, openCount = 0, openStake = 0;
+    const byType = {};
+    labPos.forEach(p => {
+        const stake = Number(p.stake) || 0;
+        if (p.status === 'open') {
+            openCount++;
+            openStake += stake;
+        } else if (p.exit_price) {
+            const r = (Number(p.shares) || 0) * Number(p.exit_price);
+            staked += stake;
+            ret += r;
+            if (r > stake) wins++; else losses++;
+        }
+        const t = p.trade_type || 'LAB';
+        byType[t] = byType[t] || {n:0, staked:0, ret:0, open:0};
+        byType[t].n += 1;
+        if (p.status === 'open') byType[t].open += 1;
+        else if (p.exit_price) {
+            byType[t].staked += stake;
+            byType[t].ret += (Number(p.shares) || 0) * Number(p.exit_price);
+        }
+    });
+    const pnl = ret - staked;
+    const roi = staked > 0 ? (pnl / staked * 100) : 0;
+
+    let html = `<div class="stats" style="margin-bottom:18px">
+        <div class="stat-label" style="color:#ffaa00;border-color:#ffaa00">LAB</div>
+        <div class="stat"><div class="sv">$${staked.toLocaleString()}</div><div class="sl">Bet</div></div>
+        <div class="stat"><div class="sv ${ret >= staked ? 'gr' : 'rd'}">$${ret.toFixed(0)}</div><div class="sl">Back</div></div>
+        <div class="stat"><div class="sv ${pnl >= 0 ? '' : 'rd'}">$${pnl >= 0 ? '+' : ''}${pnl.toFixed(0)}</div><div class="sl">Net P&L</div></div>
+        <div class="stat"><div class="sv bl">${(roi >= 0 ? '+' : '') + roi.toFixed(1)}%</div><div class="sl">ROI</div></div>
+        <div class="stat"><div class="sv gr">${wins}</div><div class="sl">Wins</div></div>
+        <div class="stat"><div class="sv rd">${losses}</div><div class="sl">Losses</div></div>
+        <div class="stat"><div class="sv or">${openCount} ($${openStake.toLocaleString()})</div><div class="sl">Open</div></div>
+    </div>`;
+
+    html += '<h3>By Lab Category</h3><table><tr><th>Play</th><th>N</th><th>Bet</th><th>Back</th><th>P&L</th><th>ROI</th><th>Open</th></tr>';
+    Object.keys(byType).forEach(t => {
+        const v = byType[t];
+        const p = v.ret - v.staked;
+        const r = v.staked > 0 ? (p / v.staked * 100) : 0;
+        html += `<tr>
+            <td><strong>${escapeHtml(t)}</strong></td>
+            <td>${v.n}</td>
+            <td>$${v.staked.toFixed(0)}</td>
+            <td class="${v.ret >= v.staked ? 'up' : 'dn'}">$${v.ret.toFixed(0)}</td>
+            <td class="${p >= 0 ? 'up' : 'dn'}"><strong>$${p >= 0 ? '+' : ''}${p.toFixed(0)}</strong></td>
+            <td class="${r >= 0 ? 'bl' : 'dn'}">${r >= 0 ? '+' : ''}${r.toFixed(1)}%</td>
+            <td>${v.open}</td>
+        </tr>`;
+    });
+    html += '</table>';
+
+    // Position list
+    html += '<h3>Lab Positions</h3><table><tr><th>Status</th><th>Type</th><th>Market</th><th>Side</th><th>Entry</th><th>Exit/Now</th><th>P&L</th></tr>';
+    labPos.sort((a, b) => (a.status === 'open' ? -1 : (b.status === 'open' ? 1 : 0))).forEach(p => {
+        const t = p.trade_type || 'LAB';
+        const statusB = p.status === 'open' ? '<span class="badge b-o">OPEN</span>'
+                        : (pnlOf(p) > 0 ? '<span class="badge b-g">WIN</span>' : '<span class="badge b-r">LOSS</span>');
+        const pnl = p.status === 'closed' ? pnlOf(p) : 0;
+        const exitP = p.status === 'closed' ? p.exit_price * 100 : '—';
+        html += `<tr>
+            <td>${statusB}</td>
+            <td><span class="badge ${t.includes('CELEB') ? 'b-n' : 'b-t'}">${escapeHtml(t.replace('LAB_',''))}</span></td>
+            <td>${escapeHtml((p.question||'').substring(0,60))}</td>
+            <td>${p.side}</td>
+            <td>${(p.entry_price * 100).toFixed(1)}¢</td>
+            <td>${typeof exitP === 'number' ? exitP.toFixed(1) + '¢' : exitP}</td>
+            <td class="${pnl > 0 ? 'up' : (pnl < 0 ? 'dn' : 'fl')}">$${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}</td>
+        </tr>`;
+    });
+    html += '</table>';
+    el.innerHTML = html;
+}
+
 function renderLLMEdges() {
     const el = document.getElementById('llm-content');
     const edges = (DATA && DATA.llm_edges) || [];
@@ -1238,6 +1331,7 @@ function render() {
     renderAlerts();
     renderOpps();
     renderMovers();
+    renderLab();
     renderNegRisk();
     renderLLMEdges();
     renderWhales();
