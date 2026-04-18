@@ -123,6 +123,17 @@ tr:hover{background:#111827}
 <h2>The Plays — Live P&L by Type</h2>
 <div class="plays-grid" id="plays-overview"></div>
 
+<details style="margin:16px 0;padding:10px 14px;background:#0a1020;border-left:3px solid #60a5fa;border-radius:6px">
+<summary style="cursor:pointer;color:#60a5fa;font-weight:700;font-size:14px">ℹ️ How the numbers work (click to expand)</summary>
+<div class="st" style="margin-top:10px;color:#e2e8f0;font-weight:500">
+<strong style="color:#00ff88">STANDARD row</strong> — actuals. Already-closed trades are frozen at whatever rules fired them. Totals update as new trades close.<br><br>
+<strong style="color:#b066ff">FREEROLL row</strong> — simulated. Recomputes every scan: "what if we'd been banking at TP on every historical trade, letting the remainder ride to today's live price?"<br><br>
+<strong style="color:#ffaa00">Rule changes</strong> are forward-only. NEWS_EDGE TP moved from 5% → 40% on Apr 17; trades closed before that still show their old 5% exits. New NEWS_EDGE trades use 40%. Same for BIG_MOVER (5→15), TIME_DECAY (8→15), SYSTEMATIC_NO/LATE_ENTRY (new plays from Apr 17-18).<br><br>
+<strong style="color:#ef4444">Apr 17 retroactive cleanup</strong> permanently removed 96 BIG_MOVER trades (Mideast/Peru/Venezuela/sports/&gt;40% moves). Snapshots backed up at <code>~/polyedge/data/snapshot_*_pre_clean.json</code> if we need to restore.<br><br>
+<strong style="color:#cbd5e1">LAB trades</strong> (celebrity + sports experiments at $50 half-size) are filtered out of Overview and Plays — see the Lab tab for their own P&L.
+</div>
+</details>
+
 <div id="sim-comparison"></div>
 
 <h2>Currently Open Positions</h2>
@@ -267,6 +278,38 @@ function getTradeType(pos) {
 function escapeHtml(s) {
     if (s == null) return '';
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// Consistent date formatting across the dashboard
+function fmtDate(v, opts) {
+    if (!v) return '—';
+    const d = new Date(v);
+    if (isNaN(d.getTime())) return '—';
+    const now = new Date();
+    const diffS = (now - d) / 1000;
+    const abs = Math.abs(diffS);
+    // Relative for recent, absolute for older
+    if (opts && opts.rel && abs < 60) return diffS >= 0 ? 'just now' : 'in moments';
+    if (opts && opts.rel && abs < 3600) {
+        const m = Math.round(diffS / 60);
+        return m >= 0 ? m + 'm ago' : 'in ' + (-m) + 'm';
+    }
+    if (opts && opts.rel && abs < 86400) {
+        const h = Math.round(diffS / 3600);
+        return h >= 0 ? h + 'h ago' : 'in ' + (-h) + 'h';
+    }
+    if (opts && opts.rel && abs < 7 * 86400) {
+        const dd = Math.round(diffS / 86400);
+        return dd >= 0 ? dd + 'd ago' : 'in ' + (-dd) + 'd';
+    }
+    // Otherwise full locale datetime
+    if (opts && opts.dateOnly) return d.toLocaleDateString(undefined, {month:'short',day:'numeric',year:'numeric'});
+    return d.toLocaleString(undefined, {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+function fmtDateWithRel(v) {
+    if (!v) return '—';
+    return fmtDate(v) + ' <span class="st" style="margin:0;font-size:11px">(' + fmtDate(v, {rel:true}) + ')</span>';
 }
 
 function togglePos(rowId) {
@@ -744,8 +787,8 @@ function renderPositions() {
 
         // Expandable detail row
         const pmUrl = p.slug ? `https://polymarket.com/market/${p.slug}` : null;
-        const opened = p.opened ? new Date(p.opened).toLocaleString() : '—';
-        const closed = p.closed ? new Date(p.closed).toLocaleString() : '—';
+        const opened = fmtDateWithRel(p.opened);
+        const closed = fmtDateWithRel(p.closed);
         const stopLoss = p.stop_loss != null ? `${p.stop_loss}%` : '—';
         const takeProfit = p.target_profit != null ? `${p.target_profit}%` : '—';
         const endDate = p.end_date || '—';
@@ -753,30 +796,33 @@ function renderPositions() {
         const closeReason = p.close_reason || (p.status === 'closed' ? 'resolved' : '—');
         const shares = p.shares || 0;
         const stake = p.stake || 0;
+        const bankedInfo = p.free_roll_banked ? `<div><div class="st">Free-Roll Banked</div><div style="color:#b066ff;font-weight:700">@ ${(p.free_roll_banked_price*100).toFixed(1)}¢ on ${fmtDate(p.free_roll_banked_at)} — locked $${p.free_roll_locked_profit || 0}, ${p.free_roll_shares_remaining || 0} shares ride on</div></div>` : '';
 
-        let detail = `<div style="padding:12px 20px;background:#050810;border-left:3px solid #00ff88">
-            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;font-size:12px">
-                <div><div class="st">Market</div><div>${escapeHtml(p.question)}</div></div>
-                <div><div class="st">Polymarket</div>${pmUrl ? `<a href="${pmUrl}" target="_blank">${p.slug}</a>` : p.slug || '—'}</div>
+        let detail = `<div style="padding:14px 20px;background:#050810;border-left:3px solid #00ff88">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;font-size:13px">
+                <div><div class="st">Market</div><div><strong>${escapeHtml(p.question)}</strong></div></div>
+                <div><div class="st">Polymarket</div>${pmUrl ? `<a href="${pmUrl}" target="_blank">Open market →</a>` : p.slug || '—'}</div>
                 <div><div class="st">Opened</div><div>${opened}</div></div>
                 <div><div class="st">${p.status==='closed'?'Closed':'Expires'}</div><div>${p.status==='closed'?closed:endDate}</div></div>
-                <div><div class="st">Stake / Shares</div><div>$${stake} &bull; ${shares}</div></div>
-                <div><div class="st">Take Profit / Stop Loss</div><div>${takeProfit} / ${stopLoss}</div></div>
-                <div style="grid-column:1/-1"><div class="st">Entry Logic (auto_reason)</div><div style="color:#d1d5db">${escapeHtml(autoReason)}</div></div>
-                ${p.status==='closed' ? `<div style="grid-column:1/-1"><div class="st">Close Reason</div><div style="color:#d1d5db">${escapeHtml(closeReason)}</div></div>`:''}`;
+                <div><div class="st">Stake / Shares</div><div><strong>$${stake}</strong> &bull; ${shares} shares</div></div>
+                <div><div class="st">Take Profit / Stop Loss</div><div><strong>${takeProfit} / ${stopLoss}</strong></div></div>
+                ${bankedInfo}
+                <div style="grid-column:1/-1"><div class="st">Entry Logic</div><div style="color:#e2e8f0;font-weight:500">${escapeHtml(autoReason)}</div></div>
+                ${p.status==='closed' ? `<div style="grid-column:1/-1"><div class="st">Close Reason</div><div style="color:#e2e8f0;font-weight:500">${escapeHtml(closeReason)}</div></div>`:''}`;
 
-        // News edge extras — triggering headlines
+        // News edge extras — triggering headlines (always show for NEWS_EDGE, not just open)
         const alerts = alertsBySlug[p.slug] || [];
         if (t === 'NEWS_EDGE' && alerts.length) {
             alerts.sort((a, b) => (b.score||0) - (a.score||0));
-            detail += `<div style="grid-column:1/-1"><div class="st">Triggering Headlines (score ≥ ${Math.min(...alerts.map(a=>a.score||0))})</div>`;
+            const verb = p.status === 'closed' ? 'Why it ' + (pnlOf(p) > 0 ? 'won' : 'lost') : 'Why we opened it';
+            detail += `<div style="grid-column:1/-1"><div class="st"><strong>${verb}</strong> — triggering headlines (score ≥ ${Math.min(...alerts.map(a=>a.score||0))})</div>`;
             alerts.slice(0, 8).forEach(a => {
                 const kw = (a.keywords || []).join(', ');
                 const src = escapeHtml(a.source || '?');
                 const hl = escapeHtml(a.headline || '');
-                detail += `<div style="margin:6px 0;padding:8px;background:#0a1020;border-radius:4px">
-                    <div><span class="badge b-n">${src}</span> <strong>score ${a.score||0}</strong> ${a.published ? '<span class="st">' + new Date(a.published).toLocaleString() + '</span>' : ''}</div>
-                    <div style="margin-top:4px">${a.link ? `<a href="${a.link}" target="_blank">${hl}</a>` : hl}</div>
+                detail += `<div style="margin:6px 0;padding:10px;background:#0a1020;border-radius:4px">
+                    <div><span class="badge b-n">${src}</span> <strong style="color:#00ff88">score ${a.score||0}</strong> <span class="st">${fmtDate(a.published)}</span></div>
+                    <div style="margin-top:6px;font-weight:500">${a.link ? `<a href="${a.link}" target="_blank">${hl}</a>` : hl}</div>
                     ${kw ? `<div class="st" style="margin-top:4px">keywords: ${escapeHtml(kw)}</div>` : ''}
                 </div>`;
             });
@@ -800,7 +846,7 @@ function renderAlerts() {
     }
     let html = '';
     alerts.slice(0, 50).forEach(a => {
-        const ts = a.timestamp ? new Date(a.timestamp).toLocaleString() : '';
+        const ts = a.timestamp ? fmtDate(a.timestamp) : '';
         html += `<div class="ac">
             <div class="ah">
                 <span class="at">${ts}</span>
@@ -970,15 +1016,18 @@ function renderLab() {
     });
     html += '</table>';
 
-    // Position list
-    html += '<h3>Lab Positions</h3><table><tr><th>Status</th><th>Type</th><th>Market</th><th>Side</th><th>Entry</th><th>Exit/Now</th><th>P&L</th></tr>';
-    labPos.sort((a, b) => (a.status === 'open' ? -1 : (b.status === 'open' ? 1 : 0))).forEach(p => {
+    // Position list — expandable
+    html += '<h3>Lab Positions</h3><p class="st">Click any row to expand.</p>';
+    html += '<table><tr><th></th><th>Status</th><th>Type</th><th>Market</th><th>Side</th><th>Entry</th><th>Exit/Now</th><th>P&L</th><th>Opened</th></tr>';
+    labPos.sort((a, b) => (a.status === 'open' ? -1 : (b.status === 'open' ? 1 : 0))).forEach((p, i) => {
         const t = p.trade_type || 'LAB';
         const statusB = p.status === 'open' ? '<span class="badge b-o">OPEN</span>'
                         : (pnlOf(p) > 0 ? '<span class="badge b-g">WIN</span>' : '<span class="badge b-r">LOSS</span>');
         const pnl = p.status === 'closed' ? pnlOf(p) : 0;
         const exitP = p.status === 'closed' ? p.exit_price * 100 : '—';
-        html += `<tr>
+        const rid = 'lab-' + i;
+        html += `<tr style="cursor:pointer" onclick="togglePos('${rid}')">
+            <td style="width:20px;color:#94a3b8" id="${rid}-caret">▸</td>
             <td>${statusB}</td>
             <td><span class="badge ${t.includes('CELEB') ? 'b-n' : 'b-t'}">${escapeHtml(t.replace('LAB_',''))}</span></td>
             <td>${escapeHtml((p.question||'').substring(0,60))}</td>
@@ -986,7 +1035,23 @@ function renderLab() {
             <td>${(p.entry_price * 100).toFixed(1)}¢</td>
             <td>${typeof exitP === 'number' ? exitP.toFixed(1) + '¢' : exitP}</td>
             <td class="${pnl > 0 ? 'up' : (pnl < 0 ? 'dn' : 'fl')}">$${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}</td>
+            <td class="st" style="margin:0">${fmtDate(p.opened, {rel:true})}</td>
         </tr>`;
+        // Expandable detail
+        const pmUrl = p.slug ? 'https://polymarket.com/market/' + p.slug : null;
+        const detail = `<div style="padding:12px 20px;background:#050810;border-left:3px solid #ffaa00">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;font-size:13px">
+                <div><div class="st">Market</div><div><strong>${escapeHtml(p.question||'')}</strong></div></div>
+                <div><div class="st">Polymarket</div>${pmUrl ? `<a href="${pmUrl}" target="_blank">Open market →</a>` : '—'}</div>
+                <div><div class="st">Opened</div><div>${fmtDateWithRel(p.opened)}</div></div>
+                <div><div class="st">${p.status==='closed'?'Closed':'Expires'}</div><div>${p.status==='closed'?fmtDateWithRel(p.closed):p.end_date||'—'}</div></div>
+                <div><div class="st">Stake / Shares</div><div><strong>$${p.stake||0}</strong> · ${p.shares||0} shares</div></div>
+                <div><div class="st">Take Profit / Stop Loss</div><div><strong>${p.target_profit||'—'}% / ${p.stop_loss||'—'}%</strong></div></div>
+                <div style="grid-column:1/-1"><div class="st">Entry Logic</div><div>${escapeHtml(p.auto_reason||'—')}</div></div>
+                ${p.status==='closed' ? `<div style="grid-column:1/-1"><div class="st">Close Reason</div><div>${escapeHtml(p.close_reason||'resolved')}</div></div>`:''}
+            </div>
+        </div>`;
+        html += `<tr id="${rid}-detail" style="display:none"><td colspan="9" style="padding:0">${detail}</td></tr>`;
     });
     html += '</table>';
     el.innerHTML = html;
@@ -1019,7 +1084,7 @@ function renderLLMEdges() {
             <div class="st" style="margin-bottom:6px">LLM reasoning:</div>
             <div style="color:#d1d5db;margin-bottom:10px">${escapeHtml(e.reasoning || '—')}</div>
             ${url ? `<a href="${url}" target="_blank">→ Open market on Polymarket</a>` : ''}
-            <div class="st" style="margin-top:8px">Estimated ${e.estimated_at ? new Date(e.estimated_at).toLocaleString() : '—'}</div>
+            <div class="st" style="margin-top:8px">Estimated ${e.estimated_at ? fmtDate(e.estimated_at) : '—'}</div>
         </div>`;
         html += `<tr id="${rid}-detail" style="display:none"><td colspan="7" style="padding:0">${detail}</td></tr>`;
     });
@@ -1033,7 +1098,8 @@ function renderWhales() {
     const top = w.top_whales || [];
     const latest = w.latest_whale_trades || [];
 
-    let html = `<div class="stats" style="margin-bottom:16px">
+    let html = `<p class="st"><strong>How it works:</strong> Every scan (~15 min) we pull Polymarket's recent trades data-api and log every trade with notional ≥ $5k. The leaderboard ranks wallets by total notional traded since we started tracking. Click a wallet to view their Polymarket profile.</p>`;
+    html += `<div class="stats" style="margin-bottom:16px">
         <div class="stat"><div class="sv">${w.trades_this_scan || 0}</div><div class="sl">Whale trades this scan</div></div>
         <div class="stat"><div class="sv gr">${w.new_trades_logged || 0}</div><div class="sl">New logged</div></div>
         <div class="stat"><div class="sv bl">${top.length}</div><div class="sl">Tracked whales</div></div>
@@ -1048,7 +1114,7 @@ function renderWhales() {
             const addr = wl.wallet || '';
             const short = addr ? addr.slice(0,6) + '...' + addr.slice(-4) : '—';
             const polyProf = addr ? 'https://polymarket.com/profile/' + addr : '';
-            const last = wl.last_seen ? new Date(wl.last_seen).toLocaleString() : '—';
+            const last = wl.last_seen ? fmtDate(wl.last_seen, {rel:true}) : '—';
             html += `<tr>
                 <td>${i+1}</td>
                 <td>${polyProf ? `<a href="${polyProf}" target="_blank">${short}</a>` : short}</td>
@@ -1069,7 +1135,7 @@ function renderWhales() {
     } else {
         html += '<table><tr><th>Time</th><th>Notional</th><th>Side</th><th>Price</th><th>Trader</th><th>Market</th></tr>';
         latest.forEach(t => {
-            const when = t.ts_iso ? new Date(t.ts_iso).toLocaleTimeString() : '—';
+            const when = t.ts_iso ? fmtDate(t.ts_iso, {rel:true}) : '—';
             const sideBadge = t.side === 'BUY' ? 'b-g' : 'b-n';
             const url = t.slug ? 'https://polymarket.com/market/' + t.slug : '';
             html += `<tr>
@@ -1145,7 +1211,7 @@ function renderNewsLag() {
     let html = `<p class="st">Showing the most recent ${recent.length} alerts from this scan window. Each row: when the headline was published, when PolyEdge saw it, the matched market and the Polymarket price at the moment of match.</p>`;
     html += '<table><tr><th>Published</th><th>Source</th><th>Headline</th><th>Matched Markets</th></tr>';
     recent.forEach(a => {
-        const pub = a.published ? new Date(a.published).toLocaleString() : '—';
+        const pub = a.published ? fmtDate(a.published) : '—';
         const src = escapeHtml(a.source || '?');
         const hl = escapeHtml(a.headline || '');
         const lnk = a.link ? `<a href="${a.link}" target="_blank">${hl}</a>` : hl;
@@ -1264,7 +1330,7 @@ function renderWhatIf() {
         return;
     }
     const s = DATA.scenarios;
-    const gen = s.generated_at ? new Date(s.generated_at).toLocaleString() : '';
+    const gen = s.generated_at ? fmtDate(s.generated_at) : '';
     const bTotal = s.baseline.total;
     const fmtD = (v, ref) => {
         const d = v - ref;
@@ -1323,7 +1389,9 @@ function renderWhatIf() {
 function render() {
     if (!DATA) return;
     const lu = DATA.last_updated ? new Date(DATA.last_updated) : null;
-    if (lu) document.getElementById('last-update').textContent = 'Updated ' + lu.toLocaleTimeString();
+    if (lu) {
+        document.getElementById('last-update').innerHTML = 'Updated ' + fmtDate(lu) + ' · ' + fmtDate(lu, {rel:true});
+    }
     document.getElementById('scanner-status').textContent = DATA.scanner_status === 'active' ? 'ACTIVE' : 'IDLE';
     renderOverview();
     renderPlaysDetail();
