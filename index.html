@@ -1899,6 +1899,29 @@ function renderGoLive() {
                 <strong>Key:</strong> bad data is cheap. The £4 loss tells us which plays survive slippage. Scale what works, kill what doesn't.
             </div>
             <div style="margin:14px 0 0">
+                <div class="sl" style="margin-bottom:8px">RISK-ADJUSTED TP/SL: why flat % breaks at extreme entries</div>
+                <table style="margin:0"><tr><th>Entry</th><th>Max Upside</th><th>Flat 40% TP</th><th>Better: 50% of remaining upside</th><th>Better SL: 30% of upside</th></tr>
+                    <tr><td>0.10¢ longshot</td><td>+900%</td><td>0.14¢</td><td class="up">0.55¢ (big win)</td><td>0.055¢</td></tr>
+                    <tr><td>0.30¢</td><td>+233%</td><td>0.42¢</td><td class="up">0.65¢</td><td>0.21¢</td></tr>
+                    <tr><td>0.50¢</td><td>+100%</td><td>0.70¢</td><td class="up">0.75¢</td><td>0.35¢</td></tr>
+                    <tr><td>0.70¢</td><td>+43%</td><td>0.98¢ (barely fits)</td><td class="up">0.85¢</td><td>0.61¢</td></tr>
+                    <tr><td>0.85¢ favourite</td><td>+18%</td><td class="dn">1.19¢ IMPOSSIBLE</td><td class="up">0.925¢</td><td>0.805¢</td></tr>
+                    <tr><td>0.95¢ near-cert</td><td>+5%</td><td class="dn">1.33¢ IMPOSSIBLE</td><td class="up">0.975¢</td><td>0.935¢</td></tr>
+                </table>
+                <div class="st" style="margin-top:10px;font-size:12px;line-height:1.65">
+                    Flat 40% TP breaks at entries above 0.71¢ (asks for impossible prices). Fix: <strong>TP = 50% of remaining upside to resolution</strong>, <strong>SL = 30% of remaining upside moving against us</strong>. Rule self-scales by entry price. SYSTEMATIC_NO at 98¢ needs risk-adjusted mode urgently (current 8% TP asks for 1.058¢ which can't happen).
+                </div>
+            </div>
+            <div style="margin:14px 0 0">
+                <div class="sl" style="margin-bottom:8px">HOW TP/SL ACTUALLY EXECUTE ON POLYMARKET</div>
+                <div class="st" style="font-size:13px;line-height:1.7;margin:0">
+                    Polymarket has no native take-profit or stop-loss. Two routes:<br>
+                    <strong>1. Limit SELL at target:</strong> place when opening. Sits on order book. Auto-fills when price touches. Good for TP.<br>
+                    <strong>2. Poll + market-order close:</strong> fast-monitor polls every 60s, closes via market order when threshold hits. PolyEdge uses this for SL (no true stop on Polymarket).<br><br>
+                    When live: entry = market BUY, TP = limit SELL (rests on book), SL = fast-monitor closes via market.
+                </div>
+            </div>
+            <div style="margin:14px 0 0">
                 <div class="sl" style="margin-bottom:8px">SLIPPAGE SIZING: what your stake actually becomes after fees</div>
                 <table style="margin:0"><tr><th>You stake</th><th>Slippage cost (2% entry + 2% exit)</th><th>Effective stake</th><th>Minimum raw edge to break even</th></tr>
                     <tr><td><strong>£1</strong></td><td>£0.04</td><td>£0.96</td><td>4.2%</td></tr>
