@@ -108,6 +108,7 @@ tr:hover{background:#111827}
 <a class="nl" onclick="showPage('alerts')">Alerts</a>
 <a class="nl" onclick="showPage('opportunities')">Opportunities</a>
 <a class="nl" onclick="showPage('movers')">Movers</a>
+<a class="nl" onclick="showPage('timeline')">Timeline</a>
 <a class="nl" onclick="showPage('ideas')">Strategy Ideas</a>
 <a class="nl" onclick="showPage('audit')">Daily Audit</a>
 <a class="nl" onclick="showPage('lab')">Lab</a>
@@ -213,6 +214,13 @@ tr:hover{background:#111827}
 <h2>Biggest 24h Movers</h2>
 <p class="st">Markets with the biggest price swings in 24h. Big movers >20% on >$500k volume trigger auto-trades.</p>
 <div id="movers-list" class="loading">Loading...</div>
+</div>
+
+<!-- TIMELINE -->
+<div id="page-timeline" class="page">
+<h2>Performance Timeline</h2>
+<p class="st">Week-by-week P&amp;L per play. Shows when each play was working and when it stopped. Rule change and event timeline annotated so you can tie cause to effect.</p>
+<div id="timeline-content" class="loading">Loading...</div>
 </div>
 
 <!-- DAILY AUDIT -->
@@ -1057,6 +1065,72 @@ function renderSettings() {
     }
 
     document.getElementById('settings-content').innerHTML = html;
+}
+
+function renderTimeline() {
+    const el = document.getElementById('timeline-content');
+    const wp = DATA && DATA.scenarios && DATA.scenarios.weekly_performance;
+    if (!wp || !wp.rows) {
+        el.innerHTML = '<p class="st">No weekly data yet.</p>';
+        return;
+    }
+    const weeks = wp.weeks || [];
+    let html = '';
+
+    // Overall weekly summary strip at top
+    html += '<h3>Total Portfolio by Week</h3>';
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:16px">';
+    weeks.forEach(wk => {
+        const t = wp.week_totals[wk] || {n:0, pnl:0};
+        const cls = t.pnl >= 0 ? '#00ff88' : '#ef4444';
+        html += `<div style="background:#111827;border:1px solid #1e293b;border-radius:8px;padding:10px">
+            <div class="st" style="margin:0;font-size:11px">${escapeHtml(wk)}</div>
+            <div style="font-size:20px;font-weight:900;color:${cls};margin-top:3px">$${t.pnl>=0?'+':''}${t.pnl.toFixed(0)}</div>
+            <div style="font-size:11px;color:#cbd5e1">${t.wins}W/${t.losses}L · ${t.wr_pct}% WR · ${t.roi_pct>=0?'+':''}${t.roi_pct}% ROI</div>
+            <div style="font-size:10px;color:#94a3b8">${t.n} trades</div>
+        </div>`;
+    });
+    html += '</div>';
+
+    // Per-play weekly matrix
+    html += '<h3>Per-Play × Week Matrix</h3>';
+    html += '<table><tr><th>Play</th>';
+    weeks.forEach(wk => { html += `<th>${escapeHtml(wk)}</th>`; });
+    html += '<th>6w Total</th></tr>';
+    wp.rows.forEach(row => {
+        html += `<tr><td><strong>${escapeHtml(row.play)}</strong></td>`;
+        weeks.forEach(wk => {
+            const d = row.weeks[wk] || {n:0, pnl:0, wr_pct:0, w:0, l:0};
+            if (d.n === 0) {
+                html += '<td class="st" style="margin:0">—</td>';
+            } else {
+                const cls = d.pnl > 0 ? 'up' : (d.pnl < 0 ? 'dn' : 'fl');
+                html += `<td class="${cls}"><strong>$${d.pnl>=0?'+':''}${d.pnl.toFixed(0)}</strong><br><span style="font-size:11px;color:#cbd5e1">${d.w}W/${d.l}L · ${d.wr_pct}%</span></td>`;
+            }
+        });
+        const totPnl = row.total_6w.pnl;
+        const totCls = totPnl > 0 ? 'up' : (totPnl < 0 ? 'dn' : 'fl');
+        html += `<td class="${totCls}"><strong>$${totPnl>=0?'+':''}${totPnl.toFixed(0)}</strong><br><span style="font-size:11px;color:#cbd5e1">${row.total_6w.n} trades</span></td>`;
+        html += '</tr>';
+    });
+    html += '</table>';
+
+    // Events
+    if (wp.events && wp.events.length) {
+        html += '<h3>Event Timeline</h3>';
+        html += '<p class="st">Key rule changes and observations plotted against weekly P&L. Use to connect cause to effect.</p>';
+        html += '<div style="position:relative;padding-left:20px;border-left:2px solid #334155;margin-top:10px">';
+        wp.events.slice().reverse().forEach(e => {
+            html += `<div style="margin-bottom:14px;position:relative">
+                <div style="position:absolute;left:-26px;top:2px;width:12px;height:12px;border-radius:50%;background:#60a5fa;border:2px solid #06080c"></div>
+                <div style="font-weight:800;color:#f1f5f9;font-size:14px">${escapeHtml(e.date)}</div>
+                <div style="color:#e2e8f0;margin-top:2px">${escapeHtml(e.label)}</div>
+            </div>`;
+        });
+        html += '</div>';
+    }
+
+    el.innerHTML = html;
 }
 
 function renderAudit() {
@@ -2026,6 +2100,7 @@ function render() {
     renderAlerts();
     renderOpps();
     renderMovers();
+    renderTimeline();
     renderAudit();
     renderIdeas();
     renderLab();
