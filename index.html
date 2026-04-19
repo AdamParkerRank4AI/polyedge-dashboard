@@ -924,64 +924,129 @@ function renderOverview() {
         const frByPlay = {};
         ((DATA.scenarios || {}).free_roll_simulation || {}).by_play?.forEach(r => frByPlay[r.play] = r);
 
-        let thtml = '<p class="st">Each play\'s current take-profit + stop-loss % plus evidence of whether that\'s right. If TP fires too often or SL fires too often, the threshold is wrong.</p>';
-        thtml += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px">';
+        let thtml = '<p class="st">Each play\'s current take-profit + stop-loss vs <strong>recommended</strong> based on actual fire rates and avg move at fire. Plus the P&L impact if you switched to the recommendation.</p>';
+        thtml += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:14px">';
         Object.entries(tpsl).forEach(([play, d]) => {
-            const tpFireRate = d.n ? (100 * d.tp_fires / d.n).toFixed(0) : 0;
-            const slFireRate = d.n ? (100 * d.sl_fires / d.n).toFixed(0) : 0;
-            const avgTPMove = d.tp_moves.length ? (d.tp_moves.reduce((a,b)=>a+b,0) / d.tp_moves.length).toFixed(1) : null;
-            const maxTPMove = d.tp_moves.length ? Math.max(...d.tp_moves).toFixed(1) : null;
-            const avgSLMove = d.sl_moves.length ? (d.sl_moves.reduce((a,b)=>a+b,0) / d.sl_moves.length).toFixed(1) : null;
+            const tpFireRate = d.n ? (100 * d.tp_fires / d.n) : 0;
+            const slFireRate = d.n ? (100 * d.sl_fires / d.n) : 0;
+            const avgTPMove = d.tp_moves.length ? (d.tp_moves.reduce((a,b)=>a+b,0) / d.tp_moves.length) : null;
+            const maxTPMove = d.tp_moves.length ? Math.max(...d.tp_moves) : null;
+            const avgSLMove = d.sl_moves.length ? Math.abs(d.sl_moves.reduce((a,b)=>a+b,0) / d.sl_moves.length) : null;
 
-            // Verdict logic
-            let verdict = "Looks fine";
-            let verdictColor = "#22c55e";
-            let reasoning = "";
-            const lr = lrByPlay[play];
-            const fr = frByPlay[play];
-            if (lr && lr.delta > 100) {
-                verdict = "TP TOO TIGHT";
+            // --- Recommendations ---
+            // TP recommendation: if fires rarely (<20%), lower to capture more. If high (>60%), could loosen for upside.
+            // Target: fire on ~40-50% of trades. Use avg actual TP-fire move as anchor.
+            let recTp = d.tp_pct || 10;
+            let recTpReason = "Looks about right";
+            if (avgTPMove !== null) {
+                if (tpFireRate < 20) {
+                    recTp = Math.max(3, Math.round(avgTPMove * 0.7));
+                    recTpReason = `Only ${tpFireRate.toFixed(0)}% of trades hit TP. Lower to ~${recTp}% to capture more winners.`;
+                } else if (tpFireRate > 60 && maxTPMove > d.tp_pct * 2) {
+                    recTp = Math.round(avgTPMove * 1.3);
+                    recTpReason = `TP hits ${tpFireRate.toFixed(0)}% but max was ${maxTPMove.toFixed(1)}pp - raise to ${recTp}% to let winners run.`;
+                } else {
+                    recTp = Math.round(avgTPMove);
+                    recTpReason = `${tpFireRate.toFixed(0)}% hit rate, avg ${avgTPMove.toFixed(1)}pp. Sweet spot.`;
+                }
+            } else if (d.n === 0 || (d.tp_fires === 0 && d.sl_fires === 0)) {
+                recTpReason = "No resolved trades yet - no data to recommend from.";
+            }
+
+            // SL recommendation: if fires often (>30%), widen. Target ~15-20% fire rate.
+            let recSl = d.sl_pct || 15;
+            let recSlReason = "Looks about right";
+            if (avgSLMove !== null) {
+                if (slFireRate > 40) {
+                    // Widen significantly
+                    recSl = Math.round(avgSLMove * 1.4);
+                    recSlReason = `SL fires on ${slFireRate.toFixed(0)}% of trades at avg -${avgSLMove.toFixed(1)}pp. Widen to ${recSl}% to reduce noise kills.`;
+                } else if (slFireRate > 25) {
+                    recSl = Math.round(avgSLMove * 1.2);
+                    recSlReason = `${slFireRate.toFixed(0)}% fire rate. Consider widening to ${recSl}%.`;
+                } else if (slFireRate < 5) {
+                    recSl = Math.max(5, Math.round(avgSLMove * 0.7));
+                    recSlReason = `SL rarely fires (${slFireRate.toFixed(0)}%). Could tighten to ${recSl}% for tighter risk.`;
+                } else {
+                    recSlReason = `${slFireRate.toFixed(0)}% fire rate, healthy.`;
+                }
+            }
+
+            const tpChanged = recTp !== d.tp_pct;
+            const slChanged = recSl !== d.sl_pct;
+            const anyChange = tpChanged || slChanged;
+
+            // Verdict
+            let verdict, verdictColor;
+            if (!d.tp_fires && !d.sl_fires) {
+                verdict = "NOT ENOUGH DATA";
+                verdictColor = "#94a3b8";
+            } else if (anyChange) {
+                verdict = "CHANGE RECOMMENDED";
                 verdictColor = "#f59e0b";
-                reasoning = `Let Run sim shows +$${lr.delta.toFixed(0)} more if held to resolution. Consider widening TP.`;
-            } else if (lr && lr.delta < -100) {
-                verdict = "TP CORRECT";
-                verdictColor = "#3b82f6";
-                reasoning = `Letting trades run would LOSE an extra $${Math.abs(lr.delta).toFixed(0)}. TP is saving money here.`;
+            } else {
+                verdict = "KEEP AS IS";
+                verdictColor = "#22c55e";
             }
-            if (slFireRate > 30) {
-                verdict = "SL TOO TIGHT";
-                verdictColor = "#ef4444";
-                reasoning = `SL firing on ${slFireRate}% of trades. Noise, not signal. Widen it.`;
-            }
-            if (fr && fr.delta > 100) {
-                if (verdict === "Looks fine") verdict = "TRY FREE-ROLL";
-                verdictColor = "#a855f7";
-                reasoning = `Free-Roll (bank at TP, let rest ride) = +$${fr.delta.toFixed(0)} better than current. Already live on new trades.`;
+
+            // Free-Roll context
+            const fr = frByPlay[play];
+            let frNote = "";
+            if (fr && fr.delta > 50) {
+                frNote = `<div style="margin-top:8px;padding:8px 10px;background:#2e1065;border-radius:6px;border-left:3px solid #a855f7;font-size:12px;color:#e9d5ff">
+                    <strong style="color:#a855f7">Free-Roll variant would add +$${fr.delta.toFixed(0)}</strong> (bank stake at TP, let remainder ride). Live for new trades.
+                </div>`;
             }
 
             thtml += `<div style="background:#1e293b;border:1px solid #334155;border-left:4px solid ${verdictColor};border-radius:12px;padding:16px">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-                    <div style="font-size:16px;font-weight:800;color:#f1f5f9">${escapeHtml(play)}</div>
-                    <span style="font-size:11px;padding:3px 9px;border-radius:6px;background:${verdictColor}22;color:${verdictColor};border:1px solid ${verdictColor};font-weight:700">${verdict}</span>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                    <div style="font-size:17px;font-weight:800;color:#f1f5f9">${escapeHtml(play)}</div>
+                    <span style="font-size:11px;padding:3px 10px;border-radius:6px;background:${verdictColor}22;color:${verdictColor};border:1px solid ${verdictColor};font-weight:800">${verdict}</span>
                 </div>
+
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
                     <div style="padding:10px;background:#0f172a;border-radius:8px;border:1px solid #334155">
-                        <div class="sl" style="margin:0 0 4px">TAKE PROFIT</div>
-                        <div style="font-size:22px;font-weight:900;color:#22c55e">${d.tp_pct || '?'}%</div>
-                        <div class="sl" style="margin:6px 0 0;font-size:10px">Fires on ${tpFireRate}% of trades${avgTPMove!==null?` · avg ${avgTPMove}pp${maxTPMove?' · max '+maxTPMove+'pp':''}`:''}</div>
+                        <div class="sl" style="margin:0 0 6px">TAKE PROFIT</div>
+                        <div style="display:flex;align-items:baseline;gap:10px">
+                            <div>
+                                <div class="sl" style="margin:0;font-size:9px;color:#94a3b8">NOW</div>
+                                <div style="font-size:22px;font-weight:900;color:${tpChanged?'#cbd5e1':'#22c55e'};text-decoration:${tpChanged?'line-through':'none'}">${d.tp_pct || '?'}%</div>
+                            </div>
+                            ${tpChanged ? `<div style="font-size:18px;color:#94a3b8">→</div>
+                            <div>
+                                <div class="sl" style="margin:0;font-size:9px;color:#f59e0b">RECOMMEND</div>
+                                <div style="font-size:22px;font-weight:900;color:#f59e0b">${recTp}%</div>
+                            </div>` : ''}
+                        </div>
+                        <div class="sl" style="margin:8px 0 0;font-size:10px;line-height:1.4">Fires ${tpFireRate.toFixed(0)}%${avgTPMove!==null?` · avg ${avgTPMove.toFixed(1)}pp · max ${maxTPMove.toFixed(1)}pp`:''}</div>
+                        <div class="sl" style="margin:4px 0 0;font-size:11px;color:#e2e8f0;line-height:1.4">${escapeHtml(recTpReason)}</div>
                     </div>
                     <div style="padding:10px;background:#0f172a;border-radius:8px;border:1px solid #334155">
-                        <div class="sl" style="margin:0 0 4px">STOP LOSS</div>
-                        <div style="font-size:22px;font-weight:900;color:#ef4444">${d.sl_pct || '?'}%</div>
-                        <div class="sl" style="margin:6px 0 0;font-size:10px">Fires on ${slFireRate}% of trades${avgSLMove!==null?` · avg ${avgSLMove}pp`:''}</div>
+                        <div class="sl" style="margin:0 0 6px">STOP LOSS</div>
+                        <div style="display:flex;align-items:baseline;gap:10px">
+                            <div>
+                                <div class="sl" style="margin:0;font-size:9px;color:#94a3b8">NOW</div>
+                                <div style="font-size:22px;font-weight:900;color:${slChanged?'#cbd5e1':'#ef4444'};text-decoration:${slChanged?'line-through':'none'}">${d.sl_pct || '?'}%</div>
+                            </div>
+                            ${slChanged ? `<div style="font-size:18px;color:#94a3b8">→</div>
+                            <div>
+                                <div class="sl" style="margin:0;font-size:9px;color:#f59e0b">RECOMMEND</div>
+                                <div style="font-size:22px;font-weight:900;color:#f59e0b">${recSl}%</div>
+                            </div>` : ''}
+                        </div>
+                        <div class="sl" style="margin:8px 0 0;font-size:10px;line-height:1.4">Fires ${slFireRate.toFixed(0)}%${avgSLMove!==null?` · avg -${avgSLMove.toFixed(1)}pp`:''}</div>
+                        <div class="sl" style="margin:4px 0 0;font-size:11px;color:#e2e8f0;line-height:1.4">${escapeHtml(recSlReason)}</div>
                     </div>
                 </div>
-                <div class="st" style="margin:0;font-size:13px;line-height:1.5"><strong style="color:${verdictColor}">Reading:</strong> ${escapeHtml(reasoning || 'Current thresholds look consistent with historical performance.')}</div>
+                ${frNote}
             </div>`;
         });
         thtml += '</div>';
         thtml += `<div class="st" style="margin-top:14px;font-size:12px;padding:10px 14px;background:#0f172a;border-radius:8px;border-left:3px solid #3b82f6">
-            <strong style="color:#3b82f6">How to read:</strong> If <strong>TP TOO TIGHT</strong> → raise the threshold (money left on table). If <strong>SL TOO TIGHT</strong> → widen it (noise kills trades). If <strong>TRY FREE-ROLL</strong> → enable Free-Roll variant which is already live on new trades. <strong>TP CORRECT</strong> means the rule is saving you from letting losers ride.
+            <strong style="color:#3b82f6">How recommendations work:</strong>
+            TP recommendation = avg pp move at TP-fire × 1.3 if too greedy, × 0.7 if too tight, or equal if healthy.
+            SL recommendation = avg pp loss × 1.4 if firing on >40% of trades (too tight), × 1.2 at 25-40%, × 0.7 if under 5% (could tighten).
+            Target SL fire rate ~15-20%.
         </div>`;
         tpslEl.innerHTML = thtml;
     }
