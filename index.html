@@ -130,6 +130,8 @@ tr:hover td{background:#0f172a}
 <a class="nl" onclick="showPage('whatif')">What If</a>
 <a class="nl" onclick="showPage('backtest')">Backtest</a>
 <a class="nl" onclick="showPage('lab')">Lab</a>
+<a class="nl" onclick="showPage('mistakes')">Mistakes</a>
+<a class="nl" onclick="showPage('sysaudit')">Audit</a>
 <a class="nl" onclick="showPage('settings')">Settings</a>
 <span class="nav-right">🟢 <span id="scanner-status" class="status-on">LIVE</span> · <span id="last-update">--</span></span>
 </div>
@@ -370,6 +372,20 @@ tr:hover td{background:#0f172a}
 <div id="whatif-content" class="loading">Loading...</div>
 </div>
 
+<!-- MISTAKES CAUGHT -->
+<div id="page-mistakes" class="page">
+<h2>Caught Mistakes</h2>
+<p class="st">Trades caused by bugs or unintended behaviour, not genuine strategy outcomes. Filtered out of main Overview P&L so we analyse the strategy we INTEND to run. Each entry tagged with the reason we caught it so we remember the lesson. Auto-flagged by <code>~/polyedge/flag_mistakes.py</code>. Manual flag: <code>python3 ~/polyedge/flag_mistakes.py --flag SLUG "reason"</code></p>
+<div id="mistakes-content" class="loading">Loading...</div>
+</div>
+
+<!-- SYSTEM AUDIT -->
+<div id="page-sysaudit" class="page">
+<h2>System Audit</h2>
+<p class="st">Automated checks across the whole stack: data integrity, filter logic, stale slugs, launchd agent health, feed responsiveness, P&L reconciliation, Polymarket market state. Runs after every scan. Anything red needs fixing.</p>
+<div id="sysaudit-content" class="loading">Loading...</div>
+</div>
+
 <!-- SETTINGS -->
 <div id="page-settings" class="page">
 <h2>Current Settings</h2>
@@ -529,8 +545,8 @@ function computePlayStats() {
     // per-play: w/l, open count, total staked on closed, total returned on closed, win/loss P&L
     const empty = () => ({w:0, l:0, o:0, staked:0, returned:0, wp:0, lp:0, openStake:0});
     const stats = {NEWS_EDGE:empty(), TIME_DECAY:empty(), CRYPTO:empty(), BIG_MOVER:empty(), MANUAL:empty()};
-    // Skip lab trades from main play stats
-    (DATA.positions || []).filter(p => !p.lab).forEach(p => {
+    // Skip lab trades AND flagged mistakes from main play stats
+    (DATA.positions || []).filter(p => !p.lab && !p.mistake).forEach(p => {
         const t = getTradeType(p);
         if (!stats[t]) stats[t] = empty();
         const stake = Number(p.stake) || 0;
@@ -550,9 +566,11 @@ function computePlayStats() {
 }
 
 function renderOverview() {
-    // Main portfolio EXCLUDES lab trades. Lab positions tracked separately.
+    // Main portfolio EXCLUDES lab trades AND flagged mistakes (bug-driven outcomes
+    // don't reflect the intended strategy). Mistakes are catalogued separately.
     const allPositions = DATA.positions || [];
-    const positions = allPositions.filter(p => !p.lab);
+    const positions = allPositions.filter(p => !p.lab && !p.mistake);
+    const mistakes = allPositions.filter(p => p.mistake);
     const signals = DATA.position_signals || [];
     let wins = 0, losses = 0, winPnL = 0, lossPnL = 0, openCount = 0;
     let totalStaked = 0, totalReturned = 0, openStake = 0;
@@ -1487,6 +1505,114 @@ function renderMovers() {
     });
     html += '</table>';
     document.getElementById('movers-list').innerHTML = html;
+}
+
+function renderAuditFindings() {
+    const el = document.getElementById('sysaudit-content');
+    const a = DATA && DATA.system_audit;
+    if (!el) return;
+    if (!a || !a.findings) {
+        el.innerHTML = '<p class="st">No audit yet. Run <code>python3 ~/polyedge/system_audit.py</code>.</p>';
+        return;
+    }
+    // Hero stats
+    let html = `<div class="stats" style="margin-bottom:20px">
+        <div class="stat"><div class="sv rd">${a.error_count}</div><div class="sl">Errors</div></div>
+        <div class="stat"><div class="sv or">${a.warn_count}</div><div class="sl">Warnings</div></div>
+        <div class="stat"><div class="sv gr">${a.ok_count}</div><div class="sl">OK</div></div>
+        <div class="stat"><div class="sv bl">${a.info_count}</div><div class="sl">Info</div></div>
+        <div class="stat"><div class="sv gy" style="font-size:13px">${fmtDate(a.generated_at, {rel:true})}</div><div class="sl">Last Run</div></div>
+    </div>`;
+
+    // Group by section
+    const bySection = {};
+    a.findings.forEach(f => {
+        if (!bySection[f.section]) bySection[f.section] = [];
+        bySection[f.section].push(f);
+    });
+    Object.entries(bySection).forEach(([section, findings]) => {
+        html += `<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px;margin-bottom:14px">
+            <h3 style="margin:0 0 12px">${escapeHtml(section)}</h3>`;
+        findings.forEach(f => {
+            const sev = f.severity || 'info';
+            const icon = {error:'✗', warn:'⚠', ok:'✓', info:'ℹ'}[sev] || '?';
+            const color = {error:'#ef4444', warn:'#f59e0b', ok:'#22c55e', info:'#3b82f6'}[sev] || '#94a3b8';
+            html += `<div style="padding:10px 12px;background:#0f172a;border-left:3px solid ${color};border-radius:8px;margin-bottom:8px;display:flex;align-items:start;gap:10px">
+                <span style="font-size:18px;color:${color};font-weight:900">${icon}</span>
+                <div style="color:#e2e8f0;font-size:14px;line-height:1.5;flex:1">${escapeHtml(f.msg)}</div>
+            </div>`;
+        });
+        html += '</div>';
+    });
+
+    html += `<div class="st" style="margin-top:16px;padding:10px 14px;background:#0f172a;border-radius:8px;border-left:3px solid #3b82f6">
+        <strong style="color:#3b82f6">Audit runs after every scan.</strong> Checks 7 categories: data integrity, filter logic, Polymarket state (stale slugs, resolved markets), launchd agent health, feed responsiveness, P&L reconciliation, config sanity. Errors = fix immediately. Warnings = monitor. OK = clean.
+    </div>`;
+    el.innerHTML = html;
+}
+
+function renderMistakes() {
+    const el = document.getElementById('mistakes-content');
+    const mistakes = (DATA.positions || []).filter(p => p.mistake);
+    if (!mistakes.length) {
+        el.innerHTML = '<p class="st">No mistakes flagged. Clean slate.</p>';
+        return;
+    }
+    // Group by reason
+    const byReason = {};
+    let totalImpact = 0;
+    mistakes.forEach(p => {
+        const r = p.mistake_reason || 'Unknown';
+        if (!byReason[r]) byReason[r] = {n:0, pnl:0, trades:[]};
+        byReason[r].n++;
+        const pnl = p.exit_price ? (Number(p.shares)||0)*Number(p.exit_price) - Number(p.stake||0) : 0;
+        byReason[r].pnl += pnl;
+        byReason[r].trades.push(p);
+        totalImpact += pnl;
+    });
+
+    let html = `<div class="stats" style="margin-bottom:16px">
+        <div class="stat"><div class="sv rd">${mistakes.length}</div><div class="sl">Trades flagged</div></div>
+        <div class="stat"><div class="sv ${totalImpact<0?'rd':'gr'}">${totalImpact<0?'-':'+'}$${Math.abs(totalImpact).toFixed(0)}</div><div class="sl">Distortion removed</div></div>
+        <div class="stat"><div class="sv bl">${Object.keys(byReason).length}</div><div class="sl">Distinct causes</div></div>
+    </div>`;
+
+    Object.entries(byReason).sort((a,b) => a[1].pnl - b[1].pnl).forEach(([reason, d]) => {
+        html += `<div style="background:#1e293b;border:1px solid #334155;border-left:4px solid #ef4444;border-radius:12px;padding:16px;margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+                <div>
+                    <div style="font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:1px">CAUSE</div>
+                    <div style="font-size:15px;font-weight:700;color:#f1f5f9;margin-top:4px;line-height:1.5">${escapeHtml(reason)}</div>
+                </div>
+                <div style="text-align:right;margin-left:16px">
+                    <div style="font-size:22px;font-weight:900;color:${d.pnl<0?'#ef4444':'#22c55e'}">${d.pnl<0?'-':'+'}$${Math.abs(d.pnl).toFixed(0)}</div>
+                    <div class="sl" style="margin:0">${d.n} trade${d.n!==1?'s':''}</div>
+                </div>
+            </div>
+            <details style="margin-top:10px">
+                <summary style="cursor:pointer;color:#60a5fa;font-size:13px;font-weight:600">Show affected trades (${d.trades.length})</summary>
+                <table style="margin-top:10px"><tr><th>Type</th><th>Market</th><th>Side</th><th>Entry→Exit</th><th>P&L</th><th>Opened</th></tr>`;
+        d.trades.forEach(p => {
+            const pnl = p.exit_price ? (Number(p.shares)||0)*Number(p.exit_price) - Number(p.stake||0) : 0;
+            const entry = Number(p.entry_price) || 0;
+            const exit = Number(p.exit_price) || 0;
+            html += `<tr>
+                <td>${p.trade_type||'?'}</td>
+                <td>${escapeHtml((p.question||'').substring(0,55))}</td>
+                <td>${p.side||'?'}</td>
+                <td>${(entry*100).toFixed(1)}¢ → ${exit ? (exit*100).toFixed(1)+'¢' : 'open'}</td>
+                <td class="${pnl<0?'dn':'up'}"><strong>$${pnl>=0?'+':''}${pnl.toFixed(2)}</strong></td>
+                <td class="st" style="margin:0;font-size:11px">${fmtDate(p.opened, {rel:true})}</td>
+            </tr>`;
+        });
+        html += `</table></details></div>`;
+    });
+
+    html += `<div class="st" style="padding:12px 16px;background:#0f172a;border-radius:8px;border-left:3px solid #3b82f6;margin-top:16px">
+        <strong style="color:#3b82f6">Why this matters:</strong> Bug-driven outcomes distort our analysis. Filtering them out means Overview shows the strategy we INTEND to run, not the accidental version. Mistakes stay in the record (not deleted) so we remember the lesson. Unflag with <code>python3 ~/polyedge/flag_mistakes.py --unflag SLUG</code>.
+    </div>`;
+
+    el.innerHTML = html;
 }
 
 function renderSettings() {
@@ -2799,6 +2925,8 @@ function render() {
     renderAudit();
     renderIdeas();
     renderLab();
+    renderMistakes();
+    renderAuditFindings();
     renderNegRisk();
     renderLLMEdges();
     renderWhales();
