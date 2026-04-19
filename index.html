@@ -1851,48 +1851,53 @@ function renderGoLive() {
     const el = document.getElementById('golive-content');
     if (!DATA) { el.innerHTML = '<p class="st">Loading...</p>'; return; }
 
-    // Pull the £100 BUDGET plan (most realistic)
+    // Pull the £100 TRACK-EVERYTHING plan (learn first, grow second)
     const rc = DATA.rule_changes;
     let planCard = '';
     if (rc && rc.changes) {
-        const p100 = rc.changes.find(c => c.name && c.name.includes('£100'));
+        const p100 = rc.changes.find(c => c.name && c.name.includes('£100 TRACK'));
         if (p100) {
-            const inPounds = v => (v / 1.27).toFixed(2);  // crude USD→GBP
-            planCard += `<div style="background:linear-gradient(135deg,#14532d 0%,#052e16 100%);border:2px solid #22c55e;border-radius:16px;padding:24px 28px;margin-bottom:20px">
-                <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#86efac;margin-bottom:6px">🎯 REAL ROLLOUT: £100 BUDGET</div>
-                <div style="font-size:22px;font-weight:800;color:#f1f5f9;margin-bottom:14px">What £100 would have made over the last 3 weeks</div>
+            const inPounds = v => (v / 1.27).toFixed(2);
+            const gbpPnl = p100.pnl_real_after_slippage / 1.27;
+            planCard += `<div style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:2px solid #3b82f6;border-radius:16px;padding:24px 28px;margin-bottom:20px">
+                <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#60a5fa;margin-bottom:6px">🧪 £100 TRACK-EVERYTHING PLAN (learn first, scale second)</div>
+                <div style="font-size:22px;font-weight:800;color:#f1f5f9;margin-bottom:8px">Run every play at micro-stakes, identify winners, compound into them</div>
+                <div class="st" style="margin:0 0 14px;font-size:13px;line-height:1.65">Stakes: TEMPORAL_ARB £4, NEWS_EDGE £3, BIG_MOVER £2.50, SYSTEMATIC_NO £2.50, TIME_DECAY/CRYPTO/LATE_ENTRY £1.50. Goal is DATA not profit in weeks 1-2.</div>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:14px">
                     <div><div class="sl">Budget</div><div style="font-size:24px;font-weight:900;color:#f1f5f9">£100</div></div>
-                    <div><div class="sl">P&amp;L (real)</div><div style="font-size:24px;font-weight:900;color:${p100.pnl_real_after_slippage>=0?'#22c55e':'#ef4444'}">£${inPounds(p100.pnl_real_after_slippage)}</div></div>
-                    <div><div class="sl">ROI (3 weeks)</div><div style="font-size:24px;font-weight:900;color:#3b82f6">${p100.roi_real_pct>=0?'+':''}${p100.roi_real_pct}%</div></div>
-                    <div><div class="sl">Slippage Cost</div><div style="font-size:24px;font-weight:900;color:#ef4444">£${inPounds(p100.slippage_cost)}</div></div>
-                    <div><div class="sl">Trades</div><div style="font-size:24px;font-weight:900;color:#cbd5e1">${p100.historical_trades_affected}</div></div>
-                </div>
-                <div class="st" style="margin:14px 0 0;padding-top:14px;border-top:1px dashed #334155;font-size:13px;line-height:1.65">
-                    <strong style="color:#86efac">Verdict:</strong> £100 → ~£${inPounds(p100.pnl_real_after_slippage)} profit over 3 weeks.
-                    ROI <strong>${p100.roi_real_pct>=0?'+':''}${p100.roi_real_pct}%</strong> after realistic 2% slippage per leg.
-                    Slippage eats <strong>${((p100.slippage_cost / (p100.pnl_ideal_no_slippage||1))*100).toFixed(0)}%</strong> of gross profit.
-                    <br><br>
-                    <strong style="color:#fbbf24">Critical finding:</strong> BIG_MOVER excluded. At £5/trade, 2% slippage per leg (4% round-trip) eats its 3.8% raw ROI. Only plays with ≥15% raw ROI survive small-stake slippage.
+                    <div><div class="sl">Historical P&amp;L (real)</div><div style="font-size:24px;font-weight:900;color:${gbpPnl>=0?'#22c55e':'#ef4444'}">£${gbpPnl.toFixed(2)}</div></div>
+                    <div><div class="sl">ROI (3 weeks)</div><div style="font-size:24px;font-weight:900;color:${p100.roi_real_pct>=0?'#22c55e':'#ef4444'}">${p100.roi_real_pct>=0?'+':''}${p100.roi_real_pct}%</div></div>
+                    <div><div class="sl">Trades fired</div><div style="font-size:24px;font-weight:900;color:#cbd5e1">${p100.historical_trades_affected}</div></div>
+                    <div><div class="sl">Slippage cost</div><div style="font-size:24px;font-weight:900;color:#ef4444">£${inPounds(p100.slippage_cost)}</div></div>
                 </div>`;
             if (p100.by_play && p100.by_play.length) {
-                planCard += '<div style="margin-top:14px"><div class="sl" style="margin-bottom:8px">BY PLAY (real P&L)</div>';
-                planCard += '<table style="margin:0"><tr><th>Play</th><th>Stake/trade</th><th>Trades</th><th>Bet</th><th>P&L (real)</th><th>ROI</th></tr>';
+                planCard += '<div class="sl" style="margin:14px 0 8px">PER-PLAY VERDICT (based on real slippage-adjusted ROI)</div>';
+                planCard += '<table style="margin:0"><tr><th>Play</th><th>£/trade</th><th>Trades</th><th>P&L</th><th>ROI</th><th>Verdict</th></tr>';
                 p100.by_play.forEach(r => {
+                    let verdict, vColor;
+                    if (r.roi_pct >= 20) { verdict = 'SCALE'; vColor = '#22c55e'; }
+                    else if (r.roi_pct >= 5) { verdict = 'KEEP'; vColor = '#3b82f6'; }
+                    else if (r.roi_pct >= -2) { verdict = 'WATCH'; vColor = '#f59e0b'; }
+                    else { verdict = 'CUT'; vColor = '#ef4444'; }
                     const pnlCls = r.pnl_real >= 0 ? 'up' : 'dn';
-                    const roiCls = r.roi_pct >= 0 ? 'bl' : 'dn';
                     planCard += `<tr>
                         <td><strong>${escapeHtml(r.play)}</strong></td>
-                        <td>$${r.stake_per_trade}</td>
+                        <td>£${(r.stake_per_trade/1.27).toFixed(1)}</td>
                         <td>${r.trades}</td>
-                        <td>$${r.staked.toFixed(0)}</td>
-                        <td class="${pnlCls}"><strong>$${r.pnl_real>=0?'+':''}${r.pnl_real.toFixed(2)}</strong></td>
-                        <td class="${roiCls}"><strong>${r.roi_pct>=0?'+':''}${r.roi_pct}%</strong></td>
+                        <td class="${pnlCls}"><strong>£${(r.pnl_real/1.27).toFixed(2)}</strong></td>
+                        <td class="${r.roi_pct>=0?'bl':'dn'}"><strong>${r.roi_pct>=0?'+':''}${r.roi_pct}%</strong></td>
+                        <td><span style="font-size:11px;padding:3px 10px;border-radius:6px;background:${vColor}22;color:${vColor};border:1px solid ${vColor};font-weight:800">${verdict}</span></td>
                     </tr>`;
                 });
-                planCard += '</table></div>';
+                planCard += '</table>';
             }
-            planCard += '</div>';
+            planCard += `<div class="st" style="margin:14px 0 0;padding:14px;background:#0f172a;border-radius:10px;border-left:4px solid #22c55e;font-size:13px;line-height:1.65">
+                <strong style="color:#22c55e">THE GROWTH PATH:</strong><br>
+                <strong>Weeks 1-2:</strong> Run all plays at micro-stakes. Lose ~£4 as tuition. Get per-play data.<br>
+                <strong>Week 3:</strong> CUT the losers (TIME_DECAY/CRYPTO/BIG_MOVER if still red). Redirect their capital to NEWS_EDGE.<br>
+                <strong>Week 4+:</strong> £100 → ~£175 (projected NEWS_EDGE-only scaling: 75% ROI × 1 month = meaningful compound).<br>
+                <strong>Key:</strong> bad data is cheap. The £4 loss tells us which plays survive slippage. Scale what works, kill what doesn't.
+            </div></div>`;
         }
         const plan = rc.changes.find(c => c.name && c.name.includes('AGREED PLAN'));
         if (plan) {
