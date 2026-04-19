@@ -198,6 +198,8 @@ tr:hover td{background:#0f172a}
 
 <div id="optimal-mix-breakdown"></div>
 
+<div id="all-variations"></div>
+
 <div id="pulse-alert" style="margin:16px 0"></div>
 
 <details style="margin:16px 0;padding:10px 14px;background:#0a1020;border-left:3px solid #60a5fa;border-radius:6px">
@@ -650,6 +652,80 @@ function renderOverview() {
         </div>`;
         html += '</div>';
         mixEl.innerHTML = html;
+    }
+
+    // --- ALL VARIATIONS TESTED: ranked table of every rule variant we've built ---
+    const varEl = document.getElementById('all-variations');
+    if (varEl && DATA.scenarios) {
+        const scen = DATA.scenarios;
+        const variants = [];
+        const baselineTotal = scen.baseline ? scen.baseline.total : netPnL;
+        variants.push({name: "Standard (as traded)", category: "Baseline", pnl: baselineTotal, desc: "Actual P&L — no rule changes"});
+
+        if (scen.scenario_A) variants.push({name: "Surgical BIG_MOVER", category: "Rules", pnl: scen.scenario_A.total, desc: "Exclude Mideast + Peru + Venezuela + moves >40% from BIG_MOVER"});
+        if (scen.scenario_B) variants.push({name: "Wider stops retroactive", category: "Rules", pnl: scen.scenario_B.total, desc: "Apply 15% BIG_MOVER / 20% TIME_DECAY stops historically"});
+        if (scen.scenario_C) variants.push({name: "Surgical + Wider stops", category: "Rules", pnl: scen.scenario_C.total, desc: "Scenario A + B combined"});
+
+        // Free-Roll aggregate
+        if (scen.free_roll_simulation && scen.free_roll_simulation.by_play) {
+            const fr = scen.free_roll_simulation.by_play;
+            const frTotal = fr.reduce((s, r) => s + r.freeroll_pnl, 0);
+            variants.push({name: "Free-Roll all plays", category: "Exit", pnl: frTotal, desc: "Bank stake at TP threshold on every play, let rest ride"});
+        }
+
+        // Let Run aggregate
+        if (scen.let_run_simulation && scen.let_run_simulation.by_play) {
+            const lr = scen.let_run_simulation.by_play;
+            const lrTotal = lr.reduce((s, r) => s + r.letrun_pnl, 0);
+            variants.push({name: "Let Run (no TP/SL)", category: "Exit", pnl: lrTotal, desc: "Hold every trade to resolution without TP or SL"});
+        }
+
+        // Optimal Mix (just computed above)
+        variants.push({name: "OPTIMAL MIX (per-play best)", category: "Combo", pnl: optPnl, desc: "Pick Standard / Free-Roll / Let Run per play — the theoretical ceiling"});
+
+        // Backtest variants
+        if (DATA.backtest && DATA.backtest.results) {
+            DATA.backtest.results.forEach(r => {
+                if (r.name === "Baseline (actual)") return;
+                variants.push({name: r.name, category: "Filter", pnl: r.pnl, desc: `WR ${r.win_rate_pct}% · ${r.trades} trades · Sharpe ${r.sharpe}`});
+            });
+        }
+
+        // Sort by P&L desc
+        variants.sort((a, b) => b.pnl - a.pnl);
+
+        const catColor = {
+            'Baseline': '#64748b',
+            'Rules':    '#3b82f6',
+            'Exit':     '#a855f7',
+            'Combo':    '#f59e0b',
+            'Filter':   '#22c55e',
+        };
+
+        let vhtml = '<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;margin-bottom:24px">';
+        vhtml += '<div style="font-size:13px;font-weight:700;color:#cbd5e1;letter-spacing:1px;margin-bottom:4px">↓ ALL STRATEGY VARIATIONS TESTED</div>';
+        vhtml += '<div class="st" style="margin:0 0 14px">Every rule variant we\'ve simulated, ranked by P&L. Categories: Baseline (actual), Rules (surgical/stops), Exit (Free-Roll/Let Run), Combo (optimal mix), Filter (backtest drops + timing).</div>';
+        vhtml += '<table style="margin:0"><tr><th>Rank</th><th>Variation</th><th>Category</th><th>P&L</th><th>Δ vs Standard</th><th>Description</th></tr>';
+        variants.forEach((v, i) => {
+            const isBase = v.name.includes("Standard (as traded)");
+            const isOptimal = v.name.includes("OPTIMAL");
+            const delta = v.pnl - baselineTotal;
+            const dCls = delta > 0 ? 'up' : (delta < 0 ? 'dn' : 'fl');
+            const pnlCls = v.pnl >= 0 ? 'up' : 'dn';
+            const rowBg = isOptimal ? 'background:#332510' : (isBase ? 'background:#0f172a' : '');
+            vhtml += `<tr style="${rowBg}">
+                <td><strong>#${i+1}</strong></td>
+                <td><strong>${escapeHtml(v.name)}</strong></td>
+                <td><span style="font-size:11px;padding:2px 8px;border-radius:6px;background:${catColor[v.category]}22;color:${catColor[v.category]};border:1px solid ${catColor[v.category]};font-weight:700">${v.category}</span></td>
+                <td class="${pnlCls}"><strong>$${v.pnl>=0?'+':''}${v.pnl.toFixed(0)}</strong></td>
+                <td class="${dCls}"><strong>${isBase ? '—' : (delta>=0?'+':'') + '$' + delta.toFixed(0)}</strong></td>
+                <td class="st" style="margin:0;font-size:12px">${escapeHtml(v.desc)}</td>
+            </tr>`;
+        });
+        vhtml += '</table>';
+        vhtml += `<div class="st" style="margin-top:12px;font-size:12px;padding-top:12px;border-top:1px dashed #334155"><strong>${variants.length} variations tested.</strong> Winners at top. Standard = actual historical P&L. Others show what we would have made with the rule change applied retroactively. Full detail on <a onclick="showPage('whatif')">What If</a> and <a onclick="showPage('backtest')">Backtest</a> tabs.</div>`;
+        vhtml += '</div>';
+        varEl.innerHTML = vhtml;
     }
 
     // --- Pulse: recent 24h performance per play — shows WHAT'S WORKING NOW ---
