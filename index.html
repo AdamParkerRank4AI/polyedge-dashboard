@@ -1851,6 +1851,45 @@ function renderGoLive() {
     const el = document.getElementById('golive-content');
     if (!DATA) { el.innerHTML = '<p class="st">Loading...</p>'; return; }
 
+    // Pull the agreed plan historical simulation from rule_changes
+    const rc = DATA.rule_changes;
+    let planCard = '';
+    if (rc && rc.changes) {
+        const plan = rc.changes.find(c => c.name && c.name.includes('AGREED PLAN'));
+        if (plan) {
+            const planRoi = plan.plan_roi_pct;
+            const actualRoi = plan.actual_roi_pct;
+            const improvement = planRoi - actualRoi;
+            planCard = `<div style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:2px solid #22c55e;border-radius:16px;padding:24px 28px;margin-bottom:28px">
+                <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#22c55e;margin-bottom:6px">THE PLAN APPLIED RETROACTIVELY</div>
+                <div style="font-size:22px;font-weight:800;color:#f1f5f9;margin-bottom:14px">What the portfolio would have done with the agreed plan</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:14px">
+                    <div><div class="sl">Capital Used</div><div style="font-size:26px;font-weight:900;color:#f1f5f9">$${plan.plan_staked.toLocaleString()}</div></div>
+                    <div><div class="sl">Net P&amp;L</div><div style="font-size:26px;font-weight:900;color:${plan.plan_pnl>=0?'#22c55e':'#ef4444'}">$${plan.plan_pnl>=0?'+':''}${plan.plan_pnl.toFixed(0)}</div></div>
+                    <div><div class="sl">ROI</div><div style="font-size:26px;font-weight:900;color:#3b82f6">${planRoi>=0?'+':''}${planRoi.toFixed(1)}%</div></div>
+                    <div><div class="sl">Trades</div><div style="font-size:26px;font-weight:900;color:#cbd5e1">${plan.plan_trades}</div></div>
+                    <div><div class="sl">vs Actual ROI</div><div style="font-size:26px;font-weight:900;color:${improvement>0?'#22c55e':'#ef4444'}">${improvement>=0?'+':''}${improvement.toFixed(1)}pp</div></div>
+                </div>
+                <div class="st" style="margin:14px 0 0;padding-top:14px;border-top:1px dashed #334155;font-size:13px;line-height:1.6">
+                    <strong style="color:#22c55e">Same history, disciplined selection.</strong> The plan excludes TIME_DECAY, CRYPTO, LATE_ENTRY, FED, LAB. Uses full size on TEMPORAL_ARB + NegRisk (high confidence), half size on NEWS_EDGE + BIG_MOVER surgical + SYSTEMATIC_NO (medium). Filters out bug-flagged mistakes.
+                    Capital saved: <strong style="color:#22c55e">$${plan.capital_saved.toLocaleString()}</strong> (would have gone to low-confidence plays).
+                </div>`;
+            // Per-play breakdown
+            if (plan.by_play && plan.by_play.length) {
+                planCard += '<div style="margin-top:14px"><div class="sl" style="margin-bottom:8px">BY PLAY (historical)</div>';
+                planCard += '<table style="margin:0"><tr><th>Play</th><th>Trades</th><th>Staked</th><th>P&L</th><th>ROI</th></tr>';
+                plan.by_play.forEach(r => {
+                    const pnlCls = r.pnl >= 0 ? 'up' : 'dn';
+                    const roiCls = r.roi_pct >= 0 ? 'bl' : 'dn';
+                    planCard += `<tr><td><strong>${escapeHtml(r.play)}</strong></td><td>${r.trades}</td><td>$${r.staked.toLocaleString()}</td><td class="${pnlCls}"><strong>$${r.pnl>=0?'+':''}${r.pnl.toFixed(2)}</strong></td><td class="${roiCls}"><strong>${r.roi_pct>=0?'+':''}${r.roi_pct.toFixed(2)}%</strong></td></tr>`;
+                });
+                planCard += '</table></div>';
+            }
+            planCard += '</div>';
+        }
+    }
+    // planCard is included into html below; don't write yet
+
     // Per-play readiness
     const plays = [
         {name:'TEMPORAL_ARB', category:'Pure Math', confidence:'HIGH', color:'#22c55e',
@@ -1890,7 +1929,9 @@ function renderGoLive() {
     const medCount = plays.filter(p => p.confidence === 'MEDIUM').length;
     const lowCount = plays.filter(p => p.confidence === 'LOW').length;
 
-    let html = `<div class="stats" style="margin-bottom:20px">
+    let html = planCard;
+    html += `<h3>Per-Play Readiness</h3>`;
+    html += `<div class="stats" style="margin-bottom:20px">
         <div class="stat"><div class="sv" style="color:#22c55e">${highCount}</div><div class="sl">Full Size Ready</div></div>
         <div class="stat"><div class="sv" style="color:#f59e0b">${medCount}</div><div class="sl">Half Size Ready</div></div>
         <div class="stat"><div class="sv" style="color:#ef4444">${lowCount}</div><div class="sl">Park / Monitor</div></div>
