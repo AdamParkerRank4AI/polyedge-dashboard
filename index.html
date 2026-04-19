@@ -924,7 +924,54 @@ function renderOverview() {
         const frByPlay = {};
         ((DATA.scenarios || {}).free_roll_simulation || {}).by_play?.forEach(r => frByPlay[r.play] = r);
 
-        let thtml = '<p class="st">Each play\'s current take-profit + stop-loss vs <strong>recommended</strong> based on actual fire rates and avg move at fire. Plus the P&L impact if you switched to the recommendation.</p>';
+        // Pull the "what if we applied recommendations" simulation
+        const recSim = (DATA.scenarios || {}).recommended_tp_sl;
+        let thtml = '';
+        if (recSim) {
+            const deltaCls = recSim.delta_total > 0 ? '#22c55e' : '#ef4444';
+            thtml += `<div style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:2px solid ${deltaCls};border-radius:14px;padding:18px 22px;margin-bottom:18px">
+                <div style="font-size:12px;font-weight:800;letter-spacing:1.5px;color:${deltaCls};margin-bottom:6px">IF WE'D USED THE RECOMMENDED TP/SL HISTORICALLY</div>
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+                    <div>
+                        <div class="sl" style="margin:0">Actual P&amp;L (what happened)</div>
+                        <div style="font-size:28px;font-weight:900;color:${recSim.actual_total>=0?'#22c55e':'#ef4444'}">$${recSim.actual_total>=0?'+':''}${recSim.actual_total.toFixed(0)}</div>
+                    </div>
+                    <div style="font-size:22px;color:#94a3b8">→</div>
+                    <div>
+                        <div class="sl" style="margin:0">With Recommendations</div>
+                        <div style="font-size:28px;font-weight:900;color:${recSim.simulated_total>=0?'#22c55e':'#ef4444'}">$${recSim.simulated_total>=0?'+':''}${recSim.simulated_total.toFixed(0)}</div>
+                    </div>
+                    <div style="font-size:22px;color:#94a3b8">=</div>
+                    <div>
+                        <div class="sl" style="margin:0">Impact</div>
+                        <div style="font-size:32px;font-weight:900;color:${deltaCls}">${recSim.delta_total>=0?'+':''}$${recSim.delta_total.toFixed(0)}</div>
+                    </div>
+                </div>
+                <div class="st" style="margin:12px 0 0;padding-top:12px;border-top:1px dashed #334155;font-size:13px;line-height:1.65">${escapeHtml(recSim.description)}</div>`;
+            if (recSim.by_play && recSim.by_play.length) {
+                thtml += '<div style="margin-top:12px"><div class="sl" style="margin-bottom:8px">BY PLAY</div>';
+                thtml += '<table style="margin:0"><tr><th>Play</th><th>Trades</th><th>Current TP/SL</th><th>Recommended TP/SL</th><th>Actual P&L</th><th>Simulated P&L</th><th>Δ</th></tr>';
+                recSim.by_play.forEach(r => {
+                    const dCls = r.delta > 0 ? 'up' : (r.delta < 0 ? 'dn' : 'fl');
+                    const aCls = r.actual_pnl >= 0 ? 'up' : 'dn';
+                    const sCls = r.simulated_pnl >= 0 ? 'up' : 'dn';
+                    const changed = (r.rec_tp !== r.current_tp) || (r.rec_sl !== r.current_sl);
+                    thtml += `<tr>
+                        <td><strong>${escapeHtml(r.play)}</strong></td>
+                        <td>${r.trades}</td>
+                        <td>${r.current_tp||'?'}% / ${r.current_sl||'?'}%</td>
+                        <td class="${changed?'bl':'fl'}"><strong>${r.rec_tp}% / ${r.rec_sl}%</strong></td>
+                        <td class="${aCls}">$${r.actual_pnl>=0?'+':''}${r.actual_pnl.toFixed(0)}</td>
+                        <td class="${sCls}">$${r.simulated_pnl>=0?'+':''}${r.simulated_pnl.toFixed(0)}</td>
+                        <td class="${dCls}"><strong>${r.delta>=0?'+':''}$${r.delta.toFixed(0)}</strong></td>
+                    </tr>`;
+                });
+                thtml += '</table></div>';
+            }
+            thtml += '</div>';
+        }
+
+        thtml += '<p class="st">Each play\'s current take-profit + stop-loss vs <strong>recommended</strong> based on actual fire rates and avg move at fire.</p>';
         thtml += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(420px,1fr));gap:14px">';
         Object.entries(tpsl).forEach(([play, d]) => {
             const tpFireRate = d.n ? (100 * d.tp_fires / d.n) : 0;
