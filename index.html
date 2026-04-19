@@ -108,7 +108,9 @@ tr:hover{background:#111827}
 <a class="nl" onclick="showPage('alerts')">Alerts</a>
 <a class="nl" onclick="showPage('opportunities')">Opportunities</a>
 <a class="nl" onclick="showPage('movers')">Movers</a>
+<a class="nl" onclick="showPage('markets')">Markets</a>
 <a class="nl" onclick="showPage('timeline')">Timeline</a>
+<a class="nl" onclick="showPage('journey')">Journey</a>
 <a class="nl" onclick="showPage('ideas')">Strategy Ideas</a>
 <a class="nl" onclick="showPage('audit')">Daily Audit</a>
 <a class="nl" onclick="showPage('lab')">Lab</a>
@@ -214,6 +216,28 @@ tr:hover{background:#111827}
 <h2>Biggest 24h Movers</h2>
 <p class="st">Markets with the biggest price swings in 24h. Big movers >20% on >$500k volume trigger auto-trades.</p>
 <div id="movers-list" class="loading">Loading...</div>
+</div>
+
+<!-- MARKETS -->
+<div id="page-markets" class="page">
+<h2>Polymarket Live Markets</h2>
+<p class="st">Every Polymarket market we're scanning. Color-coded by our relationship. Top 80 by 24h volume. Click any tile to open on Polymarket.</p>
+<div class="filter-bar" style="margin-bottom:12px">
+<span class="fb active" onclick="filterMarkets(this,'all')">All</span>
+<span class="fb" onclick="filterMarkets(this,'held')">🟢 Holding</span>
+<span class="fb" onclick="filterMarkets(this,'watched')">🔵 Watchlist</span>
+<span class="fb" onclick="filterMarkets(this,'missed')">🟠 Just Missed</span>
+<span class="fb" onclick="filterMarkets(this,'lost')">🔴 Lost on</span>
+<span class="fb" onclick="filterMarkets(this,'new')">⚪ New / Untouched</span>
+</div>
+<div id="markets-content" class="loading">Loading...</div>
+</div>
+
+<!-- JOURNEY -->
+<div id="page-journey" class="page">
+<h2>The Journey — March to Now</h2>
+<p class="st">Chronological narrative: what worked, what we changed, what we added, why.</p>
+<div id="journey-content" class="loading">Loading...</div>
 </div>
 
 <!-- TIMELINE -->
@@ -1065,6 +1089,231 @@ function renderSettings() {
     }
 
     document.getElementById('settings-content').innerHTML = html;
+}
+
+let marketFilter = 'all';
+function filterMarkets(el, f) {
+    document.querySelectorAll('#page-markets .fb').forEach(x => x.classList.remove('active'));
+    el.classList.add('active');
+    marketFilter = f;
+    renderMarkets();
+}
+
+function renderMarkets() {
+    const el = document.getElementById('markets-content');
+    if (!DATA) { el.innerHTML = '<p class="st">Loading...</p>'; return; }
+
+    // Build our slug → status map
+    const heldSlugs = new Set();
+    const lostSlugs = new Set();
+    (DATA.positions || []).forEach(p => {
+        if (p.lab) return;
+        if (p.status === 'open') heldSlugs.add(p.slug);
+        else if (p.exit_price) {
+            const pnl = (Number(p.shares)||0) * Number(p.exit_price) - Number(p.stake||0);
+            if (pnl < 0) lostSlugs.add(p.slug);
+        }
+    });
+    const watchedSlugs = new Set((DATA.watchlist || []).map(w => w.slug));
+    const missedSlugs = new Set();
+    const jm = (DATA.scenarios || {}).just_missed || {};
+    ['just_missed_1_source','just_missed_diff_market'].forEach(k => {
+        (jm[k] || []).forEach(r => missedSlugs.add(r.slug));
+    });
+
+    // Build markets list from DATA (use movers + watchlist + fallback to alerts matches)
+    const marketsById = {};
+    (DATA.movers || []).forEach(m => { if (m.slug) marketsById[m.slug] = m; });
+    (DATA.watchlist || []).forEach(w => {
+        if (w.slug && !marketsById[w.slug]) marketsById[w.slug] = w;
+    });
+    // Add markets mentioned in latest alerts
+    (DATA.alerts || []).forEach(a => {
+        (a.matches || []).forEach(m => {
+            if (m.slug && !marketsById[m.slug]) {
+                marketsById[m.slug] = {slug:m.slug, question:m.question, yes_price:m.yes_price, volume_24h:m.volume_24h};
+            }
+        });
+    });
+
+    let markets = Object.values(marketsById);
+
+    // Categorize
+    markets.forEach(m => {
+        if (heldSlugs.has(m.slug)) m.status = 'held';
+        else if (watchedSlugs.has(m.slug)) m.status = 'watched';
+        else if (missedSlugs.has(m.slug)) m.status = 'missed';
+        else if (lostSlugs.has(m.slug)) m.status = 'lost';
+        else m.status = 'new';
+    });
+
+    // Apply filter
+    let filtered = markets;
+    if (marketFilter !== 'all') {
+        filtered = markets.filter(m => m.status === marketFilter);
+    }
+
+    // Sort by 24h volume
+    filtered.sort((a, b) => (Number(b.volume_24h)||0) - (Number(a.volume_24h)||0));
+    filtered = filtered.slice(0, 80);
+
+    if (!filtered.length) {
+        el.innerHTML = '<p class="st">No markets match this filter.</p>';
+        return;
+    }
+
+    const statusMeta = {
+        held:    {color:'#00ff88', label:'🟢 HOLDING', desc:'We have open position'},
+        watched: {color:'#60a5fa', label:'🔵 WATCHLIST', desc:'On watchlist, not held'},
+        missed:  {color:'#ffaa00', label:'🟠 JUST MISSED', desc:'Convergence hit but filter blocked'},
+        lost:    {color:'#ef4444', label:'🔴 LOST ON', desc:'Closed at loss on this market'},
+        new:     {color:'#475569', label:'⚪ NEW', desc:'Scanning, not yet traded'},
+    };
+
+    // Status counts
+    const counts = {};
+    markets.forEach(m => { counts[m.status] = (counts[m.status] || 0) + 1; });
+    let html = '<div class="stats" style="margin-bottom:16px">';
+    ['held','watched','missed','lost','new'].forEach(s => {
+        const m = statusMeta[s];
+        html += `<div class="stat" style="border-color:${m.color}"><div class="sv" style="color:${m.color}">${counts[s]||0}</div><div class="sl">${m.label}</div></div>`;
+    });
+    html += '</div>';
+
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px">';
+    filtered.forEach(m => {
+        const meta = statusMeta[m.status];
+        const yes = Number(m.yes_price) || 0;
+        const yesPct = (yes * 100).toFixed(1);
+        const vol24 = Number(m.volume_24h) || 0;
+        const change = Number(m.change_24h) || 0;
+        const changeCls = change > 0 ? 'up' : (change < 0 ? 'dn' : 'fl');
+        const pmUrl = m.slug ? 'https://polymarket.com/market/' + m.slug : '#';
+
+        html += `<a href="${pmUrl}" target="_blank" style="text-decoration:none">
+            <div style="background:#111827;border:1px solid #1e293b;border-left:5px solid ${meta.color};border-radius:10px;padding:14px;height:100%;transition:transform 0.1s" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:8px">
+                    <span class="badge" style="background:${meta.color};color:#06080c;font-weight:800">${meta.label}</span>
+                    ${change ? `<span class="${changeCls}" style="font-size:12px;font-weight:700">${change>0?'+':''}${(change*100).toFixed(1)}%</span>` : ''}
+                </div>
+                <div style="font-size:14px;font-weight:700;color:#f1f5f9;line-height:1.4;margin-bottom:10px;min-height:40px">${escapeHtml((m.question||'').substring(0,100))}</div>
+                <div style="display:flex;justify-content:space-between;align-items:center">
+                    <div>
+                        <div style="font-size:22px;font-weight:900;color:#00ff88">${yesPct}¢</div>
+                        <div class="st" style="margin:0;font-size:11px">YES</div>
+                    </div>
+                    <div style="text-align:right">
+                        <div style="font-size:14px;font-weight:700;color:#cbd5e1">$${vol24.toLocaleString(undefined,{maximumFractionDigits:0})}</div>
+                        <div class="st" style="margin:0;font-size:11px">24h vol</div>
+                    </div>
+                </div>
+                <div style="margin-top:10px;height:6px;background:#1e293b;border-radius:3px;overflow:hidden">
+                    <div style="height:100%;width:${yesPct}%;background:#00ff88"></div>
+                </div>
+            </div>
+        </a>`;
+    });
+    html += '</div>';
+
+    el.innerHTML = html;
+}
+
+function renderJourney() {
+    const el = document.getElementById('journey-content');
+    if (!DATA) { el.innerHTML = '<p class="st">Loading...</p>'; return; }
+
+    // Compute key figures from live data
+    const positions = (DATA.positions || []).filter(p => !p.lab);
+    const closed = positions.filter(p => p.exit_price);
+    let staked = 0, ret = 0, wins = 0, losses = 0;
+    closed.forEach(p => {
+        const s = Number(p.stake) || 0;
+        const r = (Number(p.shares)||0) * Number(p.exit_price);
+        staked += s; ret += r;
+        if (r > s) wins++; else losses++;
+    });
+    const pnl = ret - staked;
+    const roi = staked ? (pnl/staked*100) : 0;
+
+    // NEWS_EDGE specific story
+    const ne = closed.filter(p => p.trade_type === 'NEWS_EDGE').sort((a,b) => (a.opened||'').localeCompare(b.opened||''));
+    const neMarch = ne.filter(p => (p.opened||'').startsWith('2026-03'));
+    const neApril = ne.filter(p => (p.opened||'').startsWith('2026-04'));
+    const nePnl = (list) => list.reduce((s,p) => s + ((Number(p.shares)||0)*Number(p.exit_price) - Number(p.stake)), 0);
+
+    const chapters = [
+        {
+            date: "March 2026",
+            title: "Chapter 1: Proving the edge (Iran war)",
+            body: `Scanner started scanning Polymarket + 10 RSS feeds + Federal Register + GDELT. First convergence trades opened on Iran war / ceasefire / regime fall markets. Thesis: news is breaking positive for Iran war escalation, but Polymarket ceasefire markets are priced too HIGH (optimism). Bet NO on ceasefires, YES on escalation. All ${neMarch.length} trades this month won. Biggest: Trump-China visit NO at 11.5¢ closed at 97.4¢ = <strong>+$746</strong> on $100 stake. Total March: +$${nePnl(neMarch).toFixed(0)}.`,
+            colour: '#00ff88',
+        },
+        {
+            date: "Early April (week 14)",
+            title: "Chapter 2: Extending the pattern",
+            body: `More Iran trades — US forces entering Iran, ceasefire by mid-April. 2 more wins at +$${nePnl(neApril.filter(p=>p.opened<'2026-04-15')).toFixed(0)}. Overall NEWS_EDGE at 8 wins 0 losses, <strong>+117% ROI</strong>. Research done into Polymarket GitHub ecosystem, 40+ edge strategies catalogued, 9 research files saved. Whale tracker scaffolded.`,
+            colour: '#00ff88',
+        },
+        {
+            date: "April 13-15",
+            title: "Chapter 3: Scaling up — auto-trading live",
+            body: `Launched full auto-trade on 4 plays: NEWS_EDGE, TIME_DECAY, CRYPTO, BIG_MOVER. Market fetch expanded 200→500 per scan. GDELT added. Stop losses widened from 5% → 15% BIG_MOVER / 8% → 20% TIME_DECAY after sensitivity analysis showed old stops were killing winners ($629 would have been saved with wider SL).`,
+            colour: '#60a5fa',
+        },
+        {
+            date: "April 17 (the big day)",
+            title: "Chapter 4: Major rewrite (5 new plays, Free-Roll, cleanup)",
+            body: `<strong>Fixed NEWS_EDGE scope bug</strong>: was only trading markets in watchlist, blocked thousands of convergence hits. Unblocked it. Added <strong>5 new play types</strong>: SYSTEMATIC_NO (buy NO on long-shots), TEMPORAL_ARB (date-ladder arbitrage), FED_DIVERGENCE, LAB_CELEBRITY, LAB_SPORTS (lab trades quarantined). Added <strong>Free-Roll</strong> variant: bank stake at TP, let rest ride. <strong>Retroactive cleanup</strong>: removed 96 bad BIG_MOVER trades (Mideast/Peru/Venezuela). Widened NEWS_EDGE TP 5→40%. Added NegRisk scanner (10 live arbs found). LLM Edge estimator via Claude.`,
+            colour: '#b066ff',
+        },
+        {
+            date: "April 18",
+            title: "Chapter 5: Expanded data + automation",
+            body: `Added 15 new RSS feeds (FT, Bloomberg, NYT, Sky, Haaretz, Jerusalem Post, SCMP, Decrypt, The Block, etc. — 30 total). Added <strong>Reddit</strong> (11 subs), <strong>Hacker News</strong> (3 lists), <strong>Bluesky</strong> (12 accounts), <strong>Wikipedia</strong> edit tracking, <strong>Farcaster</strong>. Source weighting: NPR 1.6x, Pentagon 0.3x based on historical accuracy. <strong>Trump Truth Social</strong> via mirror 1.8x weight. <strong>Daily audit</strong> via Claude at 09:00 UK. <strong>Fast-monitor</strong> 60s launchd agent. <strong>Backtest harness</strong> with 11 rule variants (found: excluding Fri+Sat = +$725 vs baseline). Risk metrics + closed-trade autopsy + Deribit options-implied probabilities + hour/day patterns + play correlation + per-play Sharpe. Health watchdog.`,
+            colour: '#60a5fa',
+        },
+        {
+            date: "April 19 (today)",
+            title: "Chapter 6: Regression + fix",
+            body: `Noticed <strong>NEWS_EDGE 1W/19L since Apr 17 scope fix</strong>. Diagnosis: algo was bullish on every positive-sounding headline, but Iran peace markets were already saturated and fading. Fix: added <strong>fade rule</strong> — if headline is positive but market is trending down 2%+, bet NO instead. Added 24h Pulse banner at top of Overview for instant "what's working now" read. Built Performance Timeline + this Journey view. Current state: main portfolio +$${pnl.toFixed(0)} (${roi.toFixed(1)}% ROI), ${wins}W/${losses}L. TEMPORAL_ARB emerged as the week's star play (3/3, +$114, 100% WR).`,
+            colour: '#ffaa00',
+        },
+    ];
+
+    let html = `<div style="background:#0a1020;border-left:4px solid #60a5fa;border-radius:8px;padding:14px 18px;margin-bottom:20px">
+        <div style="font-size:14px;font-weight:800;letter-spacing:1px;color:#60a5fa">CURRENT STATE</div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:8px">
+            <div><div class="st" style="margin:0">P&L</div><div style="font-size:24px;font-weight:900;color:${pnl>=0?'#00ff88':'#ef4444'}">$${pnl>=0?'+':''}${pnl.toFixed(0)}</div></div>
+            <div><div class="st" style="margin:0">ROI</div><div style="font-size:24px;font-weight:900;color:#60a5fa">${roi>=0?'+':''}${roi.toFixed(1)}%</div></div>
+            <div><div class="st" style="margin:0">Trades</div><div style="font-size:24px;font-weight:900;color:#f1f5f9">${wins}W/${losses}L</div></div>
+            <div><div class="st" style="margin:0">March NEWS_EDGE</div><div style="font-size:24px;font-weight:900;color:#00ff88">+$${nePnl(neMarch).toFixed(0)}</div></div>
+        </div>
+    </div>`;
+
+    chapters.forEach((c, i) => {
+        html += `<div style="margin-bottom:16px;background:#111827;border:1px solid #1e293b;border-left:5px solid ${c.colour};border-radius:10px;padding:14px 18px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                <div>
+                    <div class="st" style="margin:0;font-size:11px;color:${c.colour};font-weight:800;letter-spacing:1px">${escapeHtml(c.date)}</div>
+                    <div style="font-size:18px;font-weight:900;color:#f1f5f9;margin-top:3px">${escapeHtml(c.title)}</div>
+                </div>
+                <div style="font-size:28px;font-weight:900;color:${c.colour};opacity:0.3">${i+1}</div>
+            </div>
+            <div style="color:#e2e8f0;line-height:1.7;font-size:14px">${c.body}</div>
+        </div>`;
+    });
+
+    html += `<div style="margin-top:20px;padding:14px 18px;background:#0a1020;border-radius:8px;border-left:4px solid #ffaa00">
+        <div style="font-size:14px;font-weight:800;letter-spacing:1px;color:#ffaa00">WHERE WE ARE</div>
+        <ul style="color:#e2e8f0;line-height:1.8;margin:8px 0 0;padding-left:20px">
+            <li><strong style="color:#00ff88">Working:</strong> March Iran trades (legacy), TEMPORAL_ARB this week (3/3), NegRisk arbitrage detection</li>
+            <li><strong style="color:#ef4444">Broken:</strong> April NEWS_EDGE direction (fixed today, monitoring)</li>
+            <li><strong style="color:#ffaa00">Unproven:</strong> SYSTEMATIC_NO (16 opens, no resolution yet), LATE_ENTRY, Lab plays</li>
+            <li><strong style="color:#60a5fa">Next:</strong> let the direction fix bake for 48h, watch TEMPORAL_ARB scale, plan real trading once SA creds arrive</li>
+        </ul>
+    </div>`;
+
+    el.innerHTML = html;
 }
 
 function renderTimeline() {
@@ -2100,6 +2349,8 @@ function render() {
     renderAlerts();
     renderOpps();
     renderMovers();
+    renderMarkets();
+    renderJourney();
     renderTimeline();
     renderAudit();
     renderIdeas();
