@@ -142,16 +142,16 @@ tr:hover td{background:#0f172a}
 <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px">
 <div>
 <div style="font-size:12px;font-weight:700;letter-spacing:2px;color:#94a3b8;margin-bottom:6px">POLYEDGE · PAPER TRADING</div>
-<div id="hero-headline" style="font-size:28px;font-weight:800;color:#f1f5f9;letter-spacing:-0.5px;line-height:1.2">—</div>
-<div id="hero-sub" style="font-size:14px;color:#94a3b8;margin-top:6px">—</div>
+<div id="hero-headline" style="font-size:28px;font-weight:800;color:#f1f5f9;letter-spacing:-0.5px;line-height:1.2">-</div>
+<div id="hero-sub" style="font-size:14px;color:#94a3b8;margin-top:6px">-</div>
 </div>
 <div style="display:flex;gap:24px;flex-wrap:wrap">
 <div style="text-align:right">
-<div id="hero-pnl" style="font-size:42px;font-weight:900;letter-spacing:-1px;line-height:1">—</div>
+<div id="hero-pnl" style="font-size:42px;font-weight:900;letter-spacing:-1px;line-height:1">-</div>
 <div class="sl">Net P&amp;L</div>
 </div>
 <div style="text-align:right">
-<div id="hero-roi" style="font-size:42px;font-weight:900;letter-spacing:-1px;line-height:1;color:#3b82f6">—</div>
+<div id="hero-roi" style="font-size:42px;font-weight:900;letter-spacing:-1px;line-height:1;color:#3b82f6">-</div>
 <div class="sl">ROI</div>
 </div>
 </div>
@@ -193,11 +193,14 @@ tr:hover td{background:#0f172a}
 <div class="stat"><div class="sv rd" id="o-losses">--</div><div class="sl">Losses</div></div>
 </div>
 
-<h2>The Plays — Live P&L by Type</h2>
+<h2>The Plays - Live P&L by Type</h2>
 <div class="plays-grid" id="plays-overview"></div>
 
 <h2>New Plays (research-backed, some still proving)</h2>
 <div id="new-plays-section"></div>
+
+<h2>Stop Loss + Take Profit Audit</h2>
+<div id="tpsl-audit"></div>
 
 <div id="optimal-mix-breakdown"></div>
 
@@ -208,11 +211,11 @@ tr:hover td{background:#0f172a}
 <details style="margin:16px 0;padding:10px 14px;background:#0a1020;border-left:3px solid #60a5fa;border-radius:6px">
 <summary style="cursor:pointer;color:#60a5fa;font-weight:700;font-size:14px">ℹ️ How the numbers work (click to expand)</summary>
 <div class="st" style="margin-top:10px;color:#e2e8f0;font-weight:500">
-<strong style="color:#22c55e">STANDARD row</strong> — actuals. Already-closed trades are frozen at whatever rules fired them. Totals update as new trades close.<br><br>
-<strong style="color:#a855f7">FREEROLL row</strong> — simulated. Recomputes every scan: "what if we'd been banking at TP on every historical trade, letting the remainder ride to today's live price?"<br><br>
+<strong style="color:#22c55e">STANDARD row</strong> - actuals. Already-closed trades are frozen at whatever rules fired them. Totals update as new trades close.<br><br>
+<strong style="color:#a855f7">FREEROLL row</strong> - simulated. Recomputes every scan: "what if we'd been banking at TP on every historical trade, letting the remainder ride to today's live price?"<br><br>
 <strong style="color:#f59e0b">Rule changes</strong> are forward-only. NEWS_EDGE TP moved from 5% → 40% on Apr 17; trades closed before that still show their old 5% exits. New NEWS_EDGE trades use 40%. Same for BIG_MOVER (5→15), TIME_DECAY (8→15), SYSTEMATIC_NO/LATE_ENTRY (new plays from Apr 17-18).<br><br>
 <strong style="color:#ef4444">Apr 17 retroactive cleanup</strong> permanently removed 96 BIG_MOVER trades (Mideast/Peru/Venezuela/sports/&gt;40% moves). Snapshots backed up at <code>~/polyedge/data/snapshot_*_pre_clean.json</code> if we need to restore.<br><br>
-<strong style="color:#cbd5e1">LAB trades</strong> (celebrity + sports experiments at $50 half-size) are filtered out of Overview and Plays — see the Lab tab for their own P&L.
+<strong style="color:#cbd5e1">LAB trades</strong> (celebrity + sports experiments at $50 half-size) are filtered out of Overview and Plays - see the Lab tab for their own P&L.
 </div>
 </details>
 
@@ -257,7 +260,7 @@ tr:hover td{background:#0f172a}
 <!-- OPPORTUNITIES -->
 <div id="page-opportunities" class="page">
 <h2>Current Opportunities</h2>
-<p class="st">Markets that meet the criteria for Time Decay or Crypto plays right now. Not all get auto-traded — some may be too close to thresholds or already traded.</p>
+<p class="st">Markets that meet the criteria for Time Decay or Crypto plays right now. Not all get auto-traded - some may be too close to thresholds or already traded.</p>
 <div id="opps-list" class="loading">Loading...</div>
 </div>
 
@@ -285,7 +288,7 @@ tr:hover td{background:#0f172a}
 
 <!-- JOURNEY -->
 <div id="page-journey" class="page">
-<h2>The Journey — March to Now</h2>
+<h2>The Journey - March to Now</h2>
 <p class="st">Chronological narrative: what worked, what we changed, what we added, why.</p>
 <div id="journey-content" class="loading">Loading...</div>
 </div>
@@ -313,7 +316,7 @@ tr:hover td{background:#0f172a}
 
 <!-- LAB -->
 <div id="page-lab" class="page">
-<h2>Lab — Experimental Plays</h2>
+<h2>Lab - Experimental Plays</h2>
 <p class="st">Celebrity, music, awards and sports markets. Half-size stakes ($50), separate P&amp;L from the main pot. These trades don&apos;t affect the Overview or Plays numbers. Here to collect data on whether these categories produce edge.</p>
 <div id="lab-content" class="loading">Loading...</div>
 </div>
@@ -348,8 +351,8 @@ tr:hover td{background:#0f172a}
 
 <!-- JUST MISSED -->
 <div id="page-missed" class="page">
-<h2>Just Missed — What We Didn&apos;t Catch</h2>
-<p class="st">Three categories: (1) Solo sources — 1 headline matched a market with score ≥5 but convergence required 2 (if we&apos;d widened the rule, we&apos;d have caught these). (2) Converged but didn&apos;t trade — 2+ sources hit but the market filter blocked (volume, price extreme, watchlist). (3) Would have lost badly — markets where looser rules would have burned us. Simulated P&L uses current live Polymarket price.</p>
+<h2>Just Missed - What We Didn&apos;t Catch</h2>
+<p class="st">Three categories: (1) Solo sources - 1 headline matched a market with score ≥5 but convergence required 2 (if we&apos;d widened the rule, we&apos;d have caught these). (2) Converged but didn&apos;t trade - 2+ sources hit but the market filter blocked (volume, price extreme, watchlist). (3) Would have lost badly - markets where looser rules would have burned us. Simulated P&L uses current live Polymarket price.</p>
 <div id="missed-content" class="loading">Loading...</div>
 </div>
 
@@ -362,8 +365,8 @@ tr:hover td{background:#0f172a}
 
 <!-- WHAT IF -->
 <div id="page-whatif" class="page">
-<h2>What If — Scenario Analysis</h2>
-<p class="st">Historical P&amp;L recomputed under different rules. Forward rule changes (surgical BIG_MOVER, wider stops, NEWS_EDGE scope) are live — historical trades stay untouched so you can compare like-for-like.</p>
+<h2>What If - Scenario Analysis</h2>
+<p class="st">Historical P&amp;L recomputed under different rules. Forward rule changes (surgical BIG_MOVER, wider stops, NEWS_EDGE scope) are live - historical trades stay untouched so you can compare like-for-like.</p>
 <div id="whatif-content" class="loading">Loading...</div>
 </div>
 
@@ -374,7 +377,7 @@ tr:hover td{background:#0f172a}
 <div id="settings-content" class="loading">Loading...</div>
 </div>
 
-<div class="footer">PolyEdge — Auto-trading paper positions every 15 minutes. Edit polyedge.py and reload launchd to change rules.</div>
+<div class="footer">PolyEdge - Auto-trading paper positions every 15 minutes. Edit polyedge.py and reload launchd to change rules.</div>
 
 <script>
 let DATA = null;
@@ -414,9 +417,9 @@ function escapeHtml(s) {
 
 // Consistent date formatting across the dashboard
 function fmtDate(v, opts) {
-    if (!v) return '—';
+    if (!v) return '-';
     const d = new Date(v);
-    if (isNaN(d.getTime())) return '—';
+    if (isNaN(d.getTime())) return '-';
     const now = new Date();
     const diffS = (now - d) / 1000;
     const abs = Math.abs(diffS);
@@ -440,7 +443,7 @@ function fmtDate(v, opts) {
 }
 
 function fmtDateWithRel(v) {
-    if (!v) return '—';
+    if (!v) return '-';
     return fmtDate(v) + ' <span class="st" style="margin:0;font-size:11px">(' + fmtDate(v, {rel:true}) + ')</span>';
 }
 
@@ -467,7 +470,7 @@ function openPnl(pos, signal) {
     return 0;
 }
 
-// Research-backed expectations per play — shown on cards so new plays with
+// Research-backed expectations per play - shown on cards so new plays with
 // 0 trades still have context.
 const PLAY_RESEARCH = {
     NEWS_EDGE: {
@@ -571,7 +574,7 @@ function renderOverview() {
     const winRate = (wins + losses) > 0 ? (wins / (wins + losses) * 100) : 0;
     const roi = totalStaked > 0 ? (netPnL / totalStaked * 100) : 0;
 
-    // Hero TL;DR — the one-glance answer
+    // Hero TL;DR - the one-glance answer
     const heroPnl = document.getElementById('hero-pnl');
     const heroRoi = document.getElementById('hero-roi');
     const heroHead = document.getElementById('hero-headline');
@@ -587,7 +590,7 @@ function renderOverview() {
         else if (roi > 5) head = "In the green";
         else if (roi > 0) head = "Marginally profitable";
         else if (roi > -5) head = "Roughly breakeven";
-        else head = "In drawdown — investigate";
+        else head = "In drawdown - investigate";
         if (heroHead) heroHead.textContent = head;
         if (heroSub) heroSub.textContent = sub;
     }
@@ -610,7 +613,7 @@ function renderOverview() {
     document.getElementById('s-losses').textContent = losses;
     document.getElementById('s-open').textContent = openCount + ' ($' + openStake.toLocaleString() + ')';
 
-    // FREEROLL row — reuse the by_play simulation and aggregate
+    // FREEROLL row - reuse the by_play simulation and aggregate
     const frSimAll = ((DATA.scenarios && DATA.scenarios.free_roll_simulation
                         && DATA.scenarios.free_roll_simulation.by_play) || []);
     const frActual = frSimAll.reduce((s, r) => s + (r.actual_pnl || 0), 0);
@@ -679,7 +682,7 @@ function renderOverview() {
     setF('o-wins', optWins);
     setF('o-losses', optLosses, 'rd');
 
-    // Per-play optimal variant breakdown — small table below the 3 rows
+    // Per-play optimal variant breakdown - small table below the 3 rows
     const mixEl = document.getElementById('optimal-mix-breakdown');
     if (mixEl && optimalByPlay.length) {
         optimalByPlay.sort((a,b) => b.best - a.best);
@@ -706,7 +709,7 @@ function renderOverview() {
         });
         html += '</div>';
         html += `<div style="margin-top:12px;padding-top:12px;border-top:1px dashed #334155;font-size:13px;color:#e2e8f0">
-            <strong>How to read:</strong> if every play had used its best variant historically, total P&L would be <strong style="color:#f59e0b">$${optPnl>=0?'+':''}${optPnl.toFixed(0)}</strong> — an uplift of <strong class="${optUplift>=0?'up':'dn'}">${optUplift>=0?'+':''}$${optUplift.toFixed(0)}</strong> over the blanket Standard approach. Use this to decide per-play whether to enable Free-Roll or remove the TP altogether.
+            <strong>How to read:</strong> if every play had used its best variant historically, total P&L would be <strong style="color:#f59e0b">$${optPnl>=0?'+':''}${optPnl.toFixed(0)}</strong> - an uplift of <strong class="${optUplift>=0?'up':'dn'}">${optUplift>=0?'+':''}$${optUplift.toFixed(0)}</strong> over the blanket Standard approach. Use this to decide per-play whether to enable Free-Roll or remove the TP altogether.
         </div>`;
         html += '</div>';
         mixEl.innerHTML = html;
@@ -718,7 +721,7 @@ function renderOverview() {
         const scen = DATA.scenarios;
         const variants = [];
         const baselineTotal = scen.baseline ? scen.baseline.total : netPnL;
-        variants.push({name: "Standard (as traded)", category: "Baseline", pnl: baselineTotal, desc: "Actual P&L — no rule changes"});
+        variants.push({name: "Standard (as traded)", category: "Baseline", pnl: baselineTotal, desc: "Actual P&L - no rule changes"});
 
         if (scen.scenario_A) variants.push({name: "Surgical BIG_MOVER", category: "Rules", pnl: scen.scenario_A.total, desc: "Exclude Mideast + Peru + Venezuela + moves >40% from BIG_MOVER"});
         if (scen.scenario_B) variants.push({name: "Wider stops retroactive", category: "Rules", pnl: scen.scenario_B.total, desc: "Apply 15% BIG_MOVER / 20% TIME_DECAY stops historically"});
@@ -739,7 +742,7 @@ function renderOverview() {
         }
 
         // Optimal Mix (just computed above)
-        variants.push({name: "OPTIMAL MIX (per-play best)", category: "Combo", pnl: optPnl, desc: "Pick Standard / Free-Roll / Let Run per play — the theoretical ceiling"});
+        variants.push({name: "OPTIMAL MIX (per-play best)", category: "Combo", pnl: optPnl, desc: "Pick Standard / Free-Roll / Let Run per play - the theoretical ceiling"});
 
         // Backtest variants
         if (DATA.backtest && DATA.backtest.results) {
@@ -763,20 +766,24 @@ function renderOverview() {
         let vhtml = '<div style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;margin-bottom:24px">';
         vhtml += '<div style="font-size:13px;font-weight:700;color:#cbd5e1;letter-spacing:1px;margin-bottom:4px">↓ ALL STRATEGY VARIATIONS TESTED</div>';
         vhtml += '<div class="st" style="margin:0 0 14px">Every rule variant we\'ve simulated, ranked by P&L. Categories: Baseline (actual), Rules (surgical/stops), Exit (Free-Roll/Let Run), Combo (optimal mix), Filter (backtest drops + timing).</div>';
-        vhtml += '<table style="margin:0"><tr><th>Rank</th><th>Variation</th><th>Category</th><th>P&L</th><th>Δ vs Standard</th><th>Description</th></tr>';
+        vhtml += '<table style="margin:0"><tr><th>Rank</th><th>Variation</th><th>Category</th><th>P&L</th><th>ROI %</th><th>Δ vs Standard</th><th>Description</th></tr>';
+        const baseStake = totalStaked || 1;
         variants.forEach((v, i) => {
             const isBase = v.name.includes("Standard (as traded)");
             const isOptimal = v.name.includes("OPTIMAL");
             const delta = v.pnl - baselineTotal;
+            const vROI = (v.pnl / baseStake * 100);
             const dCls = delta > 0 ? 'up' : (delta < 0 ? 'dn' : 'fl');
             const pnlCls = v.pnl >= 0 ? 'up' : 'dn';
+            const roiCls = vROI >= 0 ? 'bl' : 'dn';
             const rowBg = isOptimal ? 'background:#332510' : (isBase ? 'background:#0f172a' : '');
             vhtml += `<tr style="${rowBg}">
                 <td><strong>#${i+1}</strong></td>
                 <td><strong>${escapeHtml(v.name)}</strong></td>
                 <td><span style="font-size:11px;padding:2px 8px;border-radius:6px;background:${catColor[v.category]}22;color:${catColor[v.category]};border:1px solid ${catColor[v.category]};font-weight:700">${v.category}</span></td>
                 <td class="${pnlCls}"><strong>$${v.pnl>=0?'+':''}${v.pnl.toFixed(0)}</strong></td>
-                <td class="${dCls}"><strong>${isBase ? '—' : (delta>=0?'+':'') + '$' + delta.toFixed(0)}</strong></td>
+                <td class="${roiCls}"><strong>${vROI>=0?'+':''}${vROI.toFixed(2)}%</strong></td>
+                <td class="${dCls}"><strong>${isBase ? 'baseline' : (delta>=0?'+':'') + '$' + delta.toFixed(0)}</strong></td>
                 <td class="st" style="margin:0;font-size:12px">${escapeHtml(v.desc)}</td>
             </tr>`;
         });
@@ -808,8 +815,8 @@ function renderOverview() {
                 }
             });
             const closed = stats.w + stats.l;
-            const wr = closed ? (100*stats.w/closed).toFixed(0) : '—';
-            const roi = stats.stake ? ((stats.pnl/stats.stake)*100).toFixed(1) : '—';
+            const wr = closed ? (100*stats.w/closed).toFixed(0) + '%' : 'No data';
+            const roi = stats.stake ? ((stats.pnl/stats.stake)*100).toFixed(1) + '%' : 'No data';
             const pnlCls = stats.pnl >= 0 ? 'up' : 'dn';
 
             let statusLabel = 'UNPROVEN';
@@ -836,8 +843,8 @@ function renderOverview() {
                 <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px">
                     <div class="ps"><div class="ps-v">${stats.n}</div><div class="ps-l">Trades</div></div>
                     <div class="ps"><div class="ps-v bl">${stats.open}</div><div class="ps-l">Open</div></div>
-                    <div class="ps"><div class="ps-v gy">${wr}${wr!=='—'?'%':''}</div><div class="ps-l">WR</div></div>
-                    <div class="ps"><div class="ps-v ${pnlCls}">${stats.pnl>=0?'+':''}$${stats.pnl.toFixed(0)}</div><div class="ps-l">P&L</div></div>
+                    <div class="ps"><div class="ps-v gy">${wr}${wr!=='-'?'%':''}</div><div class="ps-l">WR</div></div>
+                    <div class="ps"><div class="ps-v ${pnlCls}">${closed?('$'+(stats.pnl>=0?'+':'')+stats.pnl.toFixed(0)):'No data'}</div><div class="ps-l">P&L</div></div>
                 </div>
                 <div class="st" style="margin:10px 0 0;font-size:11px;padding-top:8px;border-top:1px dashed #334155"><strong style="color:#94a3b8">Evidence:</strong> ${escapeHtml(research.evidence || '')}</div>
             </div>`;
@@ -846,7 +853,106 @@ function renderOverview() {
         newPlaysEl.innerHTML = nphtml;
     }
 
-    // --- Pulse: recent 24h performance per play — shows WHAT'S WORKING NOW ---
+    // --- TP/SL Audit: did we pick the right thresholds? ---
+    const tpslEl = document.getElementById('tpsl-audit');
+    if (tpslEl) {
+        const tpsl = {};
+        // Gather actuals per play
+        (DATA.positions || []).filter(p => !p.lab && p.exit_price && p.trade_type).forEach(p => {
+            const t = p.trade_type;
+            tpsl[t] = tpsl[t] || {
+                tp_fires: 0, sl_fires: 0, other_closes: 0,
+                tp_pct: p.target_profit, sl_pct: p.stop_loss,
+                tp_moves: [], sl_moves: [], n: 0,
+            };
+            tpsl[t].n++;
+            // Recent trade's TP/SL settings win (most current)
+            if (p.target_profit) tpsl[t].tp_pct = p.target_profit;
+            if (p.stop_loss) tpsl[t].sl_pct = p.stop_loss;
+            const cr = (p.close_reason || '').toUpperCase();
+            const entry = Number(p.entry_price) || 0;
+            const exit = Number(p.exit_price) || 0;
+            const move = entry ? ((exit - entry) / entry * 100) : 0;
+            if (cr.includes('TAKE PROFIT')) {
+                tpsl[t].tp_fires++;
+                tpsl[t].tp_moves.push(move);
+            } else if (cr.includes('STOP LOSS')) {
+                tpsl[t].sl_fires++;
+                tpsl[t].sl_moves.push(move);
+            } else {
+                tpsl[t].other_closes++;
+            }
+        });
+
+        // Build sensitivity findings from scenarios.let_run + free_roll
+        const lrByPlay = {};
+        ((DATA.scenarios || {}).let_run_simulation || {}).by_play?.forEach(r => lrByPlay[r.play] = r);
+        const frByPlay = {};
+        ((DATA.scenarios || {}).free_roll_simulation || {}).by_play?.forEach(r => frByPlay[r.play] = r);
+
+        let thtml = '<p class="st">Each play\'s current take-profit + stop-loss % plus evidence of whether that\'s right. If TP fires too often or SL fires too often, the threshold is wrong.</p>';
+        thtml += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));gap:14px">';
+        Object.entries(tpsl).forEach(([play, d]) => {
+            const tpFireRate = d.n ? (100 * d.tp_fires / d.n).toFixed(0) : 0;
+            const slFireRate = d.n ? (100 * d.sl_fires / d.n).toFixed(0) : 0;
+            const avgTPMove = d.tp_moves.length ? (d.tp_moves.reduce((a,b)=>a+b,0) / d.tp_moves.length).toFixed(1) : null;
+            const maxTPMove = d.tp_moves.length ? Math.max(...d.tp_moves).toFixed(1) : null;
+            const avgSLMove = d.sl_moves.length ? (d.sl_moves.reduce((a,b)=>a+b,0) / d.sl_moves.length).toFixed(1) : null;
+
+            // Verdict logic
+            let verdict = "Looks fine";
+            let verdictColor = "#22c55e";
+            let reasoning = "";
+            const lr = lrByPlay[play];
+            const fr = frByPlay[play];
+            if (lr && lr.delta > 100) {
+                verdict = "TP TOO TIGHT";
+                verdictColor = "#f59e0b";
+                reasoning = `Let Run sim shows +$${lr.delta.toFixed(0)} more if held to resolution. Consider widening TP.`;
+            } else if (lr && lr.delta < -100) {
+                verdict = "TP CORRECT";
+                verdictColor = "#3b82f6";
+                reasoning = `Letting trades run would LOSE an extra $${Math.abs(lr.delta).toFixed(0)}. TP is saving money here.`;
+            }
+            if (slFireRate > 30) {
+                verdict = "SL TOO TIGHT";
+                verdictColor = "#ef4444";
+                reasoning = `SL firing on ${slFireRate}% of trades. Noise, not signal. Widen it.`;
+            }
+            if (fr && fr.delta > 100) {
+                if (verdict === "Looks fine") verdict = "TRY FREE-ROLL";
+                verdictColor = "#a855f7";
+                reasoning = `Free-Roll (bank at TP, let rest ride) = +$${fr.delta.toFixed(0)} better than current. Already live on new trades.`;
+            }
+
+            thtml += `<div style="background:#1e293b;border:1px solid #334155;border-left:4px solid ${verdictColor};border-radius:12px;padding:16px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                    <div style="font-size:16px;font-weight:800;color:#f1f5f9">${escapeHtml(play)}</div>
+                    <span style="font-size:11px;padding:3px 9px;border-radius:6px;background:${verdictColor}22;color:${verdictColor};border:1px solid ${verdictColor};font-weight:700">${verdict}</span>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+                    <div style="padding:10px;background:#0f172a;border-radius:8px;border:1px solid #334155">
+                        <div class="sl" style="margin:0 0 4px">TAKE PROFIT</div>
+                        <div style="font-size:22px;font-weight:900;color:#22c55e">${d.tp_pct || '?'}%</div>
+                        <div class="sl" style="margin:6px 0 0;font-size:10px">Fires on ${tpFireRate}% of trades${avgTPMove!==null?` · avg ${avgTPMove}pp${maxTPMove?' · max '+maxTPMove+'pp':''}`:''}</div>
+                    </div>
+                    <div style="padding:10px;background:#0f172a;border-radius:8px;border:1px solid #334155">
+                        <div class="sl" style="margin:0 0 4px">STOP LOSS</div>
+                        <div style="font-size:22px;font-weight:900;color:#ef4444">${d.sl_pct || '?'}%</div>
+                        <div class="sl" style="margin:6px 0 0;font-size:10px">Fires on ${slFireRate}% of trades${avgSLMove!==null?` · avg ${avgSLMove}pp`:''}</div>
+                    </div>
+                </div>
+                <div class="st" style="margin:0;font-size:13px;line-height:1.5"><strong style="color:${verdictColor}">Reading:</strong> ${escapeHtml(reasoning || 'Current thresholds look consistent with historical performance.')}</div>
+            </div>`;
+        });
+        thtml += '</div>';
+        thtml += `<div class="st" style="margin-top:14px;font-size:12px;padding:10px 14px;background:#0f172a;border-radius:8px;border-left:3px solid #3b82f6">
+            <strong style="color:#3b82f6">How to read:</strong> If <strong>TP TOO TIGHT</strong> → raise the threshold (money left on table). If <strong>SL TOO TIGHT</strong> → widen it (noise kills trades). If <strong>TRY FREE-ROLL</strong> → enable Free-Roll variant which is already live on new trades. <strong>TP CORRECT</strong> means the rule is saving you from letting losers ride.
+        </div>`;
+        tpslEl.innerHTML = thtml;
+    }
+
+    // --- Pulse: recent 24h performance per play - shows WHAT'S WORKING NOW ---
     const pulseEl = document.getElementById('pulse-alert');
     if (pulseEl) {
         const now = Date.now();
@@ -899,7 +1005,7 @@ function renderOverview() {
         }
     }
 
-    // Simulation headline comparison — baseline vs each what-if scenario
+    // Simulation headline comparison - baseline vs each what-if scenario
     const simEl = document.getElementById('sim-comparison');
     if (simEl) {
         const scen = (DATA && DATA.scenarios) || {};
@@ -929,7 +1035,7 @@ function renderOverview() {
             const cls = r.total >= 0 ? 'up' : 'dn';
             const delta = (r.delta == null) ? 0 : r.delta;
             const dCls = delta > 0 ? 'up' : (delta < 0 ? 'dn' : 'fl');
-            const dStr = r.label === 'ACTUAL' ? '—' : (delta >= 0 ? '+' : '') + '$' + delta.toFixed(0);
+            const dStr = r.label === 'ACTUAL' ? '-' : (delta >= 0 ? '+' : '') + '$' + delta.toFixed(0);
             html += `<tr>
                 <td><strong>${escapeHtml(r.label)}</strong></td>
                 <td class="${cls}"><strong>${r.total >= 0 ? '+' : ''}$${r.total.toFixed(0)}</strong></td>
@@ -956,8 +1062,8 @@ function renderOverview() {
         const roi = s.staked > 0 ? (net / s.staked * 100) : 0;
         const settingInfo = (settings.plays && settings.plays[t]) || {};
         const enabled = settingInfo.enabled !== false;
-        const tp = settingInfo.take_profit_pct != null ? settingInfo.take_profit_pct + '%' : '—';
-        const sl = settingInfo.stop_loss_pct != null ? settingInfo.stop_loss_pct + '%' : '—';
+        const tp = settingInfo.take_profit_pct != null ? settingInfo.take_profit_pct + '%' : '-';
+        const sl = settingInfo.stop_loss_pct != null ? settingInfo.stop_loss_pct + '%' : '-';
 
         // Free-roll variant: lookup simulation data for this play
         const freeRollCfg = (DATA.settings && DATA.settings.free_roll) || {};
@@ -1004,7 +1110,7 @@ function renderOverview() {
             </div>`;
         }
 
-        // Let-Run sibling card — no TP, no SL, hold to resolution
+        // Let-Run sibling card - no TP, no SL, hold to resolution
         const lrSim = ((DATA.scenarios && DATA.scenarios.let_run_simulation
                         && DATA.scenarios.let_run_simulation.by_play) || []).find(x => x.play === t);
         if (lrSim) {
@@ -1099,7 +1205,7 @@ function renderPlaysDetail() {
                 <strong>Skip:</strong> "Between X and Y" range markets`;
         } else if (t === 'BIG_MOVER') {
             rules = `<strong>Entry:</strong> >${cfg.min_change_pct || 20}% 24h move, min $${(cfg.min_volume || 500000).toLocaleString()} volume<br>
-                <strong>Direction:</strong> momentum — ride the move<br>
+                <strong>Direction:</strong> momentum - ride the move<br>
                 <strong>Take profit:</strong> +${cfg.take_profit_pct || 5}%<br>
                 <strong>Stop loss:</strong> -${cfg.stop_loss_pct || 15}%<br>
                 <strong>Skip:</strong> Sports, crypto, price >85% or <15%`;
@@ -1262,19 +1368,19 @@ function renderPositions() {
         const pmUrl = p.slug ? `https://polymarket.com/market/${p.slug}` : null;
         const opened = fmtDateWithRel(p.opened);
         const closed = fmtDateWithRel(p.closed);
-        const stopLoss = p.stop_loss != null ? `${p.stop_loss}%` : '—';
-        const takeProfit = p.target_profit != null ? `${p.target_profit}%` : '—';
-        const endDate = p.end_date || '—';
-        const autoReason = p.auto_reason || '—';
-        const closeReason = p.close_reason || (p.status === 'closed' ? 'resolved' : '—');
+        const stopLoss = p.stop_loss != null ? `${p.stop_loss}%` : '-';
+        const takeProfit = p.target_profit != null ? `${p.target_profit}%` : '-';
+        const endDate = p.end_date || '-';
+        const autoReason = p.auto_reason || '-';
+        const closeReason = p.close_reason || (p.status === 'closed' ? 'resolved' : '-');
         const shares = p.shares || 0;
         const stake = p.stake || 0;
-        const bankedInfo = p.free_roll_banked ? `<div><div class="st">Free-Roll Banked</div><div style="color:#a855f7;font-weight:700">@ ${(p.free_roll_banked_price*100).toFixed(1)}¢ on ${fmtDate(p.free_roll_banked_at)} — locked $${p.free_roll_locked_profit || 0}, ${p.free_roll_shares_remaining || 0} shares ride on</div></div>` : '';
+        const bankedInfo = p.free_roll_banked ? `<div><div class="st">Free-Roll Banked</div><div style="color:#a855f7;font-weight:700">@ ${(p.free_roll_banked_price*100).toFixed(1)}¢ on ${fmtDate(p.free_roll_banked_at)} - locked $${p.free_roll_locked_profit || 0}, ${p.free_roll_shares_remaining || 0} shares ride on</div></div>` : '';
 
         let detail = `<div style="padding:14px 20px;background:#050810;border-left:3px solid #00ff88">
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;font-size:13px">
                 <div><div class="st">Market</div><div><strong>${escapeHtml(p.question)}</strong></div></div>
-                <div><div class="st">Polymarket</div>${pmUrl ? `<a href="${pmUrl}" target="_blank">Open market →</a>` : p.slug || '—'}</div>
+                <div><div class="st">Polymarket</div>${pmUrl ? `<a href="${pmUrl}" target="_blank">Open market →</a>` : p.slug || '-'}</div>
                 <div><div class="st">Opened</div><div>${opened}</div></div>
                 <div><div class="st">${p.status==='closed'?'Closed':'Expires'}</div><div>${p.status==='closed'?closed:endDate}</div></div>
                 <div><div class="st">Stake / Shares</div><div><strong>$${stake}</strong> &bull; ${shares} shares</div></div>
@@ -1283,12 +1389,12 @@ function renderPositions() {
                 <div style="grid-column:1/-1"><div class="st">Entry Logic</div><div style="color:#e2e8f0;font-weight:500">${escapeHtml(autoReason)}</div></div>
                 ${p.status==='closed' ? `<div style="grid-column:1/-1"><div class="st">Close Reason</div><div style="color:#e2e8f0;font-weight:500">${escapeHtml(closeReason)}</div></div>`:''}`;
 
-        // News edge extras — triggering headlines (always show for NEWS_EDGE, not just open)
+        // News edge extras - triggering headlines (always show for NEWS_EDGE, not just open)
         const alerts = alertsBySlug[p.slug] || [];
         if (t === 'NEWS_EDGE' && alerts.length) {
             alerts.sort((a, b) => (b.score||0) - (a.score||0));
             const verb = p.status === 'closed' ? 'Why it ' + (pnlOf(p) > 0 ? 'won' : 'lost') : 'Why we opened it';
-            detail += `<div style="grid-column:1/-1"><div class="st"><strong>${verb}</strong> — triggering headlines (score ≥ ${Math.min(...alerts.map(a=>a.score||0))})</div>`;
+            detail += `<div style="grid-column:1/-1"><div class="st"><strong>${verb}</strong> - triggering headlines (score ≥ ${Math.min(...alerts.map(a=>a.score||0))})</div>`;
             alerts.slice(0, 8).forEach(a => {
                 const kw = (a.keywords || []).join(', ');
                 const src = escapeHtml(a.source || '?');
@@ -1589,12 +1695,12 @@ function renderJourney() {
         {
             date: "Early April (week 14)",
             title: "Chapter 2: Extending the pattern",
-            body: `More Iran trades — US forces entering Iran, ceasefire by mid-April. 2 more wins at +$${nePnl(neApril.filter(p=>p.opened<'2026-04-15')).toFixed(0)}. Overall NEWS_EDGE at 8 wins 0 losses, <strong>+117% ROI</strong>. Research done into Polymarket GitHub ecosystem, 40+ edge strategies catalogued, 9 research files saved. Whale tracker scaffolded.`,
+            body: `More Iran trades - US forces entering Iran, ceasefire by mid-April. 2 more wins at +$${nePnl(neApril.filter(p=>p.opened<'2026-04-15')).toFixed(0)}. Overall NEWS_EDGE at 8 wins 0 losses, <strong>+117% ROI</strong>. Research done into Polymarket GitHub ecosystem, 40+ edge strategies catalogued, 9 research files saved. Whale tracker scaffolded.`,
             colour: '#00ff88',
         },
         {
             date: "April 13-15",
-            title: "Chapter 3: Scaling up — auto-trading live",
+            title: "Chapter 3: Scaling up - auto-trading live",
             body: `Launched full auto-trade on 4 plays: NEWS_EDGE, TIME_DECAY, CRYPTO, BIG_MOVER. Market fetch expanded 200→500 per scan. GDELT added. Stop losses widened from 5% → 15% BIG_MOVER / 8% → 20% TIME_DECAY after sensitivity analysis showed old stops were killing winners ($629 would have been saved with wider SL).`,
             colour: '#60a5fa',
         },
@@ -1607,13 +1713,13 @@ function renderJourney() {
         {
             date: "April 18",
             title: "Chapter 5: Expanded data + automation",
-            body: `Added 15 new RSS feeds (FT, Bloomberg, NYT, Sky, Haaretz, Jerusalem Post, SCMP, Decrypt, The Block, etc. — 30 total). Added <strong>Reddit</strong> (11 subs), <strong>Hacker News</strong> (3 lists), <strong>Bluesky</strong> (12 accounts), <strong>Wikipedia</strong> edit tracking, <strong>Farcaster</strong>. Source weighting: NPR 1.6x, Pentagon 0.3x based on historical accuracy. <strong>Trump Truth Social</strong> via mirror 1.8x weight. <strong>Daily audit</strong> via Claude at 09:00 UK. <strong>Fast-monitor</strong> 60s launchd agent. <strong>Backtest harness</strong> with 11 rule variants (found: excluding Fri+Sat = +$725 vs baseline). Risk metrics + closed-trade autopsy + Deribit options-implied probabilities + hour/day patterns + play correlation + per-play Sharpe. Health watchdog.`,
+            body: `Added 15 new RSS feeds (FT, Bloomberg, NYT, Sky, Haaretz, Jerusalem Post, SCMP, Decrypt, The Block, etc. - 30 total). Added <strong>Reddit</strong> (11 subs), <strong>Hacker News</strong> (3 lists), <strong>Bluesky</strong> (12 accounts), <strong>Wikipedia</strong> edit tracking, <strong>Farcaster</strong>. Source weighting: NPR 1.6x, Pentagon 0.3x based on historical accuracy. <strong>Trump Truth Social</strong> via mirror 1.8x weight. <strong>Daily audit</strong> via Claude at 09:00 UK. <strong>Fast-monitor</strong> 60s launchd agent. <strong>Backtest harness</strong> with 11 rule variants (found: excluding Fri+Sat = +$725 vs baseline). Risk metrics + closed-trade autopsy + Deribit options-implied probabilities + hour/day patterns + play correlation + per-play Sharpe. Health watchdog.`,
             colour: '#60a5fa',
         },
         {
             date: "April 19 (today)",
             title: "Chapter 6: Regression + fix",
-            body: `Noticed <strong>NEWS_EDGE 1W/19L since Apr 17 scope fix</strong>. Diagnosis: algo was bullish on every positive-sounding headline, but Iran peace markets were already saturated and fading. Fix: added <strong>fade rule</strong> — if headline is positive but market is trending down 2%+, bet NO instead. Added 24h Pulse banner at top of Overview for instant "what's working now" read. Built Performance Timeline + this Journey view. Current state: main portfolio +$${pnl.toFixed(0)} (${roi.toFixed(1)}% ROI), ${wins}W/${losses}L. TEMPORAL_ARB emerged as the week's star play (3/3, +$114, 100% WR).`,
+            body: `Noticed <strong>NEWS_EDGE 1W/19L since Apr 17 scope fix</strong>. Diagnosis: algo was bullish on every positive-sounding headline, but Iran peace markets were already saturated and fading. Fix: added <strong>fade rule</strong> - if headline is positive but market is trending down 2%+, bet NO instead. Added 24h Pulse banner at top of Overview for instant "what's working now" read. Built Performance Timeline + this Journey view. Current state: main portfolio +$${pnl.toFixed(0)} (${roi.toFixed(1)}% ROI), ${wins}W/${losses}L. TEMPORAL_ARB emerged as the week's star play (3/3, +$114, 100% WR).`,
             colour: '#ffaa00',
         },
     ];
@@ -1689,7 +1795,7 @@ function renderTimeline() {
         weeks.forEach(wk => {
             const d = row.weeks[wk] || {n:0, pnl:0, wr_pct:0, w:0, l:0};
             if (d.n === 0) {
-                html += '<td class="st" style="margin:0">—</td>';
+                html += '<td class="st" style="margin:0">-</td>';
             } else {
                 const cls = d.pnl > 0 ? 'up' : (d.pnl < 0 ? 'dn' : 'fl');
                 html += `<td class="${cls}"><strong>$${d.pnl>=0?'+':''}${d.pnl.toFixed(0)}</strong><br><span style="font-size:11px;color:#cbd5e1">${d.w}W/${d.l}L · ${d.wr_pct}%</span></td>`;
@@ -1724,12 +1830,12 @@ function renderAudit() {
     const el = document.getElementById('audit-content');
     const a = DATA && DATA.daily_audit;
     if (!a) {
-        el.innerHTML = '<p class="st">No audit yet — runs daily at 09:00 UK. Trigger manually with <code>python3 ~/polyedge/run_daily_audit.py</code>.</p>';
+        el.innerHTML = '<p class="st">No audit yet - runs daily at 09:00 UK. Trigger manually with <code>python3 ~/polyedge/run_daily_audit.py</code>.</p>';
         return;
     }
     let html = `<div style="background:#0a1020;border-left:4px solid #60a5fa;border-radius:8px;padding:14px 18px;margin-bottom:20px">
         <div class="st" style="margin:0;color:#60a5fa;font-weight:700">Generated ${fmtDate(a.generated_at)} · ${fmtDate(a.generated_at, {rel:true})}</div>
-        <div style="margin-top:8px;font-size:15px;color:#f1f5f9;line-height:1.6;font-weight:500">${escapeHtml(a.health_summary || '—')}</div>
+        <div style="margin-top:8px;font-size:15px;color:#f1f5f9;line-height:1.6;font-weight:500">${escapeHtml(a.health_summary || '-')}</div>
     </div>`;
 
     if (a.error) {
@@ -1801,7 +1907,7 @@ function renderIdeas() {
         rank, tier, title, evidence, action, color: colorHex,
     });
 
-    // 1. TOP PLAYS — by ROI on closed
+    // 1. TOP PLAYS - by ROI on closed
     const playRows = [];
     Object.keys(stats).forEach(t => {
         const s = stats[t];
@@ -1836,7 +1942,7 @@ function renderIdeas() {
         if (bestFr && bestFr.delta > 50) {
             ideas.push(makeIdea(ideas.length + 1, 'SIMULATION', `Free-Roll is the upgrade for ${bestFr.play}`,
                 `If we'd banked at +${bestFr.bank_threshold_pct}% and let the rest ride, +$${bestFr.delta.toFixed(0)} more across ${bestFr.banked_trades} banked trades.`,
-                `Free-Roll is already LIVE — the delta will materialise on new trades automatically. No action needed, monitor impact over 1-2 weeks.`,
+                `Free-Roll is already LIVE - the delta will materialise on new trades automatically. No action needed, monitor impact over 1-2 weeks.`,
                 '#b066ff'));
         }
     }
@@ -1877,7 +1983,7 @@ function renderIdeas() {
         });
     }
 
-    // 5. TOP TOPIC — concentrate on the winning theme
+    // 5. TOP TOPIC - concentrate on the winning theme
     if (patterns.by_topic && patterns.by_topic.length) {
         const topTopic = patterns.by_topic[0];
         if (topTopic.net_sim_pnl > 500) {
@@ -1888,26 +1994,26 @@ function renderIdeas() {
         }
     }
 
-    // 6. LAB feedback — if lab is outperforming, promote concepts
+    // 6. LAB feedback - if lab is outperforming, promote concepts
     const labPos = (DATA.positions || []).filter(p => p.lab && p.exit_price);
     if (labPos.length >= 5) {
         const labStaked = labPos.reduce((s, p) => s + (p.stake || 0), 0);
         const labRet = labPos.reduce((s, p) => s + ((p.shares||0) * (p.exit_price||0)), 0);
         const labRoi = labStaked > 0 ? ((labRet - labStaked) / labStaked * 100) : 0;
         if (labRoi > 5) {
-            ideas.push(makeIdea(ideas.length + 1, 'PROMOTE', `Lab is working — promote to main`,
+            ideas.push(makeIdea(ideas.length + 1, 'PROMOTE', `Lab is working - promote to main`,
                 `${labPos.length} closed lab trades at ${labRoi.toFixed(1)}% ROI. The experiment is producing edge.`,
                 `Promote best lab categories (celebrity / sports contrarian) to main pot with $100 stakes.`,
                 '#00ff88'));
         } else if (labRoi < -5) {
-            ideas.push(makeIdea(ideas.length + 1, 'ARCHIVE', `Lab is leaking — consider closing`,
+            ideas.push(makeIdea(ideas.length + 1, 'ARCHIVE', `Lab is leaking - consider closing`,
                 `${labPos.length} closed trades at ${labRoi.toFixed(1)}% ROI. Confirmed these categories don't produce edge for us.`,
                 `Either raise the lab entry bar (lower min-volume, stricter price range) or cut the lab scanners.`,
                 '#ef4444'));
         }
     }
 
-    // 7. NegRisk — flag current live arbs
+    // 7. NegRisk - flag current live arbs
     if (DATA.neg_risk_arbs && DATA.neg_risk_arbs.length) {
         const top = DATA.neg_risk_arbs[0];
         if (top.edge_pct >= 5) {
@@ -1923,7 +2029,7 @@ function renderIdeas() {
         const strongEdge = DATA.llm_edges.filter(e => Math.abs(e.edge) >= 0.25);
         if (strongEdge.length) {
             ideas.push(makeIdea(ideas.length + 1, 'LLM', `Claude flagged ${strongEdge.length} high-divergence market${strongEdge.length===1?'':'s'}`,
-                `Biggest: ${strongEdge[0].question} — market ${(strongEdge[0].market_price*100).toFixed(0)}¢, Claude estimates ${(strongEdge[0].llm_probability*100).toFixed(0)}¢.`,
+                `Biggest: ${strongEdge[0].question} - market ${(strongEdge[0].market_price*100).toFixed(0)}¢, Claude estimates ${(strongEdge[0].llm_probability*100).toFixed(0)}¢.`,
                 `Check Claude's reasoning under the LLM Edges tab. If it matches your view, size up.`,
                 '#60a5fa'));
         }
@@ -1939,7 +2045,7 @@ function renderIdeas() {
 
     // --- Render ---
     if (!ideas.length) {
-        el.innerHTML = '<p class="st">No strong ideas yet — need more closed trades + scenarios data. Come back after a few days of runtime.</p>';
+        el.innerHTML = '<p class="st">No strong ideas yet - need more closed trades + scenarios data. Come back after a few days of runtime.</p>';
         return;
     }
 
@@ -2024,7 +2130,7 @@ function renderLab() {
     });
     html += '</table>';
 
-    // Position list — expandable
+    // Position list - expandable
     html += '<h3>Lab Positions</h3><p class="st">Click any row to expand.</p>';
     html += '<table><tr><th></th><th>Status</th><th>Type</th><th>Market</th><th>Side</th><th>Entry</th><th>Exit/Now</th><th>P&L</th><th>Opened</th></tr>';
     labPos.sort((a, b) => (a.status === 'open' ? -1 : (b.status === 'open' ? 1 : 0))).forEach((p, i) => {
@@ -2032,7 +2138,7 @@ function renderLab() {
         const statusB = p.status === 'open' ? '<span class="badge b-o">OPEN</span>'
                         : (pnlOf(p) > 0 ? '<span class="badge b-g">WIN</span>' : '<span class="badge b-r">LOSS</span>');
         const pnl = p.status === 'closed' ? pnlOf(p) : 0;
-        const exitP = p.status === 'closed' ? p.exit_price * 100 : '—';
+        const exitP = p.status === 'closed' ? p.exit_price * 100 : '-';
         const rid = 'lab-' + i;
         html += `<tr style="cursor:pointer" onclick="togglePos('${rid}')">
             <td style="width:20px;color:#94a3b8" id="${rid}-caret">▸</td>
@@ -2050,12 +2156,12 @@ function renderLab() {
         const detail = `<div style="padding:12px 20px;background:#050810;border-left:3px solid #ffaa00">
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;font-size:13px">
                 <div><div class="st">Market</div><div><strong>${escapeHtml(p.question||'')}</strong></div></div>
-                <div><div class="st">Polymarket</div>${pmUrl ? `<a href="${pmUrl}" target="_blank">Open market →</a>` : '—'}</div>
+                <div><div class="st">Polymarket</div>${pmUrl ? `<a href="${pmUrl}" target="_blank">Open market →</a>` : '-'}</div>
                 <div><div class="st">Opened</div><div>${fmtDateWithRel(p.opened)}</div></div>
-                <div><div class="st">${p.status==='closed'?'Closed':'Expires'}</div><div>${p.status==='closed'?fmtDateWithRel(p.closed):p.end_date||'—'}</div></div>
+                <div><div class="st">${p.status==='closed'?'Closed':'Expires'}</div><div>${p.status==='closed'?fmtDateWithRel(p.closed):p.end_date||'-'}</div></div>
                 <div><div class="st">Stake / Shares</div><div><strong>$${p.stake||0}</strong> · ${p.shares||0} shares</div></div>
-                <div><div class="st">Take Profit / Stop Loss</div><div><strong>${p.target_profit||'—'}% / ${p.stop_loss||'—'}%</strong></div></div>
-                <div style="grid-column:1/-1"><div class="st">Entry Logic</div><div>${escapeHtml(p.auto_reason||'—')}</div></div>
+                <div><div class="st">Take Profit / Stop Loss</div><div><strong>${p.target_profit||'-'}% / ${p.stop_loss||'-'}%</strong></div></div>
+                <div style="grid-column:1/-1"><div class="st">Entry Logic</div><div>${escapeHtml(p.auto_reason||'-')}</div></div>
                 ${p.status==='closed' ? `<div style="grid-column:1/-1"><div class="st">Close Reason</div><div>${escapeHtml(p.close_reason||'resolved')}</div></div>`:''}
             </div>
         </div>`;
@@ -2090,9 +2196,9 @@ function renderLLMEdges() {
         const url = e.slug ? 'https://polymarket.com/market/' + e.slug : '';
         const detail = `<div style="padding:12px 20px;background:#050810;border-left:3px solid #00d4ff">
             <div class="st" style="margin-bottom:6px">LLM reasoning:</div>
-            <div style="color:#d1d5db;margin-bottom:10px">${escapeHtml(e.reasoning || '—')}</div>
+            <div style="color:#d1d5db;margin-bottom:10px">${escapeHtml(e.reasoning || '-')}</div>
             ${url ? `<a href="${url}" target="_blank">→ Open market on Polymarket</a>` : ''}
-            <div class="st" style="margin-top:8px">Estimated ${e.estimated_at ? fmtDate(e.estimated_at) : '—'}</div>
+            <div class="st" style="margin-top:8px">Estimated ${e.estimated_at ? fmtDate(e.estimated_at) : '-'}</div>
         </div>`;
         html += `<tr id="${rid}-detail" style="display:none"><td colspan="7" style="padding:0">${detail}</td></tr>`;
     });
@@ -2120,13 +2226,13 @@ function renderWhales() {
         html += '<table><tr><th>Rank</th><th>Wallet</th><th>Trader</th><th>Trades</th><th>Total Notional</th><th>Avg Trade</th><th>Markets</th><th>Last Seen</th></tr>';
         top.forEach((wl, i) => {
             const addr = wl.wallet || '';
-            const short = addr ? addr.slice(0,6) + '...' + addr.slice(-4) : '—';
+            const short = addr ? addr.slice(0,6) + '...' + addr.slice(-4) : '-';
             const polyProf = addr ? 'https://polymarket.com/profile/' + addr : '';
-            const last = wl.last_seen ? fmtDate(wl.last_seen, {rel:true}) : '—';
+            const last = wl.last_seen ? fmtDate(wl.last_seen, {rel:true}) : '-';
             html += `<tr>
                 <td>${i+1}</td>
                 <td>${polyProf ? `<a href="${polyProf}" target="_blank">${short}</a>` : short}</td>
-                <td>${escapeHtml(wl.name || '—')}</td>
+                <td>${escapeHtml(wl.name || '-')}</td>
                 <td>${wl.trades}</td>
                 <td><strong>$${wl.total_notional.toLocaleString()}</strong></td>
                 <td>$${wl.avg_notional.toLocaleString()}</td>
@@ -2143,7 +2249,7 @@ function renderWhales() {
     } else {
         html += '<table><tr><th>Time</th><th>Notional</th><th>Side</th><th>Price</th><th>Trader</th><th>Market</th></tr>';
         latest.forEach(t => {
-            const when = t.ts_iso ? fmtDate(t.ts_iso, {rel:true}) : '—';
+            const when = t.ts_iso ? fmtDate(t.ts_iso, {rel:true}) : '-';
             const sideBadge = t.side === 'BUY' ? 'b-g' : 'b-n';
             const url = t.slug ? 'https://polymarket.com/market/' + t.slug : '';
             html += `<tr>
@@ -2151,7 +2257,7 @@ function renderWhales() {
                 <td><strong>$${t.notional.toLocaleString()}</strong></td>
                 <td><span class="badge ${sideBadge}">${t.side} ${t.outcome || ''}</span></td>
                 <td>${(t.price * 100).toFixed(1)}¢</td>
-                <td>${escapeHtml(t.name || '—')}</td>
+                <td>${escapeHtml(t.name || '-')}</td>
                 <td>${url ? `<a href="${url}" target="_blank">${escapeHtml((t.title||'').substring(0,55))}</a>` : escapeHtml((t.title||'').substring(0,55))}</td>
             </tr>`;
         });
@@ -2191,7 +2297,7 @@ function renderNegRisk() {
                 <td>${escapeHtml(o.question)}</td>
                 <td>${o.yes_price}</td>
                 <td>$${(o.volume_24h || 0).toLocaleString()}</td>
-                <td>${url ? `<a href="${url}" target="_blank">open</a>` : '—'}</td>
+                <td>${url ? `<a href="${url}" target="_blank">open</a>` : '-'}</td>
             </tr>`;
         });
         detail += '</table>';
@@ -2219,7 +2325,7 @@ function renderNewsLag() {
     let html = `<p class="st">Showing the most recent ${recent.length} alerts from this scan window. Each row: when the headline was published, when PolyEdge saw it, the matched market and the Polymarket price at the moment of match.</p>`;
     html += '<table><tr><th>Published</th><th>Source</th><th>Headline</th><th>Matched Markets</th></tr>';
     recent.forEach(a => {
-        const pub = a.published ? fmtDate(a.published) : '—';
+        const pub = a.published ? fmtDate(a.published) : '-';
         const src = escapeHtml(a.source || '?');
         const hl = escapeHtml(a.headline || '');
         const lnk = a.link ? `<a href="${a.link}" target="_blank">${hl}</a>` : hl;
@@ -2235,7 +2341,7 @@ function renderNewsLag() {
         </tr>`;
     });
     html += '</table>';
-    html += `<p class="st" style="margin-top:16px">Full append-only log: <code>~/polyedge/data/news_timing.jsonl</code> — every match captured with published time, seen time, and Polymarket price snapshot. Use this for lag analysis: did PolyEdge beat the market move?</p>`;
+    html += `<p class="st" style="margin-top:16px">Full append-only log: <code>~/polyedge/data/news_timing.jsonl</code> - every match captured with published time, seen time, and Polymarket price snapshot. Use this for lag analysis: did PolyEdge beat the market move?</p>`;
     el.innerHTML = html;
 }
 
@@ -2256,7 +2362,7 @@ function renderBacktest() {
         html += `<tr${isBase ? ' style="background:#0a1020"' : ''}>
             <td><strong>${escapeHtml(r.name)}</strong></td>
             <td class="${pnlCls}"><strong>$${r.pnl>=0?'+':''}${r.pnl.toFixed(0)}</strong></td>
-            <td class="${dCls}"><strong>${isBase ? '—' : (r.delta_vs_baseline>=0?'+':'') + '$' + r.delta_vs_baseline.toFixed(0)}</strong></td>
+            <td class="${dCls}"><strong>${isBase ? '-' : (r.delta_vs_baseline>=0?'+':'') + '$' + r.delta_vs_baseline.toFixed(0)}</strong></td>
             <td class="${r.roi_pct>=0?'bl':'dn'}">${r.roi_pct>=0?'+':''}${r.roi_pct.toFixed(2)}%</td>
             <td>${r.win_rate_pct}%</td>
             <td>${r.trades}</td>
@@ -2289,9 +2395,9 @@ function renderJustMissed() {
         rows.forEach(r => {
             const pnl = r.sim_pnl_if_traded;
             const pnlCls = pnl == null ? 'gy' : (pnl > 0 ? 'up' : 'dn');
-            const pnlTxt = pnl == null ? '—' : `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}`;
-            const entryTxt = r.price_at_alert != null ? r.price_at_alert.toFixed(2) : '—';
-            const nowTxt = r.current_price != null ? r.current_price.toFixed(3) : '—';
+            const pnlTxt = pnl == null ? '-' : `${pnl >= 0 ? '+' : ''}$${pnl.toFixed(2)}`;
+            const entryTxt = r.price_at_alert != null ? r.price_at_alert.toFixed(2) : '-';
+            const nowTxt = r.current_price != null ? r.current_price.toFixed(3) : '-';
             const hlText = r.headline || '';
             const hlLinked = r.link ? `<a href="${r.link}" target="_blank">${escapeHtml(hlText)}</a>` : escapeHtml(hlText);
             const pmUrl = r.slug ? 'https://polymarket.com/market/' + r.slug : '';
@@ -2314,10 +2420,10 @@ function renderJustMissed() {
     html += renderSection('Converged but untraded (watchlist or price-range filter blocked)', jm.just_missed_diff_market, '#ffaa00');
     html += renderSection('Would have lost badly (looser rules = bleed)', jm.would_have_lost, '#ef4444');
 
-    // Pattern analysis — who's right, what's reliable
+    // Pattern analysis - who's right, what's reliable
     const p = jm.patterns || {};
     if (p.by_source && p.by_source.length) {
-        html += '<h3 style="border-left:3px solid #00d4ff;padding-left:10px;margin-top:24px">Patterns — by News Source</h3>';
+        html += '<h3 style="border-left:3px solid #00d4ff;padding-left:10px;margin-top:24px">Patterns - by News Source</h3>';
         html += '<p class="st">Which sources drove winning vs losing calls. Green = trustworthy signal. Red = noise/whiplash.</p>';
         html += '<table><tr><th>Source</th><th>Total</th><th>Winners</th><th>Losers</th><th>Flat</th><th>Accuracy</th><th>Net Sim P&L</th><th>Max Score</th></tr>';
         p.by_source.forEach(s => {
@@ -2338,7 +2444,7 @@ function renderJustMissed() {
     }
 
     if (p.by_topic && p.by_topic.length) {
-        html += '<h3 style="border-left:3px solid #00d4ff;padding-left:10px;margin-top:24px">Patterns — by Topic</h3>';
+        html += '<h3 style="border-left:3px solid #00d4ff;padding-left:10px;margin-top:24px">Patterns - by Topic</h3>';
         html += '<p class="st">Which topic clusters produced wins vs losses.</p>';
         html += '<table><tr><th>Topic</th><th>Total</th><th>Winners</th><th>Losers</th><th>Flat</th><th>Accuracy</th><th>Net Sim P&L</th></tr>';
         p.by_topic.forEach(s => {
@@ -2381,10 +2487,10 @@ function renderWhatIf() {
 
     // Headline scenarios
     html += '<table><tr><th>Scenario</th><th>Total P&amp;L</th><th>Δ vs Baseline</th><th>Description</th></tr>';
-    html += `<tr><td><strong>Baseline</strong> (as traded)</td><td class="${clr(bTotal)}">${fmt$(bTotal)}</td><td>—</td><td>${s.baseline.desc}</td></tr>`;
+    html += `<tr><td><strong>Baseline</strong> (as traded)</td><td class="${clr(bTotal)}">${fmt$(bTotal)}</td><td>-</td><td>${s.baseline.desc}</td></tr>`;
     html += `<tr><td><strong>A:</strong> ${s.scenario_A.label}</td><td class="${clr(s.scenario_A.total)}">${fmt$(s.scenario_A.total)}</td><td>${fmtD(s.scenario_A.total, bTotal)}</td><td>${s.scenario_A.desc}<br><span class="st">Removed ${s.scenario_A.removed_trades} historical trades worth ${fmt$(s.scenario_A.removed_pnl)}</span></td></tr>`;
     html += `<tr><td><strong>B:</strong> ${s.scenario_B.label}</td><td class="${clr(s.scenario_B.total)}">${fmt$(s.scenario_B.total)}</td><td>${fmtD(s.scenario_B.total, bTotal)}</td><td>${s.scenario_B.desc}<br><span class="st">${s.scenario_B.recoveries} SL hits that would have recovered</span></td></tr>`;
-    html += `<tr><td><strong>C:</strong> ${s.scenario_C.label}</td><td class="${clr(s.scenario_C.total)}">${fmt$(s.scenario_C.total)}</td><td>${fmtD(s.scenario_C.total, bTotal)}</td><td>A and B combined — the "we applied all lessons from day 1" case.</td></tr>`;
+    html += `<tr><td><strong>C:</strong> ${s.scenario_C.label}</td><td class="${clr(s.scenario_C.total)}">${fmt$(s.scenario_C.total)}</td><td>${fmtD(s.scenario_C.total, bTotal)}</td><td>A and B combined - the "we applied all lessons from day 1" case.</td></tr>`;
     html += '</table>';
 
     // BIG_MOVER bucket breakdown
@@ -2401,7 +2507,7 @@ function renderWhatIf() {
 
     // SL counterfactual detail
     if (s.scenario_B.top_recoveries && s.scenario_B.top_recoveries.length) {
-        html += '<h3>Stop-Loss Counterfactuals — trades killed by old tight stops</h3>';
+        html += '<h3>Stop-Loss Counterfactuals - trades killed by old tight stops</h3>';
         html += '<p class="st">Each row: a trade that was stopped out under the old 5%/8% stops. "Now" is live Polymarket price. "Hold" is what you&apos;d have if you&apos;d held. Δ is the cost of the tight stop.</p>';
         html += '<table><tr><th>Play</th><th>Side</th><th>Entry</th><th>SL Exit</th><th>Now</th><th>State</th><th>Actual</th><th>Hold</th><th>Δ</th><th>Market</th></tr>';
         for (const r of s.scenario_B.top_recoveries) {
@@ -2665,10 +2771,10 @@ function renderWhatIf() {
 
     html += '<h3>Forward Rule Changes (applied, not retroactive)</h3>';
     html += '<ul>';
-    html += '<li><strong>Apr 15:</strong> Stop losses widened — BIG_MOVER/CRYPTO/NEWS 5% → 15%, TIME_DECAY 8% → 20%. Applies to new trades only.</li>';
+    html += '<li><strong>Apr 15:</strong> Stop losses widened - BIG_MOVER/CRYPTO/NEWS 5% → 15%, TIME_DECAY 8% → 20%. Applies to new trades only.</li>';
     html += '<li><strong>Apr 17:</strong> Sports filter consolidated (one <code>SPORTS_EXCLUDE</code> list, 80+ keywords) and applied to all 4 trade paths including NEWS_EDGE which had none.</li>';
-    html += '<li><strong>Apr 17:</strong> NEWS_EDGE scope fix — paper trades now open on any converged news match, not just watchlist. First re-scan opened 2 new Iran trades after 19-day silence.</li>';
-    html += '<li><strong>Apr 17:</strong> BIG_MOVER surgical — excludes Iran/Israel/Lebanon/Peru/Venezuela markets and moves over 40%. Working buckets (Musk tweets, oil, token launches, Hungarian elections, crypto) kept.</li>';
+    html += '<li><strong>Apr 17:</strong> NEWS_EDGE scope fix - paper trades now open on any converged news match, not just watchlist. First re-scan opened 2 new Iran trades after 19-day silence.</li>';
+    html += '<li><strong>Apr 17:</strong> BIG_MOVER surgical - excludes Iran/Israel/Lebanon/Peru/Venezuela markets and moves over 40%. Working buckets (Musk tweets, oil, token launches, Hungarian elections, crypto) kept.</li>';
     html += '</ul>';
 
     el.innerHTML = html;
