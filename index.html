@@ -150,6 +150,8 @@ tr:hover{background:#111827}
 <h2>The Plays — Live P&L by Type</h2>
 <div class="plays-grid" id="plays-overview"></div>
 
+<div id="pulse-alert" style="margin:16px 0"></div>
+
 <details style="margin:16px 0;padding:10px 14px;background:#0a1020;border-left:3px solid #60a5fa;border-radius:6px">
 <summary style="cursor:pointer;color:#60a5fa;font-weight:700;font-size:14px">ℹ️ How the numbers work (click to expand)</summary>
 <div class="st" style="margin-top:10px;color:#e2e8f0;font-weight:500">
@@ -473,6 +475,59 @@ function renderOverview() {
     setF('f-wins', wins);
     setF('f-losses', losses, 'rd');
     setF('f-open', openCount + ' ($' + openStake.toLocaleString() + ')', 'or');
+
+    // --- Pulse: recent 24h performance per play — shows WHAT'S WORKING NOW ---
+    const pulseEl = document.getElementById('pulse-alert');
+    if (pulseEl) {
+        const now = Date.now();
+        const dayAgo = now - 24 * 3600 * 1000;
+        const recentByPlay = {};
+        (DATA.positions || []).filter(p => !p.lab && p.exit_price && p.closed).forEach(p => {
+            const t = new Date(p.closed).getTime();
+            if (t < dayAgo) return;
+            const play = p.trade_type || '?';
+            if (!recentByPlay[play]) recentByPlay[play] = {n:0, w:0, pnl:0};
+            recentByPlay[play].n++;
+            const pnl = (Number(p.shares)||0) * Number(p.exit_price) - Number(p.stake||0);
+            recentByPlay[play].pnl += pnl;
+            if (pnl > 0) recentByPlay[play].w++;
+        });
+
+        const entries = Object.entries(recentByPlay).sort((a, b) => b[1].pnl - a[1].pnl);
+        if (entries.length) {
+            const total24 = entries.reduce((s, [,v]) => s + v.pnl, 0);
+            const totalClass = total24 >= 0 ? 'gr' : 'rd';
+            let pulseHtml = `<div style="background:#0a1020;border-left:4px solid ${total24>=0?'#00ff88':'#ef4444'};border-radius:8px;padding:14px 18px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                    <div style="font-size:14px;font-weight:800;letter-spacing:1px;color:#f1f5f9">⚡ LAST 24H PULSE</div>
+                    <div style="font-size:22px;font-weight:900;color:${total24>=0?'#00ff88':'#ef4444'}">$${total24>=0?'+':''}${total24.toFixed(0)}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px">`;
+            entries.forEach(([play, v]) => {
+                const wr = 100 * v.w / v.n;
+                const pnlCls = v.pnl >= 0 ? '#00ff88' : '#ef4444';
+                const wrCls = wr >= 60 ? '#00ff88' : (wr < 40 ? '#ef4444' : '#cbd5e1');
+                pulseHtml += `<div style="padding:8px 10px;background:#111827;border-radius:6px;border:1px solid #1e293b">
+                    <div style="font-size:12px;font-weight:700;color:#cbd5e1">${escapeHtml(play)}</div>
+                    <div style="font-size:18px;font-weight:900;color:${pnlCls};margin-top:3px">$${v.pnl>=0?'+':''}${v.pnl.toFixed(0)}</div>
+                    <div style="font-size:11px;color:#cbd5e1;margin-top:2px">${v.w}W/${v.n-v.w}L · <span style="color:${wrCls};font-weight:700">${wr.toFixed(0)}% WR</span></div>
+                </div>`;
+            });
+            pulseHtml += '</div>';
+
+            // Verdict line
+            const winners = entries.filter(([,v]) => v.pnl > 0 && v.n >= 3);
+            const losers = entries.filter(([,v]) => v.pnl < 0 && v.n >= 3);
+            if (winners.length || losers.length) {
+                pulseHtml += '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #334155;font-size:13px;color:#e2e8f0;line-height:1.6">';
+                if (winners.length) pulseHtml += `<strong style="color:#00ff88">Working:</strong> ${winners.map(([p])=>p).join(', ')}. `;
+                if (losers.length) pulseHtml += `<strong style="color:#ef4444">Not working:</strong> ${losers.map(([p])=>p).join(', ')}.`;
+                pulseHtml += '</div>';
+            }
+            pulseHtml += '</div>';
+            pulseEl.innerHTML = pulseHtml;
+        }
+    }
 
     // Simulation headline comparison — baseline vs each what-if scenario
     const simEl = document.getElementById('sim-comparison');
