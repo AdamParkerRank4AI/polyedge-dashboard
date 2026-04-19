@@ -114,6 +114,8 @@ tr:hover td{background:#0f172a}
 <a class="nl" onclick="showPage('positions')">Positions</a>
 <span class="nav-divider"></span>
 <a class="nl" onclick="showPage('journey')">Journey</a>
+<a class="nl" onclick="showPage('changes')">Rule Changes</a>
+<a class="nl" onclick="showPage('golive')">Go Live</a>
 <a class="nl" onclick="showPage('timeline')">Timeline</a>
 <a class="nl" onclick="showPage('audit')">Daily Audit</a>
 <a class="nl" onclick="showPage('ideas')">Ideas</a>
@@ -293,6 +295,20 @@ tr:hover td{background:#0f172a}
 <h2>The Journey - March to Now</h2>
 <p class="st">Chronological narrative: what worked, what we changed, what we added, why.</p>
 <div id="journey-content" class="loading">Loading...</div>
+</div>
+
+<!-- RULE CHANGES A/B -->
+<div id="page-changes" class="page">
+<h2>Rule Changes — Before / After</h2>
+<p class="st">Every rule change, simulated against historical trades. Shows what would have happened WITH the change vs WITHOUT. Lets us validate changes against 2-3 weeks of real data instead of waiting for new trades.</p>
+<div id="changes-content" class="loading">Loading...</div>
+</div>
+
+<!-- GO LIVE READINESS -->
+<div id="page-golive" class="page">
+<h2>Go-Live Confidence</h2>
+<p class="st">Per-play readiness score. Green = commit full size. Amber = small/half-size. Red = park. Based on evidence, sample size, recent performance, and how well the rule is validated.</p>
+<div id="golive-content" class="loading">Loading...</div>
 </div>
 
 <!-- TIMELINE -->
@@ -1788,6 +1804,129 @@ function renderMarkets() {
     el.innerHTML = html;
 }
 
+function renderRuleChanges() {
+    const el = document.getElementById('changes-content');
+    const rc = DATA && DATA.rule_changes;
+    if (!rc || !rc.changes) {
+        el.innerHTML = '<p class="st">No rule change data yet. Run <code>python3 ~/polyedge/rule_changes.py</code>.</p>';
+        return;
+    }
+    let html = `<p class="st">${escapeHtml(rc.description)} Last run: ${fmtDate(rc.generated_at, {rel:true})}.</p>`;
+
+    // Sort by delta impact
+    const changes = [...rc.changes].sort((a, b) => (b.delta || 0) - (a.delta || 0));
+
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(460px,1fr));gap:14px">';
+    changes.forEach(c => {
+        const status = c.deployed ? 'LIVE' : 'PROPOSED';
+        const statusColor = c.deployed ? '#22c55e' : '#f59e0b';
+        const delta = c.delta || 0;
+        const deltaColor = delta > 0 ? '#22c55e' : (delta < 0 ? '#ef4444' : '#94a3b8');
+        const actualCls = c.actual_pnl >= 0 ? 'up' : 'dn';
+        const simCls = c.simulated_pnl >= 0 ? 'up' : 'dn';
+        html += `<div style="background:#1e293b;border:1px solid #334155;border-left:5px solid ${statusColor};border-radius:12px;padding:16px">
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+                <div>
+                    <div style="font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:1px">${c.category}</div>
+                    <div style="font-size:16px;font-weight:800;color:#f1f5f9;margin-top:3px">${escapeHtml(c.name)}</div>
+                    <div class="st" style="margin:4px 0 0;font-size:12px">Applies to: <strong>${escapeHtml(c.applies_to)}</strong></div>
+                </div>
+                <span style="font-size:11px;padding:4px 10px;border-radius:6px;background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor};font-weight:700">${status}</span>
+            </div>
+            <div class="st" style="margin:0 0 12px;font-size:13px;line-height:1.5">${escapeHtml(c.description)}</div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+                <div class="ps"><div class="ps-v ${actualCls}">$${c.actual_pnl>=0?'+':''}${c.actual_pnl.toFixed(0)}</div><div class="ps-l">Actual (without)</div></div>
+                <div class="ps"><div class="ps-v ${simCls}">$${c.simulated_pnl>=0?'+':''}${c.simulated_pnl.toFixed(0)}</div><div class="ps-l">Simulated (with)</div></div>
+                <div class="ps" style="border:1px solid ${deltaColor}"><div class="ps-v" style="color:${deltaColor}">${delta>=0?'+':''}$${delta.toFixed(0)}</div><div class="ps-l">Δ (change impact)</div></div>
+            </div>
+            <div class="st" style="margin:10px 0 0;font-size:11px">${c.historical_trades_affected} trades in the sample. ${c.deployed ? 'Deployed ' + c.deployed_at : 'Not yet deployed'}</div>
+        </div>`;
+    });
+    html += '</div>';
+
+    el.innerHTML = html;
+}
+
+function renderGoLive() {
+    const el = document.getElementById('golive-content');
+    if (!DATA) { el.innerHTML = '<p class="st">Loading...</p>'; return; }
+
+    // Per-play readiness
+    const plays = [
+        {name:'TEMPORAL_ARB', category:'Pure Math', confidence:'HIGH', color:'#22c55e',
+         reason:'P(earlier) > P(later) is mathematically impossible. 3/3 wins this week, 100% WR.',
+         action:'FULL SIZE when it fires. No hedging needed.', sample:'3 trades'},
+        {name:'NEGRISK Scanner', category:'Pure Math', confidence:'HIGH', color:'#22c55e',
+         reason:'Multi-outcome sum ≠ $1 = free arb. Finding 10/scan. Research: $29M historically extracted.',
+         action:'FULL SIZE when liquidity supports. Execute all legs atomically.', sample:'10 live arbs'},
+        {name:'NEWS_EDGE', category:'Speed Edge', confidence:'MEDIUM', color:'#f59e0b',
+         reason:'March: 8/8 100% WR. Apr 17-18 direction bug (19L/1W) FIXED today with fade-rule. Needs 2 weeks post-fix OR historical backtest proof.',
+         action:'SMALL SIZE until fade rule proves itself. Paper-only for 1 more week.', sample:'28 closed, 9W/19L'},
+        {name:'BIG_MOVER (surgical)', category:'Momentum', confidence:'MEDIUM', color:'#f59e0b',
+         reason:'Post-filter: +3.8% ROI on 50 trades. Working buckets: Musk tweets, oil, token launches. Excluded: Mideast, Peru, Venezuela.',
+         action:'HALF SIZE initially. Scale if it holds.', sample:'50 closed'},
+        {name:'SYSTEMATIC_NO', category:'Statistical', confidence:'MEDIUM', color:'#f59e0b',
+         reason:'Research: 73% NO base rate on low-probability binaries. 16 trades opened at 98c, none resolved yet.',
+         action:'HALF SIZE initially. Watch first 20 resolutions to validate base rate.', sample:'16 open'},
+        {name:'TIME_DECAY', category:'Deadline', confidence:'LOW', color:'#ef4444',
+         reason:'This week: 58W/41L, -$110. Free-Roll sim shows +$358 uplift. Need to prove Free-Roll live.',
+         action:'FREE-ROLL ONLY mode. Small size until the uplift materialises.', sample:'99 closed this week'},
+        {name:'CRYPTO', category:'Threshold', confidence:'LOW', color:'#ef4444',
+         reason:'60% WR but -1.1% ROI = breakeven. Deribit divergences not yet proven.',
+         action:'ONLY trade when Deribit divergence ≥15pp. Otherwise skip.', sample:'35 closed'},
+        {name:'LATE_ENTRY', category:'Pre-resolution', confidence:'UNPROVEN', color:'#94a3b8',
+         reason:'Zero closed trades to date. Logic is sound (sub-3h crypto thresholds past the line).',
+         action:'Let it run small in paper another week. Re-evaluate.', sample:'No data'},
+        {name:'FED_DIVERGENCE', category:'Rate Events', confidence:'BLOCKED', color:'#94a3b8',
+         reason:'CME FedWatch API locked. FRED fallback unreliable.',
+         action:'PARK until working data source. Consider paid Kalshi comparator.', sample:'No data'},
+        {name:'LAB (Celebrity + Sports)', category:'Experimental', confidence:'LOW', color:'#ef4444',
+         reason:'Closed 5 trades at -$55 ROI. Old logic was -EV (betting NO on favourites). Logic changed Apr 19.',
+         action:'Keep $50 half-size only. No main pot impact.', sample:'5 closed, 7 open'},
+    ];
+
+    // Summary stats
+    const highCount = plays.filter(p => p.confidence === 'HIGH').length;
+    const medCount = plays.filter(p => p.confidence === 'MEDIUM').length;
+    const lowCount = plays.filter(p => p.confidence === 'LOW').length;
+
+    let html = `<div class="stats" style="margin-bottom:20px">
+        <div class="stat"><div class="sv" style="color:#22c55e">${highCount}</div><div class="sl">Full Size Ready</div></div>
+        <div class="stat"><div class="sv" style="color:#f59e0b">${medCount}</div><div class="sl">Half Size Ready</div></div>
+        <div class="stat"><div class="sv" style="color:#ef4444">${lowCount}</div><div class="sl">Park / Monitor</div></div>
+        <div class="stat"><div class="sv" style="color:#94a3b8">${plays.length-highCount-medCount-lowCount}</div><div class="sl">Unproven / Blocked</div></div>
+    </div>`;
+
+    html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:14px">';
+    plays.forEach(p => {
+        html += `<div style="background:#1e293b;border:1px solid #334155;border-left:5px solid ${p.color};border-radius:12px;padding:16px">
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+                <div>
+                    <div style="font-size:11px;color:#94a3b8;font-weight:700;letter-spacing:1px">${escapeHtml(p.category)}</div>
+                    <div style="font-size:18px;font-weight:800;color:#f1f5f9;margin-top:3px">${escapeHtml(p.name)}</div>
+                </div>
+                <span style="font-size:11px;padding:4px 12px;border-radius:6px;background:${p.color}22;color:${p.color};border:1px solid ${p.color};font-weight:700">${p.confidence}</span>
+            </div>
+            <div class="st" style="margin:0 0 10px;font-size:13px;line-height:1.5"><strong style="color:#cbd5e1">Why:</strong> ${escapeHtml(p.reason)}</div>
+            <div style="padding-top:10px;border-top:1px dashed #334155;font-size:13px;color:#e2e8f0;line-height:1.5"><strong style="color:${p.color}">Action:</strong> ${escapeHtml(p.action)}</div>
+            <div class="st" style="margin:8px 0 0;font-size:11px">Sample: ${escapeHtml(p.sample)}</div>
+        </div>`;
+    });
+    html += '</div>';
+
+    html += `<div style="margin-top:24px;padding:14px 18px;background:#0f172a;border-radius:10px;border-left:4px solid #3b82f6">
+        <div style="font-size:15px;font-weight:800;color:#3b82f6;margin-bottom:8px">Recommended Rollout</div>
+        <ul style="color:#e2e8f0;line-height:1.8;font-size:14px;margin:0;padding-left:20px">
+            <li><strong>Week 1 ($500 budget):</strong> Only TEMPORAL_ARB + NegRisk. Prove execution works. Measure real slippage.</li>
+            <li><strong>Week 2-3 ($2k budget):</strong> Add NEWS_EDGE (fade-rule validated) + BIG_MOVER surgical at half size.</li>
+            <li><strong>Week 4+ ($5k+ budget):</strong> Scale what's proven. Add SYSTEMATIC_NO if base rate holds.</li>
+            <li><strong>Never without proof:</strong> TIME_DECAY, CRYPTO, LAB unless historical/live evidence turns positive.</li>
+        </ul>
+    </div>`;
+
+    el.innerHTML = html;
+}
+
 function renderJourney() {
     const el = document.getElementById('journey-content');
     if (!DATA) { el.innerHTML = '<p class="st">Loading...</p>'; return; }
@@ -2921,6 +3060,8 @@ function render() {
     renderMovers();
     renderMarkets();
     renderJourney();
+    renderRuleChanges();
+    renderGoLive();
     renderTimeline();
     renderAudit();
     renderIdeas();
