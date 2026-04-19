@@ -1851,10 +1851,49 @@ function renderGoLive() {
     const el = document.getElementById('golive-content');
     if (!DATA) { el.innerHTML = '<p class="st">Loading...</p>'; return; }
 
-    // Pull the agreed plan historical simulation from rule_changes
+    // Pull the £100 BUDGET plan (most realistic)
     const rc = DATA.rule_changes;
     let planCard = '';
     if (rc && rc.changes) {
+        const p100 = rc.changes.find(c => c.name && c.name.includes('£100'));
+        if (p100) {
+            const inPounds = v => (v / 1.27).toFixed(2);  // crude USD→GBP
+            planCard += `<div style="background:linear-gradient(135deg,#14532d 0%,#052e16 100%);border:2px solid #22c55e;border-radius:16px;padding:24px 28px;margin-bottom:20px">
+                <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#86efac;margin-bottom:6px">🎯 REAL ROLLOUT: £100 BUDGET</div>
+                <div style="font-size:22px;font-weight:800;color:#f1f5f9;margin-bottom:14px">What £100 would have made over the last 3 weeks</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:12px;margin-bottom:14px">
+                    <div><div class="sl">Budget</div><div style="font-size:24px;font-weight:900;color:#f1f5f9">£100</div></div>
+                    <div><div class="sl">P&amp;L (real)</div><div style="font-size:24px;font-weight:900;color:${p100.pnl_real_after_slippage>=0?'#22c55e':'#ef4444'}">£${inPounds(p100.pnl_real_after_slippage)}</div></div>
+                    <div><div class="sl">ROI (3 weeks)</div><div style="font-size:24px;font-weight:900;color:#3b82f6">${p100.roi_real_pct>=0?'+':''}${p100.roi_real_pct}%</div></div>
+                    <div><div class="sl">Slippage Cost</div><div style="font-size:24px;font-weight:900;color:#ef4444">£${inPounds(p100.slippage_cost)}</div></div>
+                    <div><div class="sl">Trades</div><div style="font-size:24px;font-weight:900;color:#cbd5e1">${p100.historical_trades_affected}</div></div>
+                </div>
+                <div class="st" style="margin:14px 0 0;padding-top:14px;border-top:1px dashed #334155;font-size:13px;line-height:1.65">
+                    <strong style="color:#86efac">Verdict:</strong> £100 → ~£${inPounds(p100.pnl_real_after_slippage)} profit over 3 weeks.
+                    ROI <strong>${p100.roi_real_pct>=0?'+':''}${p100.roi_real_pct}%</strong> after realistic 2% slippage per leg.
+                    Slippage eats <strong>${((p100.slippage_cost / (p100.pnl_ideal_no_slippage||1))*100).toFixed(0)}%</strong> of gross profit.
+                    <br><br>
+                    <strong style="color:#fbbf24">Critical finding:</strong> BIG_MOVER excluded. At £5/trade, 2% slippage per leg (4% round-trip) eats its 3.8% raw ROI. Only plays with ≥15% raw ROI survive small-stake slippage.
+                </div>`;
+            if (p100.by_play && p100.by_play.length) {
+                planCard += '<div style="margin-top:14px"><div class="sl" style="margin-bottom:8px">BY PLAY (real P&L)</div>';
+                planCard += '<table style="margin:0"><tr><th>Play</th><th>Stake/trade</th><th>Trades</th><th>Bet</th><th>P&L (real)</th><th>ROI</th></tr>';
+                p100.by_play.forEach(r => {
+                    const pnlCls = r.pnl_real >= 0 ? 'up' : 'dn';
+                    const roiCls = r.roi_pct >= 0 ? 'bl' : 'dn';
+                    planCard += `<tr>
+                        <td><strong>${escapeHtml(r.play)}</strong></td>
+                        <td>$${r.stake_per_trade}</td>
+                        <td>${r.trades}</td>
+                        <td>$${r.staked.toFixed(0)}</td>
+                        <td class="${pnlCls}"><strong>$${r.pnl_real>=0?'+':''}${r.pnl_real.toFixed(2)}</strong></td>
+                        <td class="${roiCls}"><strong>${r.roi_pct>=0?'+':''}${r.roi_pct}%</strong></td>
+                    </tr>`;
+                });
+                planCard += '</table></div>';
+            }
+            planCard += '</div>';
+        }
         const plan = rc.changes.find(c => c.name && c.name.includes('AGREED PLAN'));
         if (plan) {
             const planRoi = plan.plan_roi_pct;
