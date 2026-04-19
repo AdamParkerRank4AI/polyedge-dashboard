@@ -196,6 +196,9 @@ tr:hover td{background:#0f172a}
 <h2>The Plays — Live P&L by Type</h2>
 <div class="plays-grid" id="plays-overview"></div>
 
+<h2>New Plays (research-backed, some still proving)</h2>
+<div id="new-plays-section"></div>
+
 <div id="optimal-mix-breakdown"></div>
 
 <div id="all-variations"></div>
@@ -464,6 +467,61 @@ function openPnl(pos, signal) {
     return 0;
 }
 
+// Research-backed expectations per play — shown on cards so new plays with
+// 0 trades still have context.
+const PLAY_RESEARCH = {
+    NEWS_EDGE: {
+        thesis: "Convergence of 2+ news sources + market not yet repriced = speed edge.",
+        benchmark: "100% WR in March (8/8 Iran/Trump trades, +117% ROI).",
+        evidence: "Trump tweet $580M insider pattern (Mar 23). 15-min RSS polls work for slow news cycles.",
+    },
+    TIME_DECAY: {
+        thesis: "Markets converge to 0 or 1 near deadline; bet the lean when <7d out.",
+        benchmark: "TIME_DECAY winners hit TP at 8-87% move, avg 14%.",
+        evidence: "Classic prediction-market edge. Documented in Polymarket research, reliable grind.",
+    },
+    CRYPTO: {
+        thesis: "BTC/ETH binary thresholds resolve cleanly. Bet near threshold where price is certain direction.",
+        benchmark: "60% WR, ROI modest. Free-Roll variant adds +$387 historically.",
+        evidence: "Binary at resolution: price goes to 0 or 1. Deribit options cross-check available.",
+    },
+    BIG_MOVER: {
+        thesis: "Market moved 20-40% in 24h on high volume. Ride momentum.",
+        benchmark: "63% WR, small net after surgical filter (exclude Mideast/Peru/VZ).",
+        evidence: "Momentum works in specific buckets (Musk tweets, oil, token launches).",
+    },
+    LATE_ENTRY: {
+        thesis: "Sub-3h crypto thresholds already past the line but market not at 1.00 yet = lockable gap.",
+        benchmark: "NEW. No closed trades yet.",
+        evidence: "Polymarket pricing inefficiency near resolution. Classic end-of-day arb.",
+    },
+    SYSTEMATIC_NO: {
+        thesis: "Most binary events DO NOT happen. Buy NO at 98c on low-probability markets, let time decay confirm.",
+        benchmark: "RESEARCH: 73.3% NO base rate on prediction markets. NEW here.",
+        evidence: "Research file 05 (unconventional plays) documents systematic NO as Tier 0 edge.",
+    },
+    TEMPORAL_ARB: {
+        thesis: "Date-ladder markets where P(by earlier date) > P(by later date) = free arb.",
+        benchmark: "3/3 wins this week, 100% WR, +$114 on $300 staked.",
+        evidence: "Pure mathematical arbitrage. Research file 02 Tier 1.",
+    },
+    FED_DIVERGENCE: {
+        thesis: "CME FedWatch reprices Fed markets ~1.44 days before Polymarket.",
+        benchmark: "NEW. CME API locked down today, FRED fallback partial.",
+        evidence: "Research file 04 documents Fed edge. Waiting on working data source.",
+    },
+    LAB_CELEBRITY: {
+        thesis: "Entertainment markets are thin, squatter odds often wrong.",
+        benchmark: "LAB: $50 stakes, not counted in main P&L.",
+        evidence: "Research file 05. Documented edge in award prediction + celeb markets.",
+    },
+    LAB_SPORTS: {
+        thesis: "Sports favorites are often overpriced by recreational bettors.",
+        benchmark: "LAB: $50 stakes. 7 trades open, contrarian NO on World Cup / NBA Finals long shots.",
+        evidence: "Research file 03 (tennis $8M bot, EPL xG models).",
+    },
+};
+
 function computePlayStats() {
     // per-play: w/l, open count, total staked on closed, total returned on closed, win/loss P&L
     const empty = () => ({w:0, l:0, o:0, staked:0, returned:0, wp:0, lp:0, openStake:0});
@@ -726,6 +784,66 @@ function renderOverview() {
         vhtml += `<div class="st" style="margin-top:12px;font-size:12px;padding-top:12px;border-top:1px dashed #334155"><strong>${variants.length} variations tested.</strong> Winners at top. Standard = actual historical P&L. Others show what we would have made with the rule change applied retroactively. Full detail on <a onclick="showPage('whatif')">What If</a> and <a onclick="showPage('backtest')">Backtest</a> tabs.</div>`;
         vhtml += '</div>';
         varEl.innerHTML = vhtml;
+    }
+
+    // --- New plays with research benchmarks ---
+    const newPlaysEl = document.getElementById('new-plays-section');
+    if (newPlaysEl) {
+        const newPlayNames = ['LATE_ENTRY','SYSTEMATIC_NO','TEMPORAL_ARB','FED_DIVERGENCE','LAB_CELEBRITY','LAB_SPORTS'];
+        let nphtml = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px">';
+        newPlayNames.forEach(name => {
+            const research = PLAY_RESEARCH[name] || {};
+            // Count trades for this play
+            const stats = {n:0, open:0, w:0, l:0, pnl:0, stake:0};
+            (DATA.positions || []).forEach(p => {
+                if (p.trade_type !== name) return;
+                stats.n++;
+                if (p.status === 'open') stats.open++;
+                else if (p.exit_price) {
+                    const s = Number(p.stake)||0;
+                    const r = (Number(p.shares)||0) * Number(p.exit_price);
+                    stats.stake += s;
+                    stats.pnl += r - s;
+                    if (r > s) stats.w++; else stats.l++;
+                }
+            });
+            const closed = stats.w + stats.l;
+            const wr = closed ? (100*stats.w/closed).toFixed(0) : '—';
+            const roi = stats.stake ? ((stats.pnl/stats.stake)*100).toFixed(1) : '—';
+            const pnlCls = stats.pnl >= 0 ? 'up' : 'dn';
+
+            let statusLabel = 'UNPROVEN';
+            let statusColor = '#94a3b8';
+            if (closed >= 5) {
+                if (stats.pnl > 0 && Number(roi) > 3) { statusLabel = 'WORKING'; statusColor = '#22c55e'; }
+                else if (stats.pnl < 0) { statusLabel = 'STRUGGLING'; statusColor = '#ef4444'; }
+                else { statusLabel = 'FLAT'; statusColor = '#f59e0b'; }
+            } else if (closed > 0) {
+                statusLabel = `EARLY (${closed})`;
+                statusColor = '#3b82f6';
+            }
+
+            nphtml += `<div style="background:#1e293b;border:1px solid #334155;border-left:4px solid ${statusColor};border-radius:12px;padding:16px">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+                    <div style="font-size:16px;font-weight:800;color:#f1f5f9">${escapeHtml(name)}</div>
+                    <span style="font-size:11px;padding:3px 9px;border-radius:6px;background:${statusColor}22;color:${statusColor};border:1px solid ${statusColor};font-weight:700">${statusLabel}</span>
+                </div>
+                <div class="st" style="margin:0 0 10px;font-size:13px;line-height:1.5"><strong style="color:#cbd5e1">Thesis:</strong> ${escapeHtml(research.thesis || '')}</div>
+                <div style="background:#0f172a;padding:10px;border-radius:8px;border:1px solid #334155;margin-bottom:10px">
+                    <div class="sl" style="margin:0 0 4px;font-size:10px">RESEARCH BENCHMARK</div>
+                    <div style="font-size:13px;color:#e2e8f0;line-height:1.5">${escapeHtml(research.benchmark || '')}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px">
+                    <div class="ps"><div class="ps-v">${stats.n}</div><div class="ps-l">Trades</div></div>
+                    <div class="ps"><div class="ps-v bl">${stats.open}</div><div class="ps-l">Open</div></div>
+                    <div class="ps"><div class="ps-v gy">${wr}${wr!=='—'?'%':''}</div><div class="ps-l">WR</div></div>
+                    <div class="ps"><div class="ps-v ${pnlCls}">${stats.pnl>=0?'+':''}$${stats.pnl.toFixed(0)}</div><div class="ps-l">P&L</div></div>
+                </div>
+                <div class="st" style="margin:10px 0 0;font-size:11px;padding-top:8px;border-top:1px dashed #334155"><strong style="color:#94a3b8">Evidence:</strong> ${escapeHtml(research.evidence || '')}</div>
+            </div>`;
+        });
+        nphtml += '</div>';
+        newPlaysEl.innerHTML = nphtml;
     }
 
     // --- Pulse: recent 24h performance per play — shows WHAT'S WORKING NOW ---
