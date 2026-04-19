@@ -6,31 +6,36 @@
 <title>PolyEdge</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro',sans-serif;background:#06080c;color:#f1f5f9;font-size:15px;font-weight:500}
-a{color:#60a5fa;text-decoration:none}a:hover{text-decoration:underline}
-.nav{background:#0a1020;border-bottom:1px solid #1a2a44;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:100;flex-wrap:wrap}
-.nav-brand{color:#00ff88;font-size:20px;font-weight:800;padding:14px 15px 14px 0;border-right:1px solid #1a2a44;margin-right:5px}
-.nav a.nl{color:#e2e8f0;padding:12px 16px;font-size:14px;font-weight:700;border-bottom:2px solid transparent;cursor:pointer}
-.nav a.nl:hover{color:#d1d5db;text-decoration:none}.nav a.nl.active{color:#00ff88;border-bottom-color:#00ff88}
-.nav-right{margin-left:auto;font-size:11px;color:#cbd5e1}
-.status-on{color:#00ff88;font-weight:700}.status-off{color:#ef4444;font-weight:700}
-.page{display:none;padding:20px 25px;max-width:1400px;margin:0 auto}.page.active{display:block}
-h2{color:#00aaff;font-size:22px;font-weight:900;margin:24px 0 12px;border-bottom:2px solid #334155;padding-bottom:8px;letter-spacing:0.3px}
-h3{color:#ffaa00;font-size:17px;font-weight:800;margin:18px 0 10px}
-.st{color:#e2e8f0;font-size:14px;font-weight:500;line-height:1.6;margin-bottom:14px}
-.stats{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap;align-items:stretch}
-.stat{background:#111827;border:1px solid #1e293b;border-radius:10px;padding:12px 16px;flex:1;text-align:center;min-width:120px}
+body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro','Inter',sans-serif;background:#0f172a;color:#f1f5f9;font-size:15px;font-weight:500;-webkit-font-smoothing:antialiased}
+a{color:#60a5fa;text-decoration:none}a:hover{text-decoration:underline;color:#93c5fd}
+.nav{background:#1e293b;border-bottom:1px solid #334155;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:100;flex-wrap:wrap;box-shadow:0 2px 12px rgba(0,0,0,0.3)}
+.nav-brand{color:#22c55e;font-size:22px;font-weight:900;padding:14px 18px 14px 0;border-right:1px solid #334155;margin-right:8px;letter-spacing:-0.3px}
+.nav a.nl{color:#cbd5e1;padding:14px 14px;font-size:13px;font-weight:600;border-bottom:3px solid transparent;cursor:pointer;transition:all 0.15s}
+.nav a.nl:hover{color:#f1f5f9;background:#0f172a;text-decoration:none}
+.nav a.nl.active{color:#22c55e;border-bottom-color:#22c55e;font-weight:700}
+.nav-divider{width:1px;height:20px;background:#334155;margin:0 4px}
+.nav-right{margin-left:auto;font-size:12px;color:#94a3b8;padding:0 8px}
+.status-on{color:#22c55e;font-weight:700}.status-off{color:#ef4444;font-weight:700}
+.page{display:none;padding:24px 28px;max-width:1500px;margin:0 auto}.page.active{display:block}
+h2{color:#f1f5f9;font-size:24px;font-weight:800;margin:26px 0 10px;letter-spacing:-0.3px}
+h2:first-child{margin-top:0}
+h3{color:#f1f5f9;font-size:17px;font-weight:700;margin:24px 0 10px;letter-spacing:-0.2px}
+.st{color:#94a3b8;font-size:14px;font-weight:400;line-height:1.65;margin-bottom:16px}
+.stats{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap;align-items:stretch}
+.stat{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:14px 18px;flex:1;text-align:center;min-width:130px;transition:all 0.15s}
+.stat:hover{border-color:#475569;transform:translateY(-1px)}
 .stat-label{background:#0a1020;border:1px solid #1e293b;border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;letter-spacing:1.5px;writing-mode:horizontal-tb;min-width:120px;text-transform:uppercase}
-.stat-label.standard{color:#00ff88;border-color:#00ff88}
-.stat-label.freeroll{color:#b066ff;border-color:#b066ff}
-.sv{font-size:30px;font-weight:900;color:#00ff88}.sv.or{color:#ffaa00}.sv.bl{color:#60a5fa}.sv.rd{color:#ef4444}.sv.gy{color:#e2e8f0}
-.sl{font-size:11px;color:#e2e8f0;font-weight:600;margin-top:4px;text-transform:uppercase;letter-spacing:1px}
+.stat-label.standard{color:#22c55e;border-color:#22c55e}
+.stat-label.freeroll{color:#a855f7;border-color:#a855f7}
+.sv{font-size:30px;font-weight:800;color:#22c55e;letter-spacing:-0.5px}.sv.or{color:#f59e0b}.sv.bl{color:#3b82f6}.sv.rd{color:#ef4444}.sv.gy{color:#cbd5e1}
+.sl{font-size:11px;color:#94a3b8;font-weight:600;margin-top:6px;text-transform:uppercase;letter-spacing:0.8px}
 .plays-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:14px 0}
-.play-card{background:#111827;border:1px solid #1e293b;border-radius:12px;padding:16px;position:relative;overflow:hidden}
-.play-card.news{border-left:4px solid #00ff88}
-.play-card.time{border-left:4px solid #60a5fa}
-.play-card.crypto{border-left:4px solid #fbbf24}
-.play-card.mover{border-left:4px solid #a78bfa}
+.play-card{background:#1e293b;border:1px solid #334155;border-radius:14px;padding:18px;position:relative;overflow:hidden;transition:all 0.15s}
+.play-card:hover{border-color:#475569}
+.play-card.news{border-left:4px solid #22c55e}
+.play-card.time{border-left:4px solid #3b82f6}
+.play-card.crypto{border-left:4px solid #f59e0b}
+.play-card.mover{border-left:4px solid #a855f7}
 .play-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .play-title{font-size:18px;font-weight:900;color:#ffffff;letter-spacing:0.5px}
 .play-toggle{font-size:11px;padding:4px 11px;border-radius:12px;font-weight:800}
@@ -40,10 +45,10 @@ h3{color:#ffaa00;font-size:17px;font-weight:800;margin:18px 0 10px}
 .play-rules{font-size:12px;color:#e2e8f0;margin-bottom:10px;line-height:1.6;padding:10px;background:#0a1020;border-radius:6px}
 .play-rules strong{color:#d1d5db}
 .play-stats{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
-.ps{background:#0a1020;padding:6px 8px;border-radius:6px;flex:1;text-align:center;min-width:60px}
-.ps-v{font-size:17px;font-weight:800}
-.ps-v.gr{color:#00ff88}.ps-v.rd{color:#ef4444}.ps-v.bl{color:#60a5fa}.ps-v.gy{color:#cbd5e1}
-.ps-l{font-size:10px;color:#e2e8f0;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
+.ps{background:#0f172a;padding:8px 10px;border-radius:8px;flex:1;text-align:center;min-width:60px;border:1px solid #334155}
+.ps-v{font-size:17px;font-weight:800;letter-spacing:-0.3px}
+.ps-v.gr{color:#22c55e}.ps-v.rd{color:#ef4444}.ps-v.bl{color:#3b82f6}.ps-v.gy{color:#cbd5e1}
+.ps-l{font-size:10px;color:#94a3b8;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-top:4px}
 .ac{background:#111827;border:1px solid #1e293b;border-radius:8px;padding:12px;margin-bottom:8px}
 .ac:hover{border-color:#334155}
 .ah{display:flex;align-items:center;gap:8px;margin-bottom:5px;font-size:11px}
@@ -53,24 +58,24 @@ h3{color:#ffaa00;font-size:17px;font-weight:800;margin:18px 0 10px}
 .b-r{background:#7f1d1d;color:#fca5a5}.b-o{background:#78350f;color:#fcd34d}.b-g{background:#064e3b;color:#6ee7b7}
 .b-n{background:#064e3b;color:#6ee7b7}.b-t{background:#0c4a6e;color:#7dd3fc}.b-c{background:#78350f;color:#fcd34d}.b-m{background:#4c1d95;color:#c4b5fd}
 .mr{display:flex;align-items:center;gap:8px;padding:4px 7px;background:#0f172a;border-radius:4px;margin:2px 0;font-size:11px}
-.mq{flex:1;color:#d1d5db}.mp{color:#00ff88;font-weight:700;min-width:45px;text-align:right}
+.mq{flex:1;color:#d1d5db}.mp{color:#22c55e;font-weight:700;min-width:45px;text-align:right}
 .mv{color:#cbd5e1;min-width:50px;text-align:right}
-table{width:100%;border-collapse:collapse;margin:10px 0}
-th{text-align:left;color:#f1f5f9;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1px;padding:9px;border-bottom:2px solid #334155}
-td{padding:9px 7px;border-bottom:1px solid #1e293b}
-td{padding:7px;border-bottom:1px solid #111827;font-size:12px}
-tr:hover{background:#111827}
-.up{color:#00ff88}.dn{color:#ef4444}.fl{color:#cbd5e1}
-.filter-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-.fb{background:#1e293b;color:#cbd5e1;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;border:1px solid transparent}
-.fb:hover{background:#334155}
-.fb.active{background:#064e3b;color:#6ee7b7;border-color:#00ff88}
+table{width:100%;border-collapse:collapse;margin:12px 0;background:#1e293b;border-radius:12px;overflow:hidden;border:1px solid #334155}
+th{text-align:left;color:#94a3b8;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px;padding:12px 10px;background:#0f172a;border-bottom:1px solid #334155}
+td{padding:11px 10px;border-bottom:1px solid #334155;font-size:13px;color:#e2e8f0}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#0f172a}
+.up{color:#22c55e;font-weight:600}.dn{color:#ef4444;font-weight:600}.fl{color:#cbd5e1}
+.filter-bar{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;background:#1e293b;padding:10px;border-radius:10px;border:1px solid #334155}
+.fb{background:transparent;color:#cbd5e1;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:1px solid #334155;transition:all 0.15s}
+.fb:hover{background:#334155;color:#f1f5f9}
+.fb.active{background:#22c55e;color:#0f172a;border-color:#22c55e;font-weight:700}
 .loading{text-align:center;padding:40px;color:#cbd5e1}
 .footer{text-align:center;padding:25px;color:#1e293b;font-size:11px}
 .settings-box{background:#111827;border:1px solid #1e293b;border-radius:8px;padding:14px;margin:10px 0}
 .settings-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #1e293b;font-size:12px}
 .settings-row:last-child{border-bottom:none}
-.settings-label{color:#e2e8f0;font-weight:600;font-size:14px}.settings-value{color:#00ff88;font-weight:700;font-family:monospace;font-size:14px}
+.settings-label{color:#e2e8f0;font-weight:600;font-size:14px}.settings-value{color:#22c55e;font-weight:700;font-family:monospace;font-size:14px}
 @media(max-width:1024px){
   .stats{flex-wrap:wrap}.stat{min-width:140px;flex:1 1 140px}
   table{font-size:12px}
@@ -103,30 +108,55 @@ tr:hover{background:#111827}
 <div class="nav">
 <span class="nav-brand">PolyEdge</span>
 <a class="nl active" onclick="showPage('overview')">Overview</a>
+<a class="nl" onclick="showPage('markets')">Markets</a>
 <a class="nl" onclick="showPage('plays')">Plays</a>
 <a class="nl" onclick="showPage('positions')">Positions</a>
-<a class="nl" onclick="showPage('alerts')">Alerts</a>
-<a class="nl" onclick="showPage('opportunities')">Opportunities</a>
-<a class="nl" onclick="showPage('movers')">Movers</a>
-<a class="nl" onclick="showPage('markets')">Markets</a>
-<a class="nl" onclick="showPage('timeline')">Timeline</a>
+<span class="nav-divider"></span>
 <a class="nl" onclick="showPage('journey')">Journey</a>
-<a class="nl" onclick="showPage('ideas')">Strategy Ideas</a>
+<a class="nl" onclick="showPage('timeline')">Timeline</a>
 <a class="nl" onclick="showPage('audit')">Daily Audit</a>
-<a class="nl" onclick="showPage('lab')">Lab</a>
+<a class="nl" onclick="showPage('ideas')">Ideas</a>
+<span class="nav-divider"></span>
+<a class="nl" onclick="showPage('alerts')">Alerts</a>
+<a class="nl" onclick="showPage('opportunities')">Opps</a>
+<a class="nl" onclick="showPage('movers')">Movers</a>
 <a class="nl" onclick="showPage('negrisk')">NegRisk</a>
-<a class="nl" onclick="showPage('llm')">LLM Edges</a>
+<a class="nl" onclick="showPage('llm')">LLM</a>
 <a class="nl" onclick="showPage('whales')">Whales</a>
 <a class="nl" onclick="showPage('newslag')">News Lag</a>
 <a class="nl" onclick="showPage('missed')">Just Missed</a>
-<a class="nl" onclick="showPage('backtest')">Backtest</a>
+<span class="nav-divider"></span>
 <a class="nl" onclick="showPage('whatif')">What If</a>
+<a class="nl" onclick="showPage('backtest')">Backtest</a>
+<a class="nl" onclick="showPage('lab')">Lab</a>
 <a class="nl" onclick="showPage('settings')">Settings</a>
-<span class="nav-right">Scanner: <span id="scanner-status" class="status-on">CHECKING...</span> | <span id="last-update">--</span></span>
+<span class="nav-right">🟢 <span id="scanner-status" class="status-on">LIVE</span> · <span id="last-update">--</span></span>
 </div>
 
 <!-- OVERVIEW -->
 <div id="page-overview" class="page active">
+
+<!-- Hero TL;DR -->
+<div id="hero-tldr" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:1px solid #334155;border-radius:16px;padding:24px 28px;margin-bottom:24px">
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px">
+<div>
+<div style="font-size:12px;font-weight:700;letter-spacing:2px;color:#94a3b8;margin-bottom:6px">POLYEDGE · PAPER TRADING</div>
+<div id="hero-headline" style="font-size:28px;font-weight:800;color:#f1f5f9;letter-spacing:-0.5px;line-height:1.2">—</div>
+<div id="hero-sub" style="font-size:14px;color:#94a3b8;margin-top:6px">—</div>
+</div>
+<div style="display:flex;gap:24px;flex-wrap:wrap">
+<div style="text-align:right">
+<div id="hero-pnl" style="font-size:42px;font-weight:900;letter-spacing:-1px;line-height:1">—</div>
+<div class="sl">Net P&amp;L</div>
+</div>
+<div style="text-align:right">
+<div id="hero-roi" style="font-size:42px;font-weight:900;letter-spacing:-1px;line-height:1;color:#3b82f6">—</div>
+<div class="sl">ROI</div>
+</div>
+</div>
+</div>
+</div>
+
 <div class="stats">
 <div class="stat-label standard">STANDARD</div>
 <div class="stat"><div class="sv" id="s-staked">--</div><div class="sl">Total Bet</div></div>
@@ -158,9 +188,9 @@ tr:hover{background:#111827}
 <details style="margin:16px 0;padding:10px 14px;background:#0a1020;border-left:3px solid #60a5fa;border-radius:6px">
 <summary style="cursor:pointer;color:#60a5fa;font-weight:700;font-size:14px">ℹ️ How the numbers work (click to expand)</summary>
 <div class="st" style="margin-top:10px;color:#e2e8f0;font-weight:500">
-<strong style="color:#00ff88">STANDARD row</strong> — actuals. Already-closed trades are frozen at whatever rules fired them. Totals update as new trades close.<br><br>
-<strong style="color:#b066ff">FREEROLL row</strong> — simulated. Recomputes every scan: "what if we'd been banking at TP on every historical trade, letting the remainder ride to today's live price?"<br><br>
-<strong style="color:#ffaa00">Rule changes</strong> are forward-only. NEWS_EDGE TP moved from 5% → 40% on Apr 17; trades closed before that still show their old 5% exits. New NEWS_EDGE trades use 40%. Same for BIG_MOVER (5→15), TIME_DECAY (8→15), SYSTEMATIC_NO/LATE_ENTRY (new plays from Apr 17-18).<br><br>
+<strong style="color:#22c55e">STANDARD row</strong> — actuals. Already-closed trades are frozen at whatever rules fired them. Totals update as new trades close.<br><br>
+<strong style="color:#a855f7">FREEROLL row</strong> — simulated. Recomputes every scan: "what if we'd been banking at TP on every historical trade, letting the remainder ride to today's live price?"<br><br>
+<strong style="color:#f59e0b">Rule changes</strong> are forward-only. NEWS_EDGE TP moved from 5% → 40% on Apr 17; trades closed before that still show their old 5% exits. New NEWS_EDGE trades use 40%. Same for BIG_MOVER (5→15), TIME_DECAY (8→15), SYSTEMATIC_NO/LATE_ENTRY (new plays from Apr 17-18).<br><br>
 <strong style="color:#ef4444">Apr 17 retroactive cleanup</strong> permanently removed 96 BIG_MOVER trades (Mideast/Peru/Venezuela/sports/&gt;40% moves). Snapshots backed up at <code>~/polyedge/data/snapshot_*_pre_clean.json</code> if we need to restore.<br><br>
 <strong style="color:#cbd5e1">LAB trades</strong> (celebrity + sports experiments at $50 half-size) are filtered out of Overview and Plays — see the Lab tab for their own P&L.
 </div>
@@ -466,6 +496,27 @@ function renderOverview() {
     const winRate = (wins + losses) > 0 ? (wins / (wins + losses) * 100) : 0;
     const roi = totalStaked > 0 ? (netPnL / totalStaked * 100) : 0;
 
+    // Hero TL;DR — the one-glance answer
+    const heroPnl = document.getElementById('hero-pnl');
+    const heroRoi = document.getElementById('hero-roi');
+    const heroHead = document.getElementById('hero-headline');
+    const heroSub = document.getElementById('hero-sub');
+    if (heroPnl) {
+        heroPnl.textContent = (netPnL >= 0 ? '+$' : '-$') + Math.abs(netPnL).toFixed(0);
+        heroPnl.style.color = netPnL >= 0 ? '#22c55e' : '#ef4444';
+        if (heroRoi) heroRoi.textContent = (roi >= 0 ? '+' : '') + roi.toFixed(1) + '%';
+        // Headline interpretation
+        let head = "In profit, paper mode";
+        let sub = `${wins} wins · ${losses} losses · ${winRate.toFixed(0)}% win rate · $${openStake.toLocaleString()} in flight across ${openCount} open trades`;
+        if (roi > 10) head = "Running profitably";
+        else if (roi > 5) head = "In the green";
+        else if (roi > 0) head = "Marginally profitable";
+        else if (roi > -5) head = "Roughly breakeven";
+        else head = "In drawdown — investigate";
+        if (heroHead) heroHead.textContent = head;
+        if (heroSub) heroSub.textContent = sub;
+    }
+
     const stakedEl = document.getElementById('s-staked');
     if (stakedEl) stakedEl.textContent = '$' + totalStaked.toLocaleString(undefined, {maximumFractionDigits:0});
     const returnedEl = document.getElementById('s-returned');
@@ -552,7 +603,7 @@ function renderOverview() {
             const losers = entries.filter(([,v]) => v.pnl < 0 && v.n >= 3);
             if (winners.length || losers.length) {
                 pulseHtml += '<div style="margin-top:10px;padding-top:10px;border-top:1px dashed #334155;font-size:13px;color:#e2e8f0;line-height:1.6">';
-                if (winners.length) pulseHtml += `<strong style="color:#00ff88">Working:</strong> ${winners.map(([p])=>p).join(', ')}. `;
+                if (winners.length) pulseHtml += `<strong style="color:#22c55e">Working:</strong> ${winners.map(([p])=>p).join(', ')}. `;
                 if (losers.length) pulseHtml += `<strong style="color:#ef4444">Not working:</strong> ${losers.map(([p])=>p).join(', ')}.`;
                 pulseHtml += '</div>';
             }
@@ -651,9 +702,9 @@ function renderOverview() {
             const sim = frSim || {banked_trades:0, actual_pnl:0, freeroll_pnl:0, delta:0};
             const deltaCls = sim.delta > 0 ? 'gr' : (sim.delta < 0 ? 'rd' : 'gy');
             const deltaSign = sim.delta >= 0 ? '+' : '';
-            html += `<div style="margin-top:10px;padding:10px;background:#05080f;border-left:3px solid #b066ff;border-radius:4px">
+            html += `<div style="margin-top:10px;padding:10px;background:#05080f;border-left:3px solid #a855f7;border-radius:4px">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                    <div style="font-size:12px;color:#b066ff;font-weight:700">↳ FREE-ROLL VARIANT</div>
+                    <div style="font-size:12px;color:#a855f7;font-weight:700">↳ FREE-ROLL VARIANT</div>
                     <span class="play-toggle ${frEnabled ? 'on' : 'off'}">${frEnabled ? 'LIVE' : 'OFF'}</span>
                 </div>
                 <div class="play-desc" style="color:#cbd5e1">Bank stake at +${frThreshold}% (= play's TP), let remainder ride. No TP, no SL after banking.</div>
@@ -674,7 +725,7 @@ function renderOverview() {
             const lrDeltaSign = lrSim.delta >= 0 ? '+' : '';
             html += `<div style="margin-top:10px;padding:10px;background:#05080f;border-left:3px solid #ffaa00;border-radius:4px">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                    <div style="font-size:12px;color:#ffaa00;font-weight:700">↳ LET RUN VARIANT</div>
+                    <div style="font-size:12px;color:#f59e0b;font-weight:700">↳ LET RUN VARIANT</div>
                     <span class="play-toggle off">SIM</span>
                 </div>
                 <div class="play-desc" style="color:#cbd5e1">No TP, no SL. Every trade opens and holds to resolution (or current live price for unresolved markets). Pure conviction.</div>
@@ -796,9 +847,9 @@ function renderPlaysDetail() {
             const sim = frSim || {banked_trades:0, actual_pnl:0, freeroll_pnl:0, delta:0};
             const deltaCls = sim.delta > 0 ? 'gr' : (sim.delta < 0 ? 'rd' : 'gy');
             const deltaSign = sim.delta >= 0 ? '+' : '';
-            html += `<div style="margin-top:10px;padding:10px;background:#05080f;border-left:3px solid #b066ff;border-radius:4px">
+            html += `<div style="margin-top:10px;padding:10px;background:#05080f;border-left:3px solid #a855f7;border-radius:4px">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                    <div style="font-size:12px;color:#b066ff;font-weight:700">↳ FREE-ROLL VARIANT</div>
+                    <div style="font-size:12px;color:#a855f7;font-weight:700">↳ FREE-ROLL VARIANT</div>
                     <span class="play-toggle ${frEnabled ? 'on' : 'off'}">${frEnabled ? 'LIVE' : 'OFF'}</span>
                 </div>
                 <div class="play-desc" style="color:#cbd5e1">Bank stake at +${frThreshold}% (= TP). Remainder rides to resolution, zero downside after banking.</div>
@@ -816,7 +867,7 @@ function renderPlaysDetail() {
             const lrDeltaSign = lrSim.delta >= 0 ? '+' : '';
             html += `<div style="margin-top:10px;padding:10px;background:#05080f;border-left:3px solid #ffaa00;border-radius:4px">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-                    <div style="font-size:12px;color:#ffaa00;font-weight:700">↳ LET RUN VARIANT</div>
+                    <div style="font-size:12px;color:#f59e0b;font-weight:700">↳ LET RUN VARIANT</div>
                     <span class="play-toggle off">SIM</span>
                 </div>
                 <div class="play-desc" style="color:#cbd5e1">No TP, no SL. Every trade opens and holds to resolution (or current live price for unresolved). Pure conviction.</div>
@@ -931,7 +982,7 @@ function renderPositions() {
         const closeReason = p.close_reason || (p.status === 'closed' ? 'resolved' : '—');
         const shares = p.shares || 0;
         const stake = p.stake || 0;
-        const bankedInfo = p.free_roll_banked ? `<div><div class="st">Free-Roll Banked</div><div style="color:#b066ff;font-weight:700">@ ${(p.free_roll_banked_price*100).toFixed(1)}¢ on ${fmtDate(p.free_roll_banked_at)} — locked $${p.free_roll_locked_profit || 0}, ${p.free_roll_shares_remaining || 0} shares ride on</div></div>` : '';
+        const bankedInfo = p.free_roll_banked ? `<div><div class="st">Free-Roll Banked</div><div style="color:#a855f7;font-weight:700">@ ${(p.free_roll_banked_price*100).toFixed(1)}¢ on ${fmtDate(p.free_roll_banked_at)} — locked $${p.free_roll_locked_profit || 0}, ${p.free_roll_shares_remaining || 0} shares ride on</div></div>` : '';
 
         let detail = `<div style="padding:14px 20px;background:#050810;border-left:3px solid #00ff88">
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;font-size:13px">
@@ -956,7 +1007,7 @@ function renderPositions() {
                 const src = escapeHtml(a.source || '?');
                 const hl = escapeHtml(a.headline || '');
                 detail += `<div style="margin:6px 0;padding:10px;background:#0a1020;border-radius:4px">
-                    <div><span class="badge b-n">${src}</span> <strong style="color:#00ff88">score ${a.score||0}</strong> <span class="st">${fmtDate(a.published)}</span></div>
+                    <div><span class="badge b-n">${src}</span> <strong style="color:#22c55e">score ${a.score||0}</strong> <span class="st">${fmtDate(a.published)}</span></div>
                     <div style="margin-top:6px;font-weight:500">${a.link ? `<a href="${a.link}" target="_blank">${hl}</a>` : hl}</div>
                     ${kw ? `<div class="st" style="margin-top:4px">keywords: ${escapeHtml(kw)}</div>` : ''}
                 </div>`;
@@ -1199,7 +1250,7 @@ function renderMarkets() {
                 <div style="font-size:14px;font-weight:700;color:#f1f5f9;line-height:1.4;margin-bottom:10px;min-height:40px">${escapeHtml((m.question||'').substring(0,100))}</div>
                 <div style="display:flex;justify-content:space-between;align-items:center">
                     <div>
-                        <div style="font-size:22px;font-weight:900;color:#00ff88">${yesPct}¢</div>
+                        <div style="font-size:22px;font-weight:900;color:#22c55e">${yesPct}¢</div>
                         <div class="st" style="margin:0;font-size:11px">YES</div>
                     </div>
                     <div style="text-align:right">
@@ -1286,7 +1337,7 @@ function renderJourney() {
             <div><div class="st" style="margin:0">P&L</div><div style="font-size:24px;font-weight:900;color:${pnl>=0?'#00ff88':'#ef4444'}">$${pnl>=0?'+':''}${pnl.toFixed(0)}</div></div>
             <div><div class="st" style="margin:0">ROI</div><div style="font-size:24px;font-weight:900;color:#60a5fa">${roi>=0?'+':''}${roi.toFixed(1)}%</div></div>
             <div><div class="st" style="margin:0">Trades</div><div style="font-size:24px;font-weight:900;color:#f1f5f9">${wins}W/${losses}L</div></div>
-            <div><div class="st" style="margin:0">March NEWS_EDGE</div><div style="font-size:24px;font-weight:900;color:#00ff88">+$${nePnl(neMarch).toFixed(0)}</div></div>
+            <div><div class="st" style="margin:0">March NEWS_EDGE</div><div style="font-size:24px;font-weight:900;color:#22c55e">+$${nePnl(neMarch).toFixed(0)}</div></div>
         </div>
     </div>`;
 
@@ -1304,11 +1355,11 @@ function renderJourney() {
     });
 
     html += `<div style="margin-top:20px;padding:14px 18px;background:#0a1020;border-radius:8px;border-left:4px solid #ffaa00">
-        <div style="font-size:14px;font-weight:800;letter-spacing:1px;color:#ffaa00">WHERE WE ARE</div>
+        <div style="font-size:14px;font-weight:800;letter-spacing:1px;color:#f59e0b">WHERE WE ARE</div>
         <ul style="color:#e2e8f0;line-height:1.8;margin:8px 0 0;padding-left:20px">
-            <li><strong style="color:#00ff88">Working:</strong> March Iran trades (legacy), TEMPORAL_ARB this week (3/3), NegRisk arbitrage detection</li>
+            <li><strong style="color:#22c55e">Working:</strong> March Iran trades (legacy), TEMPORAL_ARB this week (3/3), NegRisk arbitrage detection</li>
             <li><strong style="color:#ef4444">Broken:</strong> April NEWS_EDGE direction (fixed today, monitoring)</li>
-            <li><strong style="color:#ffaa00">Unproven:</strong> SYSTEMATIC_NO (16 opens, no resolution yet), LATE_ENTRY, Lab plays</li>
+            <li><strong style="color:#f59e0b">Unproven:</strong> SYSTEMATIC_NO (16 opens, no resolution yet), LATE_ENTRY, Lab plays</li>
             <li><strong style="color:#60a5fa">Next:</strong> let the direction fix bake for 48h, watch TEMPORAL_ARB scale, plan real trading once SA creds arrive</li>
         </ul>
     </div>`;
@@ -1427,7 +1478,7 @@ function renderAudit() {
             html += `<tr>
                 <td><strong>${escapeHtml(p.play || '?')}</strong></td>
                 <td>${escapeHtml(p.current_approach || '')}</td>
-                <td style="color:#b066ff;font-weight:600">${escapeHtml(p.alternative || '')}</td>
+                <td style="color:#a855f7;font-weight:600">${escapeHtml(p.alternative || '')}</td>
                 <td>${escapeHtml(p.why || '')}</td>
             </tr>`;
         });
@@ -1659,7 +1710,7 @@ function renderLab() {
     const roi = staked > 0 ? (pnl / staked * 100) : 0;
 
     let html = `<div class="stats" style="margin-bottom:18px">
-        <div class="stat-label" style="color:#ffaa00;border-color:#ffaa00">LAB</div>
+        <div class="stat-label" style="color:#f59e0b;border-color:#f59e0b">LAB</div>
         <div class="stat"><div class="sv">$${staked.toLocaleString()}</div><div class="sl">Bet</div></div>
         <div class="stat"><div class="sv ${ret >= staked ? 'gr' : 'rd'}">$${ret.toFixed(0)}</div><div class="sl">Back</div></div>
         <div class="stat"><div class="sv ${pnl >= 0 ? '' : 'rd'}">$${pnl >= 0 ? '+' : ''}${pnl.toFixed(0)}</div><div class="sl">Net P&L</div></div>
@@ -1845,7 +1896,7 @@ function renderNegRisk() {
             <td><span class="badge ${dirBadge}">${a.direction.replace('_', ' ')}</span></td>
             <td>$${(a.volume_24h || 0).toLocaleString()}</td>
         </tr>`;
-        let detail = '<div style="padding:12px 20px;background:#050810;border-left:3px solid #b066ff">';
+        let detail = '<div style="padding:12px 20px;background:#050810;border-left:3px solid #a855f7">';
         detail += '<table style="margin:0"><tr><th>Outcome</th><th>YES price</th><th>24h Vol</th><th>Polymarket</th></tr>';
         (a.outcomes || []).forEach(o => {
             const url = o.slug ? 'https://polymarket.com/market/' + o.slug : '';
@@ -2243,7 +2294,7 @@ function renderWhatIf() {
         html += '<h3>Closed-Trade Autopsy</h3>';
         html += `<p class="st">${escapeHtml(a.description)} ${a.wins_count} wins vs ${a.losses_count} losses.</p>`;
         html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">';
-        html += '<div><h3 style="color:#00ff88;font-size:15px;margin-top:0">Wins</h3>';
+        html += '<div><h3 style="color:#22c55e;font-size:15px;margin-top:0">Wins</h3>';
         html += '<p class="st">By close reason:</p><table><tr><th>Reason</th><th>N</th><th>P&L</th></tr>';
         a.close_reason_wins.forEach(r => {
             html += `<tr><td>${escapeHtml(r.key)}</td><td>${r.n}</td><td class="up"><strong>$${r.pnl>=0?'+':''}${r.pnl.toFixed(0)}</strong></td></tr>`;
@@ -2266,7 +2317,7 @@ function renderWhatIf() {
         });
         html += '</table></div></div>';
         // Biggest winners/losers
-        html += '<h3 style="color:#00ff88;font-size:15px;margin-top:20px">Top 5 Wins</h3>';
+        html += '<h3 style="color:#22c55e;font-size:15px;margin-top:20px">Top 5 Wins</h3>';
         html += '<table><tr><th>Market</th><th>Type</th><th>Side</th><th>Entry→Exit</th><th>P&L</th><th>Closed</th></tr>';
         a.top_5_wins.forEach(w => {
             html += `<tr><td>${escapeHtml(w.question)}</td><td>${w.type||''}</td><td>${w.side||''}</td><td>${(w.entry*100).toFixed(1)}→${(w.exit*100).toFixed(1)}¢</td><td class="up"><strong>$${w.pnl>=0?'+':''}${w.pnl.toFixed(0)}</strong></td><td class="st">${fmtDate(w.closed, {rel:true})}</td></tr>`;
