@@ -27,6 +27,7 @@ h3{color:#f1f5f9;font-size:17px;font-weight:700;margin:24px 0 10px;letter-spacin
 .stat-label{background:#0a1020;border:1px solid #1e293b;border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:13px;letter-spacing:1.5px;writing-mode:horizontal-tb;min-width:120px;text-transform:uppercase}
 .stat-label.standard{color:#22c55e;border-color:#22c55e}
 .stat-label.freeroll{color:#a855f7;border-color:#a855f7}
+.stat-label.optimal{color:#f59e0b;border-color:#f59e0b}
 .sv{font-size:30px;font-weight:800;color:#22c55e;letter-spacing:-0.5px}.sv.or{color:#f59e0b}.sv.bl{color:#3b82f6}.sv.rd{color:#ef4444}.sv.gy{color:#cbd5e1}
 .sl{font-size:11px;color:#94a3b8;font-weight:600;margin-top:6px;text-transform:uppercase;letter-spacing:0.8px}
 .plays-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin:14px 0}
@@ -180,8 +181,22 @@ tr:hover td{background:#0f172a}
 <div class="stat"><div class="sv or" id="f-open">--</div><div class="sl">Open</div></div>
 </div>
 
+<div class="stats">
+<div class="stat-label optimal">OPTIMAL MIX</div>
+<div class="stat"><div class="sv" id="o-staked">--</div><div class="sl">Total Bet</div></div>
+<div class="stat"><div class="sv" id="o-returned">--</div><div class="sl">Total Back</div></div>
+<div class="stat"><div class="sv" id="o-pnl">--</div><div class="sl">Net P&L</div></div>
+<div class="stat"><div class="sv bl" id="o-roi">--</div><div class="sl">ROI on Bet</div></div>
+<div class="stat"><div class="sv" id="o-uplift">--</div><div class="sl">vs Standard</div></div>
+<div class="stat"><div class="sv" id="o-winrate">--</div><div class="sl">Win Rate</div></div>
+<div class="stat"><div class="sv" id="o-wins">--</div><div class="sl">Wins</div></div>
+<div class="stat"><div class="sv rd" id="o-losses">--</div><div class="sl">Losses</div></div>
+</div>
+
 <h2>The Plays — Live P&L by Type</h2>
 <div class="plays-grid" id="plays-overview"></div>
+
+<div id="optimal-mix-breakdown"></div>
 
 <div id="pulse-alert" style="margin:16px 0"></div>
 
@@ -558,6 +573,84 @@ function renderOverview() {
     setF('f-wins', wins);
     setF('f-losses', losses, 'rd');
     setF('f-open', openCount + ' ($' + openStake.toLocaleString() + ')', 'or');
+
+    // --- OPTIMAL MIX: pick the best variant per play ---
+    const frSim = ((DATA.scenarios || {}).free_roll_simulation || {}).by_play || [];
+    const lrSim = ((DATA.scenarios || {}).let_run_simulation || {}).by_play || [];
+    const frByPlay = {}; frSim.forEach(r => frByPlay[r.play] = r);
+    const lrByPlay = {}; lrSim.forEach(r => lrByPlay[r.play] = r);
+
+    // For each play, compute actual vs freeroll vs letrun → pick max
+    const playStats = computePlayStats();
+    const optimalByPlay = [];
+    let optPnl = 0;
+    let optWins = 0, optLosses = 0;
+    Object.keys(playStats).forEach(play => {
+        const s = playStats[play];
+        const actualPnl = s.wp + s.lp;
+        if (s.w + s.l === 0) return;  // no closed trades yet
+        const frPnl = frByPlay[play] ? frByPlay[play].freeroll_pnl : actualPnl;
+        const lrPnl = lrByPlay[play] ? lrByPlay[play].letrun_pnl : actualPnl;
+        const best = Math.max(actualPnl, frPnl, lrPnl);
+        let variant = 'Standard';
+        if (best === lrPnl && lrPnl > actualPnl) variant = 'Let Run';
+        else if (best === frPnl && frPnl > actualPnl) variant = 'Free-Roll';
+        optPnl += best;
+        optWins += s.w;
+        optLosses += s.l;
+        optimalByPlay.push({play, actual: actualPnl, best, variant, trades: s.w + s.l});
+    });
+    const optStaked = totalStaked;  // stake unchanged under any variant
+    const optBack = optStaked + optPnl;
+    const optRoi = optStaked ? (optPnl/optStaked*100) : 0;
+    const optUplift = optPnl - netPnL;
+    const optWr = (optWins+optLosses) ? (optWins/(optWins+optLosses)*100) : 0;
+
+    setF('o-staked', '$' + optStaked.toLocaleString(undefined, {maximumFractionDigits:0}));
+    setF('o-returned', '$' + optBack.toLocaleString(undefined, {maximumFractionDigits:0}));
+    setF('o-pnl', '$' + (optPnl>=0?'+':'') + optPnl.toFixed(0), optPnl>=0?'':'rd');
+    setF('o-roi', (optRoi>=0?'+':'') + optRoi.toFixed(1) + '%', optRoi>=0?'bl':'rd');
+    const upliftEl = document.getElementById('o-uplift');
+    if (upliftEl) {
+        upliftEl.textContent = (optUplift>=0?'+':'') + '$' + optUplift.toFixed(0);
+        upliftEl.className = 'sv ' + (optUplift>0 ? '' : (optUplift<0 ? 'rd' : 'gy'));
+    }
+    setF('o-winrate', optWr.toFixed(0) + '%', 'bl');
+    setF('o-wins', optWins);
+    setF('o-losses', optLosses, 'rd');
+
+    // Per-play optimal variant breakdown — small table below the 3 rows
+    const mixEl = document.getElementById('optimal-mix-breakdown');
+    if (mixEl && optimalByPlay.length) {
+        optimalByPlay.sort((a,b) => b.best - a.best);
+        let html = '<div style="background:#1e293b;border:1px solid #334155;border-left:4px solid #f59e0b;border-radius:12px;padding:16px 20px;margin-bottom:24px">';
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+        html += '<div><div style="font-size:13px;font-weight:700;color:#f59e0b;letter-spacing:1px">↓ OPTIMAL MIX BREAKDOWN</div>';
+        html += '<div class="st" style="margin:0;margin-top:4px">Picks best variant (Standard / Free-Roll / Let Run) per play.</div></div></div>';
+        html += '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:10px">';
+        optimalByPlay.forEach(p => {
+            const vColor = p.variant === 'Let Run' ? '#f59e0b' : (p.variant === 'Free-Roll' ? '#a855f7' : '#22c55e');
+            const uplift = p.best - p.actual;
+            const upCls = uplift > 0 ? 'up' : (uplift < 0 ? 'dn' : 'fl');
+            html += `<div style="padding:12px;background:#0f172a;border-radius:10px;border:1px solid #334155">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+                    <div style="font-size:14px;font-weight:800;color:#f1f5f9">${escapeHtml(p.play)}</div>
+                    <span style="font-size:10px;font-weight:800;padding:3px 8px;border-radius:6px;background:${vColor}22;color:${vColor};border:1px solid ${vColor}">${p.variant}</span>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:8px">
+                    <div><div class="sl" style="margin:0;font-size:10px">Actual</div><div style="font-size:16px;font-weight:700;color:#cbd5e1">$${p.actual>=0?'+':''}${p.actual.toFixed(0)}</div></div>
+                    <div><div class="sl" style="margin:0;font-size:10px">Best</div><div style="font-size:16px;font-weight:700;color:${vColor}">$${p.best>=0?'+':''}${p.best.toFixed(0)}</div></div>
+                    <div><div class="sl" style="margin:0;font-size:10px">Uplift</div><div class="${upCls}" style="font-size:16px;font-weight:700">${uplift>0?'+':''}$${uplift.toFixed(0)}</div></div>
+                </div>
+            </div>`;
+        });
+        html += '</div>';
+        html += `<div style="margin-top:12px;padding-top:12px;border-top:1px dashed #334155;font-size:13px;color:#e2e8f0">
+            <strong>How to read:</strong> if every play had used its best variant historically, total P&L would be <strong style="color:#f59e0b">$${optPnl>=0?'+':''}${optPnl.toFixed(0)}</strong> — an uplift of <strong class="${optUplift>=0?'up':'dn'}">${optUplift>=0?'+':''}$${optUplift.toFixed(0)}</strong> over the blanket Standard approach. Use this to decide per-play whether to enable Free-Roll or remove the TP altogether.
+        </div>`;
+        html += '</div>';
+        mixEl.innerHTML = html;
+    }
 
     // --- Pulse: recent 24h performance per play — shows WHAT'S WORKING NOW ---
     const pulseEl = document.getElementById('pulse-alert');
