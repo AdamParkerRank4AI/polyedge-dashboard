@@ -1897,6 +1897,31 @@ function renderGoLive() {
                 <strong>Week 3:</strong> CUT the losers (TIME_DECAY/CRYPTO/BIG_MOVER if still red). Redirect their capital to NEWS_EDGE.<br>
                 <strong>Week 4+:</strong> £100 → ~£175 (projected NEWS_EDGE-only scaling: 75% ROI × 1 month = meaningful compound).<br>
                 <strong>Key:</strong> bad data is cheap. The £4 loss tells us which plays survive slippage. Scale what works, kill what doesn't.
+            </div>
+            <div style="margin:14px 0 0">
+                <div class="sl" style="margin-bottom:8px">SLIPPAGE SIZING: what your stake actually becomes after fees</div>
+                <table style="margin:0"><tr><th>You stake</th><th>Slippage cost (2% entry + 2% exit)</th><th>Effective stake</th><th>Minimum raw edge to break even</th></tr>
+                    <tr><td><strong>£1</strong></td><td>£0.04</td><td>£0.96</td><td>4.2%</td></tr>
+                    <tr><td><strong>£2</strong></td><td>£0.08</td><td>£1.92</td><td>4.2%</td></tr>
+                    <tr><td><strong>£4</strong></td><td>£0.16</td><td>£3.84</td><td>4.2%</td></tr>
+                    <tr><td><strong>£10</strong></td><td>£0.40</td><td>£9.60</td><td>4.2%</td></tr>
+                    <tr><td><strong>£25</strong></td><td>£1.00</td><td>£24.00</td><td>4.2%</td></tr>
+                    <tr><td><strong>£50</strong></td><td>£2.00</td><td>£48.00</td><td>4.2%</td></tr>
+                </table>
+                <div class="st" style="margin-top:10px;font-size:12px;line-height:1.65">
+                    Slippage is a <strong>percentage</strong>, so it scales with stake. Doesn't change the break-even edge needed - stays at 4.2% raw ROI minimum in NORMAL conditions (2% per leg).
+                    On <strong>thin markets</strong> (5% per leg slippage) you need 10.5%+ raw edge. On <strong>liquid markets</strong> (1% per leg) only 2.1%+.
+                </div>
+                <div style="margin-top:10px"><div class="sl" style="margin-bottom:6px">BY PLAY: does the raw edge survive slippage?</div>
+                    <table style="margin:0"><tr><th>Play</th><th>Raw ROI</th><th>Break-even slippage</th><th>Normal 4%</th><th>Thin 10%</th></tr>
+                    <tr><td><strong>NEWS_EDGE</strong></td><td class="up"><strong>+119%</strong></td><td>Needs &lt;119%</td><td class="up">✓ Easy</td><td class="up">✓ Easy</td></tr>
+                    <tr><td><strong>TEMPORAL_ARB</strong></td><td class="up"><strong>Near 100%</strong></td><td>Trivial</td><td class="up">✓ Easy</td><td class="up">✓ Easy</td></tr>
+                    <tr><td><strong>SYSTEMATIC_NO</strong></td><td class="bl">+2-3% per trade</td><td>Needs &lt;3%</td><td class="dn">✗ Eaten</td><td class="dn">✗ Eaten</td></tr>
+                    <tr><td><strong>BIG_MOVER</strong></td><td>+3.8%</td><td>Needs &lt;3.8%</td><td class="dn">✗ Marginal loss</td><td class="dn">✗ Dies</td></tr>
+                    <tr><td><strong>CRYPTO</strong></td><td class="dn">-1.1%</td><td>Needs positive first</td><td class="dn">✗ Dead</td><td class="dn">✗ Dead</td></tr>
+                    <tr><td><strong>TIME_DECAY</strong></td><td class="dn">-1.4% this week</td><td>Negative</td><td class="dn">✗ Dead</td><td class="dn">✗ Dead</td></tr>
+                    </table>
+                </div>
             </div></div>`;
         }
         const plan = rc.changes.find(c => c.name && c.name.includes('AGREED PLAN'));
