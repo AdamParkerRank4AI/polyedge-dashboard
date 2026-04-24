@@ -8,11 +8,21 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro','Inter',sans-serif;background:#0f172a;color:#f1f5f9;font-size:15px;font-weight:500;-webkit-font-smoothing:antialiased}
 a{color:#60a5fa;text-decoration:none}a:hover{text-decoration:underline;color:#93c5fd}
-.nav{background:#1e293b;border-bottom:1px solid #334155;display:flex;align-items:center;padding:0 20px;position:sticky;top:0;z-index:100;flex-wrap:wrap;box-shadow:0 2px 12px rgba(0,0,0,0.3)}
+.nav{background:#1e293b;border-bottom:1px solid #334155;padding:0 20px;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(0,0,0,0.3)}
+.nav-row{display:flex;align-items:center;flex-wrap:wrap}
+.nav-row.main{border-bottom:1px solid #334155}
+.nav-row.secondary{background:#15213a;padding:0 0}
+.nav-row.secondary .nl{padding:10px 12px;font-size:12px;color:#94a3b8}
+.nav-row.secondary .nl:hover{color:#cbd5e1}
+.nav-row.secondary .nl.active{color:#22c55e}
 .nav-brand{color:#22c55e;font-size:22px;font-weight:900;padding:14px 18px 14px 0;border-right:1px solid #334155;margin-right:8px;letter-spacing:-0.3px}
+.nav-section-label{color:#64748b;font-size:10px;font-weight:800;letter-spacing:2px;padding:10px 10px 10px 4px;text-transform:uppercase;border-right:1px solid #334155;margin-right:4px}
 .nav a.nl{color:#cbd5e1;padding:14px 14px;font-size:13px;font-weight:600;border-bottom:3px solid transparent;cursor:pointer;transition:all 0.15s}
 .nav a.nl:hover{color:#f1f5f9;background:#0f172a;text-decoration:none}
 .nav a.nl.active{color:#22c55e;border-bottom-color:#22c55e;font-weight:700}
+.nav a.nl.since-live{color:#22c55e;font-weight:800}
+.nav a.nl.since-live::before{content:"● ";color:#22c55e;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 .nav-divider{width:1px;height:20px;background:#334155;margin:0 4px}
 .nav-right{margin-left:auto;font-size:12px;color:#94a3b8;padding:0 8px}
 .status-on{color:#22c55e;font-weight:700}.status-off{color:#ef4444;font-weight:700}
@@ -107,35 +117,41 @@ tr:hover td{background:#0f172a}
 <body>
 
 <div class="nav">
-<span class="nav-brand">PolyEdge</span>
-<a class="nl active" onclick="showPage('overview')">Overview</a>
-<a class="nl" onclick="showPage('markets')">Markets</a>
-<a class="nl" onclick="showPage('plays')">Plays</a>
-<a class="nl" onclick="showPage('positions')">Positions</a>
-<span class="nav-divider"></span>
-<a class="nl" onclick="showPage('journey')">Journey</a>
-<a class="nl" onclick="showPage('changes')">Rule Changes</a>
-<a class="nl" onclick="showPage('golive')">Go Live</a>
-<a class="nl" onclick="showPage('timeline')">Timeline</a>
-<a class="nl" onclick="showPage('audit')">Daily Audit</a>
-<a class="nl" onclick="showPage('ideas')">Ideas</a>
-<span class="nav-divider"></span>
-<a class="nl" onclick="showPage('alerts')">Alerts</a>
-<a class="nl" onclick="showPage('opportunities')">Opps</a>
-<a class="nl" onclick="showPage('movers')">Movers</a>
-<a class="nl" onclick="showPage('negrisk')">NegRisk</a>
-<a class="nl" onclick="showPage('llm')">LLM</a>
-<a class="nl" onclick="showPage('whales')">Whales</a>
-<a class="nl" onclick="showPage('newslag')">News Lag</a>
-<a class="nl" onclick="showPage('missed')">Just Missed</a>
-<span class="nav-divider"></span>
-<a class="nl" onclick="showPage('whatif')">What If</a>
-<a class="nl" onclick="showPage('backtest')">Backtest</a>
-<a class="nl" onclick="showPage('lab')">Lab</a>
-<a class="nl" onclick="showPage('mistakes')">Mistakes</a>
-<a class="nl" onclick="showPage('sysaudit')">Audit</a>
-<a class="nl" onclick="showPage('settings')">Settings</a>
-<span class="nav-right">🟢 <span id="scanner-status" class="status-on">LIVE</span> · <span id="last-update">--</span></span>
+  <div class="nav-row main">
+    <span class="nav-brand">PolyEdge</span>
+    <a class="nl since-live" onclick="showPage('sincelive')">Since Live</a>
+    <a class="nl active" onclick="showPage('overview')">Overview</a>
+    <a class="nl" onclick="showPage('positions')">Positions</a>
+    <a class="nl" onclick="showPage('plays')">Plays</a>
+    <a class="nl" onclick="showPage('alerts')">Alerts</a>
+    <a class="nl" onclick="showPage('lab')">Lab</a>
+    <span class="nav-right">🟢 <span id="scanner-status" class="status-on">LIVE</span> · <span id="last-update">--</span></span>
+  </div>
+  <div class="nav-row secondary">
+    <span class="nav-section-label">Research</span>
+    <a class="nl" onclick="showPage('markets')">Markets</a>
+    <a class="nl" onclick="showPage('opportunities')">Opps</a>
+    <a class="nl" onclick="showPage('movers')">Movers</a>
+    <a class="nl" onclick="showPage('negrisk')">NegRisk</a>
+    <a class="nl" onclick="showPage('llm')">LLM</a>
+    <a class="nl" onclick="showPage('whales')">Whales</a>
+    <a class="nl" onclick="showPage('newslag')">News Lag</a>
+    <a class="nl" onclick="showPage('missed')">Just Missed</a>
+    <a class="nl" onclick="showPage('ideas')">Ideas</a>
+  </div>
+  <div class="nav-row secondary">
+    <span class="nav-section-label">System</span>
+    <a class="nl" onclick="showPage('journey')">Journey</a>
+    <a class="nl" onclick="showPage('timeline')">Timeline</a>
+    <a class="nl" onclick="showPage('audit')">Daily Audit</a>
+    <a class="nl" onclick="showPage('changes')">Rule Changes</a>
+    <a class="nl" onclick="showPage('golive')">Go Live</a>
+    <a class="nl" onclick="showPage('whatif')">What If</a>
+    <a class="nl" onclick="showPage('backtest')">Backtest</a>
+    <a class="nl" onclick="showPage('mistakes')">Mistakes</a>
+    <a class="nl" onclick="showPage('sysaudit')">Audit</a>
+    <a class="nl" onclick="showPage('settings')">Settings</a>
+  </div>
 </div>
 
 <!-- OVERVIEW -->
@@ -227,6 +243,50 @@ tr:hover td{background:#0f172a}
 
 <h2>Currently Open Positions</h2>
 <div id="overview-open" class="loading">Loading...</div>
+</div>
+
+<!-- SINCE LIVE -->
+<div id="page-sincelive" class="page">
+<div style="background:linear-gradient(135deg,#064e3b 0%,#0f172a 100%);border:1px solid #22c55e;border-radius:16px;padding:24px 28px;margin-bottom:24px">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px">
+    <div>
+      <div style="font-size:12px;font-weight:700;letter-spacing:2px;color:#22c55e;margin-bottom:6px">● LIVE DATA · SINCE CUTOVER</div>
+      <div style="font-size:24px;font-weight:800;color:#f1f5f9;letter-spacing:-0.3px;line-height:1.2">Post-API-Handoff Performance</div>
+      <div id="sincelive-cutover-note" style="font-size:13px;color:#94a3b8;margin-top:6px">Cutover: 23 Apr 2026 18:00 UTC (when read-only API credentials came online)</div>
+    </div>
+  </div>
+</div>
+<div class="stats" id="sincelive-stats">
+  <div class="stat"><div class="sv gy" id="sl-hours">-</div><div class="sl">Hours Live</div></div>
+  <div class="stat"><div class="sv" id="sl-opened">-</div><div class="sl">Opened</div></div>
+  <div class="stat"><div class="sv" id="sl-closed">-</div><div class="sl">Closed</div></div>
+  <div class="stat"><div class="sv" id="sl-open">-</div><div class="sl">Still Open</div></div>
+  <div class="stat"><div class="sv" id="sl-pnl">-</div><div class="sl">P&amp;L</div></div>
+  <div class="stat"><div class="sv bl" id="sl-roi">-</div><div class="sl">ROI</div></div>
+</div>
+
+<h3 style="margin-top:24px">Decisions shipped since cutover</h3>
+<p class="st">Config changes + position housekeeping applied during the audit remediation.</p>
+<div id="sincelive-decisions">
+  <div class="ac"><div class="ahl">TIME_DECAY disabled — −$906 / 236 trades, no profitable sub-segment</div></div>
+  <div class="ac"><div class="ahl">NEWS_EDGE fade rule gated — Iran/Russia/ceasefire themes skip fade (was 5W/41L since Apr 19)</div></div>
+  <div class="ac"><div class="ahl">NEWS_EDGE source blocklist — GDELT/Reddit/HN zero-weighted (SCMP +$841 only positive)</div></div>
+  <div class="ac"><div class="ahl">CRYPTO max entry 0.50 — dropped losing 0.5-0.7 band</div></div>
+  <div class="ac"><div class="ahl">BIG_MOVER entry 0.30-0.50 only — only profitable band (+$132)</div></div>
+  <div class="ac"><div class="ahl">SYSTEMATIC_NO max entry 0.94 — no more 2c-for-99c longshots (25 open closed)</div></div>
+  <div class="ac"><div class="ahl">TEMPORAL_ARB sports filter wired — 12/18 past winners were sports leaks</div></div>
+  <div class="ac"><div class="ahl">Fri + Sat auto-skip — +$654 backtest delta, only validated rule change</div></div>
+  <div class="ac"><div class="ahl">8 dead RSS feeds removed — Reuters×3, AP, Politico, Sky World, Haaretz, CoinDesk</div></div>
+  <div class="ac"><div class="ahl">pnl_usd populated on close — 598 historical backfilled, new closes now correct</div></div>
+  <div class="ac"><div class="ahl">Polygon RPC failover — 3 fallback endpoints (polygon-rpc.com started 401-ing)</div></div>
+  <div class="ac"><div class="ahl">ANTHROPIC_API_KEY wired to launchd — daily audit + LLM estimator re-enabled</div></div>
+</div>
+
+<h3 style="margin-top:24px">Positions opened since cutover</h3>
+<div id="sincelive-positions" class="loading">Loading...</div>
+
+<h3 style="margin-top:24px">Live wallet (read-only pull)</h3>
+<div id="sincelive-wallet" class="loading">Loading...</div>
 </div>
 
 <!-- PLAYS -->
@@ -413,6 +473,11 @@ tr:hover td{background:#0f172a}
 
 <script>
 let DATA = null;
+
+// Cutover: when the core Polymarket API credentials came online (read-only data pull).
+// Anything opened / closed after this timestamp is tracked as "since live".
+const LIVE_CUTOVER_ISO = '2026-04-23T18:00:00Z';
+const LIVE_CUTOVER = new Date(LIVE_CUTOVER_ISO);
 
 async function loadData() {
     try {
@@ -3290,6 +3355,70 @@ function renderWhatIf() {
     el.innerHTML = html;
 }
 
+function renderSinceLive() {
+    if (!DATA) return;
+    const positions = (DATA.positions || []);
+    const cutover = LIVE_CUTOVER;
+    const now = new Date();
+    const hoursLive = Math.max(0, (now - cutover) / 3.6e6);
+
+    const sinceOpen = positions.filter(p => {
+        const o = p.opened ? new Date(p.opened) : null;
+        return o && o >= cutover;
+    });
+    const closed = sinceOpen.filter(p => p.status === 'closed' && !p.mistake && !p.flagged);
+    const open = sinceOpen.filter(p => p.status === 'open');
+
+    const pnl = closed.reduce((s, p) => {
+        if (p.pnl_usd != null) return s + Number(p.pnl_usd);
+        const shares = Number(p.shares||0), ep = Number(p.entry_price||0), xp = Number(p.exit_price||0);
+        return s + shares * (xp - ep);
+    }, 0);
+    const stake = closed.reduce((s, p) => s + Number(p.stake||0), 0);
+    const roi = stake > 0 ? (pnl / stake * 100) : 0;
+
+    const el = id => document.getElementById(id);
+    el('sl-hours').textContent = hoursLive.toFixed(1) + 'h';
+    el('sl-opened').textContent = sinceOpen.length;
+    el('sl-closed').textContent = closed.length;
+    el('sl-open').textContent = open.length;
+    const pnlEl = el('sl-pnl');
+    pnlEl.textContent = (pnl >= 0 ? '+$' : '-$') + Math.abs(pnl).toFixed(2);
+    pnlEl.className = 'sv ' + (pnl >= 0 ? '' : 'rd');
+    el('sl-roi').textContent = (roi >= 0 ? '+' : '') + roi.toFixed(1) + '%';
+    el('sl-roi').className = 'sv ' + (roi >= 0 ? 'bl' : 'rd');
+
+    const posEl = el('sincelive-positions');
+    if (sinceOpen.length === 0) {
+        posEl.innerHTML = '<p class="st">No new positions since cutover (Fri+Sat exclusion gate is currently active).</p>';
+    } else {
+        let html = '<table><thead><tr><th>Opened</th><th>Play</th><th>Slug</th><th>Side</th><th>Entry</th><th>Stake</th><th>Status</th><th>P&amp;L</th></tr></thead><tbody>';
+        sinceOpen.slice().sort((a,b) => new Date(b.opened) - new Date(a.opened)).forEach(p => {
+            const tt = p.trade_type || getTradeType(p);
+            const pnlVal = p.pnl_usd != null ? Number(p.pnl_usd) : 0;
+            const pnlStr = p.status === 'closed' ? (pnlVal >= 0 ? '+$' : '-$') + Math.abs(pnlVal).toFixed(2) : '-';
+            const cls = p.status === 'closed' ? (pnlVal >= 0 ? 'up' : 'dn') : 'fl';
+            html += `<tr><td>${fmtDate(p.opened, {rel:true})}</td><td><span class="badge b-n">${tt}</span></td><td style="font-family:monospace;font-size:11px">${escapeHtml((p.slug||'').slice(0,50))}</td><td>${p.side||''}</td><td>${((p.entry_price||0)*100).toFixed(1)}c</td><td>$${(p.stake||0)}</td><td>${p.status||'?'}</td><td class="${cls}">${pnlStr}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        posEl.innerHTML = html;
+    }
+
+    const walletEl = el('sincelive-wallet');
+    const lw = DATA.live_wallet || null;
+    if (lw) {
+        walletEl.innerHTML = `<div class="stats">
+            <div class="stat"><div class="sv gy">$${(lw.usdc_balance||0).toFixed(2)}</div><div class="sl">USDC on Wallet</div></div>
+            <div class="stat"><div class="sv gy">${lw.positions_count||0}</div><div class="sl">Real Positions</div></div>
+            <div class="stat"><div class="sv gy">${lw.trades_total||0}</div><div class="sl">Real Trades Ever</div></div>
+            <div class="stat"><div class="sv gy">${fmtDate(lw.checked_at, {rel:true})}</div><div class="sl">Last Checked</div></div>
+          </div>
+          <p class="st">Wallet: <code style="font-family:monospace">${escapeHtml(lw.wallet||'')}</code>. Polled every 60s via Polymarket data-api (zero auth, zero cost). Populates after SA partner funds wallet + shares signing key.</p>`;
+    } else {
+        walletEl.innerHTML = '<p class="st">Live wallet snapshot not yet in gist — will populate on next scan push.</p>';
+    }
+}
+
 function render() {
     if (!DATA) return;
     const lu = DATA.last_updated ? new Date(DATA.last_updated) : null;
@@ -3297,6 +3426,7 @@ function render() {
         document.getElementById('last-update').innerHTML = 'Updated ' + fmtDate(lu) + ' · ' + fmtDate(lu, {rel:true});
     }
     document.getElementById('scanner-status').textContent = DATA.scanner_status === 'active' ? 'ACTIVE' : 'IDLE';
+    renderSinceLive();
     renderOverview();
     renderPlaysDetail();
     renderPositions();
