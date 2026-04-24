@@ -123,12 +123,14 @@ tr:hover td{background:#0f172a}
     <a class="nl active" onclick="showPage('overview2')">Overview</a>
     <a class="nl" onclick="showPage('suggestions')">Suggestions</a>
     <a class="nl" onclick="showPage('coverage')">Coverage</a>
-    <a class="nl" onclick="showPage('overview')">Overview (old)</a>
     <a class="nl" onclick="showPage('positions')">Positions</a>
     <a class="nl" onclick="showPage('plays')">Plays</a>
     <a class="nl" onclick="showPage('alerts')">Alerts</a>
     <a class="nl" onclick="showPage('lab')">Lab</a>
-    <span class="nav-right">🟢 <span id="scanner-status" class="status-on">LIVE</span> · <span id="last-update">--</span></span>
+    <span class="nav-right">
+      <span id="safety-banner" style="margin-right:12px;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:800;letter-spacing:1px;background:#065f46;color:#d1fae5">PAPER</span>
+      🟢 <span id="scanner-status" class="status-on">LIVE</span> · <span id="last-update">--</span>
+    </span>
   </div>
   <div class="nav-row secondary">
     <span class="nav-section-label">Research</span>
@@ -3524,6 +3526,34 @@ function renderSinceLive() {
     }
 }
 
+function renderSafetyBanner() {
+    const el = document.getElementById('safety-banner');
+    if (!el) return;
+    const s = DATA.safety_status;
+    if (!s) {
+        el.textContent = 'PAPER';
+        el.style.background = '#065f46';
+        el.style.color = '#d1fae5';
+        return;
+    }
+    const mode = s.trading_mode || 'paper';
+    const allowed = !!s.real_trading_allowed;
+    if (mode === 'real' && allowed) {
+        el.textContent = '● LIVE — REAL';
+        el.style.background = '#991b1b';
+        el.style.color = '#fecaca';
+    } else if (mode === 'real' && !allowed) {
+        el.textContent = 'REAL MODE (guards blocked)';
+        el.style.background = '#9a3412';
+        el.style.color = '#fed7aa';
+    } else {
+        el.textContent = 'PAPER';
+        el.style.background = '#065f46';
+        el.style.color = '#d1fae5';
+    }
+    el.title = s.block_reason || 'All guards pass';
+}
+
 function renderLLMBudget() {
     const strip = document.getElementById('llm-budget-strip');
     const line = document.getElementById('llm-budget-line');
@@ -3838,6 +3868,7 @@ function render() {
     renderSinceLive();
     renderOverview2();
     renderSuggestions();
+    renderSafetyBanner();
     renderLLMBudget();
     renderCoverage();
     renderOverview();
