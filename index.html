@@ -148,13 +148,12 @@ tr:hover td{background:#0f172a}
     <span class="nav-section-label">System</span>
     <a class="nl" onclick="showPage('journey')">Journey</a>
     <a class="nl" onclick="showPage('timeline')">Timeline</a>
-    <a class="nl" onclick="showPage('audit')">Daily Audit</a>
+    <a class="nl" onclick="showPage('audit')">Audit</a>
     <a class="nl" onclick="showPage('changes')">Rule Changes</a>
     <a class="nl" onclick="showPage('golive')">Go Live</a>
     <a class="nl" onclick="showPage('whatif')">What If</a>
     <a class="nl" onclick="showPage('backtest')">Backtest</a>
     <a class="nl" onclick="showPage('mistakes')">Mistakes</a>
-    <a class="nl" onclick="showPage('sysaudit')">Audit</a>
     <a class="nl" onclick="showPage('settings')">Settings</a>
   </div>
 </div>
@@ -478,8 +477,15 @@ tr:hover td{background:#0f172a}
 
 <!-- DAILY AUDIT -->
 <div id="page-audit" class="page">
-<h2>Daily Strategy Audit</h2>
-<p class="st">Claude reviews the full portfolio once a day and produces a strategic audit: portfolio health, new strategy ideas grounded in the last 24h of data, alternative ways of positioning, and early-warning watch-outs. Runs via launchd at 09:00 UK time.</p>
+<h2>Audit</h2>
+<p class="st">System health + daily strategy review. System audit runs after every scan. Daily strategy audit runs at 09:00 UK.</p>
+
+<h3 style="margin-top:20px">System Health</h3>
+<p class="st">Automated checks: data integrity, filter logic, stale slugs, launchd agent health, feed responsiveness, P&amp;L reconciliation, Polymarket market state. Anything red needs fixing.</p>
+<div id="sysaudit-content" class="loading">Loading...</div>
+
+<h3 style="margin-top:32px">Daily Strategy Audit</h3>
+<p class="st">Claude reviews the full portfolio once a day: portfolio health, new strategy ideas, alternative positions, watch-outs.</p>
 <div id="audit-content" class="loading">Loading...</div>
 </div>
 
@@ -551,13 +557,6 @@ tr:hover td{background:#0f172a}
 <h2>Caught Mistakes</h2>
 <p class="st">Trades caused by bugs or unintended behaviour, not genuine strategy outcomes. Filtered out of main Overview P&L so we analyse the strategy we INTEND to run. Each entry tagged with the reason we caught it so we remember the lesson. Auto-flagged by <code>~/polyedge/flag_mistakes.py</code>. Manual flag: <code>python3 ~/polyedge/flag_mistakes.py --flag SLUG "reason"</code></p>
 <div id="mistakes-content" class="loading">Loading...</div>
-</div>
-
-<!-- SYSTEM AUDIT -->
-<div id="page-sysaudit" class="page">
-<h2>System Audit</h2>
-<p class="st">Automated checks across the whole stack: data integrity, filter logic, stale slugs, launchd agent health, feed responsiveness, P&L reconciliation, Polymarket market state. Runs after every scan. Anything red needs fixing.</p>
-<div id="sysaudit-content" class="loading">Loading...</div>
 </div>
 
 <!-- SETTINGS -->
@@ -3567,6 +3566,62 @@ function renderLLMBudget() {
     badge.className = within ? 'badge b-g' : 'badge b-r';
 }
 
+// --- SUGGESTIONS action helpers ---
+function suggDismissKey() { return 'polyedge_dismissed_suggestions_v1'; }
+function suggIsDismissed(sig) {
+    try {
+        const raw = localStorage.getItem(suggDismissKey()) || '{}';
+        const d = JSON.parse(raw);
+        return !!d[sig];
+    } catch(e) { return false; }
+}
+function suggDismiss(sig) {
+    try {
+        const raw = localStorage.getItem(suggDismissKey()) || '{}';
+        const d = JSON.parse(raw);
+        d[sig] = new Date().toISOString();
+        localStorage.setItem(suggDismissKey(), JSON.stringify(d));
+    } catch(e) {}
+    renderSuggestions();
+}
+function suggUndismissAll() {
+    localStorage.removeItem(suggDismissKey());
+    renderSuggestions();
+}
+function suggSig(item) {
+    // Stable signature so dismissal persists across rebuilds
+    return (item.title || '') + '|' + (item.category || '') + '|' + ((item.data && item.data.play) || '');
+}
+function suggBuildConfigSnippet(item) {
+    const d = item.data || {};
+    const play = d.play;
+    if (!play) return null;
+    const t = item.title.toLowerCase();
+    if (t.startsWith('scale ')) {
+        return `# polyedge.py: raise PAPER_STAKE for ${play}.\n# Current PAPER_STAKE is shared across plays.\n# Suggestion: add PAPER_STAKE_${play} = ... and use it in the ${play} branch of auto_paper_trade.`;
+    }
+    if (t.startsWith('cut ') || t.startsWith('disable ')) {
+        return `# polyedge.py: disable ${play}.\n# Add near other play flags:\n${play}_ENABLED = False\n# Then gate the ${play} branch in auto_paper_trade with:\n#     if not ${play}_ENABLED: continue`;
+    }
+    if (t.startsWith('tighten') && t.includes('stop-loss')) {
+        return `# polyedge.py: tighten ${play}_STOP_LOSS_PCT by ~5 points.\n# Current values around line 207-234.`;
+    }
+    if (t.startsWith('tighten') && t.includes('entry')) {
+        return `# polyedge.py: raise entry threshold for ${play}.\n# For NEWS_EDGE: PAPER_TRADE_NEWS_MIN_SCORE += 1\n# For SYSTEMATIC_NO: SYSTEMATIC_NO_MAX_YES_PRICE -= 0.02\n# For CRYPTO: CRYPTO_MAX_ENTRY -= 0.05`;
+    }
+    if (t.startsWith('close ') && d.position_id) {
+        return `# Close this position manually:\n# Edit ~/polyedge/positions.json — find id="${d.position_id}"\n# Set status="closed", exit_price=${d.entry}, pnl_usd=0\n# Or use the close-position helper (TODO).`;
+    }
+    return `# Manual action required.\n# See suggestion rationale above.`;
+}
+function copyToClipboard(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.textContent;
+        btn.textContent = '✓ Copied';
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+    });
+}
+
 // --- COVERAGE GAPS — Polymarket movers without news ---
 function renderCoverage() {
     const cg = DATA.coverage_gaps;
@@ -3652,9 +3707,11 @@ function renderSuggestions() {
     document.getElementById('sugg-total').textContent = s.count || 0;
     document.getElementById('sugg-when').textContent = fmtDate(s.generated_at, {rel:true});
 
-    const items = s.suggestions || [];
+    const items = (s.suggestions || []).filter(it => !suggIsDismissed(suggSig(it)));
+    const dismissedCount = (s.suggestions || []).length - items.length;
+
     if (!items.length) {
-        box.innerHTML = '<p class="st">No open suggestions right now. Everything looks healthy.</p>';
+        box.innerHTML = '<p class="st">No open suggestions right now.' + (dismissedCount > 0 ? ` <a onclick="suggUndismissAll()" style="cursor:pointer;color:#60a5fa">Restore ${dismissedCount} dismissed</a>` : '') + '</p>';
         return;
     }
 
@@ -3667,7 +3724,8 @@ function renderSuggestions() {
     const html = items.map((item, idx) => {
         const pColor = priorityColor[item.priority] || '#94a3b8';
         const data = item.data || {};
-        // Render data fields as key→value pairs for transparency
+        const sig = suggSig(item);
+        const sigId = 'sugg-' + btoa(unescape(encodeURIComponent(sig))).replace(/[^a-zA-Z0-9]/g,'').slice(0,16);
         const dataRows = Object.entries(data)
             .filter(([k,v]) => v !== null && v !== undefined && typeof v !== 'object')
             .map(([k,v]) => {
@@ -3682,6 +3740,9 @@ function renderSuggestions() {
                 return `<div class="settings-row"><span class="settings-label" style="font-size:12px">${label}</span><span class="settings-value" style="font-size:12px">${escapeHtml(String(val))}</span></div>`;
             }).join('');
 
+        const snippet = suggBuildConfigSnippet(item);
+        const hasSnippet = snippet !== null;
+
         return `
           <div class="ac" style="border-left:4px solid ${pColor};padding:16px 18px;margin-bottom:12px">
             <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px">
@@ -3690,13 +3751,21 @@ function renderSuggestions() {
                 <span class="badge b-n" style="font-size:10px;margin-right:8px">${categoryLabel[item.category] || item.category}</span>
                 <strong style="font-size:15px">${escapeHtml(item.title)}</strong>
               </div>
+              <div style="display:flex;gap:6px">
+                ${hasSnippet ? `<button class="fb" style="padding:4px 10px;font-size:11px" onclick="copyToClipboard(document.getElementById('${sigId}-snippet').textContent, this)">Copy change</button>` : ''}
+                <button class="fb" style="padding:4px 10px;font-size:11px;background:#334155;color:#cbd5e1;border-color:#475569" onclick="suggDismiss(${JSON.stringify(sig).replace(/"/g,'&quot;')})">Dismiss</button>
+              </div>
             </div>
             <div style="font-size:13px;color:#cbd5e1;line-height:1.55;margin:8px 0">${escapeHtml(item.rationale)}</div>
+            ${hasSnippet ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;color:#94a3b8">Suggested change →</summary><pre id="${sigId}-snippet" style="background:#0a1020;padding:10px;border-radius:6px;font-size:11px;color:#cbd5e1;overflow-x:auto;white-space:pre-wrap;margin-top:6px">${escapeHtml(snippet)}</pre></details>` : ''}
             ${dataRows ? `<details style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;color:#94a3b8">Data →</summary><div class="settings-box" style="margin-top:6px">${dataRows}</div></details>` : ''}
           </div>
         `;
     }).join('');
-    box.innerHTML = html;
+    const footer = dismissedCount > 0
+        ? `<p class="st" style="margin-top:12px;font-size:11px;color:#64748b">${dismissedCount} suggestion(s) dismissed. <a onclick="suggUndismissAll()" style="cursor:pointer">Restore all</a></p>`
+        : '';
+    box.innerHTML = html + footer;
 }
 
 // --- SINCE LIVE play filter ---
