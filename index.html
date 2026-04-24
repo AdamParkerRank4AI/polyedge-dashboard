@@ -148,6 +148,7 @@ tr:hover td{background:#0f172a}
     <span class="nav-section-label">System</span>
     <a class="nl" onclick="showPage('journey')">Journey</a>
     <a class="nl" onclick="showPage('timeline')">Timeline</a>
+    <a class="nl" onclick="showPage('events')">Events</a>
     <a class="nl" onclick="showPage('audit')">Audit</a>
     <a class="nl" onclick="showPage('changes')">Rule Changes</a>
     <a class="nl" onclick="showPage('golive')">Go Live</a>
@@ -476,6 +477,23 @@ tr:hover td{background:#0f172a}
 </div>
 
 <!-- DAILY AUDIT -->
+<!-- EVENTS — unified audit log browser -->
+<div id="page-events" class="page">
+  <h2>Events</h2>
+  <p class="st">Every significant decision and state change logged append-only. Recent events surfaced here; full 30-day history on disk in <code>~/polyedge/data/events/events-YYYY-MM-DD.jsonl</code>.</p>
+  <div class="filter-bar" id="events-filter">
+    <span class="fb active" onclick="filterEvents(this,'ALL')">All</span>
+    <span class="fb" onclick="filterEvents(this,'scan_end')">Scans</span>
+    <span class="fb" onclick="filterEvents(this,'fast_loop_end')">Fast-loop</span>
+    <span class="fb" onclick="filterEvents(this,'news_fired')">News fired</span>
+    <span class="fb" onclick="filterEvents(this,'news_rejected')">News rejected</span>
+    <span class="fb" onclick="filterEvents(this,'wallet_snapshot')">Wallet</span>
+    <span class="fb" onclick="filterEvents(this,'real_order_attempt,real_order_fill,real_order_reject,real_order_error,safety_gate_fail')">Real orders</span>
+    <span class="fb" onclick="filterEvents(this,'suggestion_built,coverage_built')">Builds</span>
+  </div>
+  <div id="events-list" class="loading">Loading...</div>
+</div>
+
 <div id="page-audit" class="page">
 <h2>Audit</h2>
 <p class="st">System health + daily strategy review. System audit runs after every scan. Daily strategy audit runs at 09:00 UK.</p>
@@ -3566,6 +3584,60 @@ function renderLLMBudget() {
     badge.className = within ? 'badge b-g' : 'badge b-r';
 }
 
+// --- EVENTS browser — unified audit log ---
+let EVENTS_FILTER = 'ALL';
+function filterEvents(btn, types) {
+    EVENTS_FILTER = types;
+    document.querySelectorAll('#events-filter .fb').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderEvents();
+}
+const EVENT_COLORS = {
+    scan_end:           '#22c55e',
+    fast_loop_end:      '#06b6d4',
+    news_fired:         '#22c55e',
+    news_rejected:      '#64748b',
+    real_order_attempt: '#f59e0b',
+    real_order_fill:    '#22c55e',
+    real_order_reject:  '#ef4444',
+    real_order_error:   '#ef4444',
+    safety_gate_fail:   '#ef4444',
+    wallet_snapshot:    '#3b82f6',
+    suggestion_built:   '#a855f7',
+    coverage_built:     '#a855f7',
+};
+function renderEvents() {
+    const box = document.getElementById('events-list');
+    if (!box) return;
+    const events = DATA.recent_events || [];
+    if (!events.length) {
+        box.innerHTML = '<p class="st">No events logged yet. Fast-loop runs every 30s; first entries will appear soon.</p>';
+        return;
+    }
+    const types = EVENTS_FILTER === 'ALL' ? null : new Set(EVENTS_FILTER.split(','));
+    const filtered = types ? events.filter(e => types.has(e.type)) : events;
+    if (!filtered.length) {
+        box.innerHTML = `<p class="st">No events of type ${EVENTS_FILTER} in recent window. <a onclick="filterEvents(document.querySelector('#events-filter .fb'),'ALL')">Show all</a></p>`;
+        return;
+    }
+    let html = '<table><thead><tr><th>When</th><th>Type</th><th>Module</th><th>Details</th></tr></thead><tbody>';
+    filtered.slice(0, 200).forEach(e => {
+        const color = EVENT_COLORS[e.type] || '#94a3b8';
+        const details = Object.entries(e)
+            .filter(([k,v]) => !['ts','type','module'].includes(k))
+            .map(([k,v]) => {
+                let display = v;
+                if (typeof v === 'object' && v !== null) display = JSON.stringify(v);
+                if (typeof display === 'string' && display.length > 60) display = display.slice(0,60) + '…';
+                return `<span style="color:#94a3b8">${k}=</span>${escapeHtml(String(display))}`;
+            }).join(' · ');
+        html += `<tr><td style="white-space:nowrap">${fmtDate(e.ts, {rel:true})}</td><td><span class="badge" style="background:${color};color:#0f172a">${e.type}</span></td><td style="color:#94a3b8;font-size:11px">${escapeHtml(e.module||'?')}</td><td style="font-family:monospace;font-size:11px">${details}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    html += `<p class="st" style="margin-top:10px;font-size:11px;color:#64748b">Showing ${Math.min(filtered.length,200)} of ${filtered.length} filtered events. Full 30-day history on disk.</p>`;
+    box.innerHTML = html;
+}
+
 // --- SUGGESTIONS action helpers ---
 function suggDismissKey() { return 'polyedge_dismissed_suggestions_v1'; }
 function suggIsDismissed(sig) {
@@ -3939,6 +4011,7 @@ function render() {
     renderSuggestions();
     renderSafetyBanner();
     renderLLMBudget();
+    renderEvents();
     renderCoverage();
     renderOverview();
     renderPlaysDetail();
