@@ -122,6 +122,7 @@ tr:hover td{background:#0f172a}
     <a class="nl since-live" onclick="showPage('sincelive')">Since Live</a>
     <a class="nl active" onclick="showPage('overview2')">Overview</a>
     <a class="nl" onclick="showPage('suggestions')">Suggestions</a>
+    <a class="nl" onclick="showPage('coverage')">Coverage</a>
     <a class="nl" onclick="showPage('overview')">Overview (old)</a>
     <a class="nl" onclick="showPage('positions')">Positions</a>
     <a class="nl" onclick="showPage('plays')">Plays</a>
@@ -245,6 +246,29 @@ tr:hover td{background:#0f172a}
 
 <h2>Currently Open Positions</h2>
 <div id="overview-open" class="loading">Loading...</div>
+</div>
+
+<!-- COVERAGE — what are we NOT seeing? -->
+<div id="page-coverage" class="page">
+  <h2>Coverage Gaps</h2>
+  <p class="st">Polymarket markets moving with no matching news in our feed. Where the market knows something we don't. Runs hourly.</p>
+  <div class="stats" id="cov-summary">
+    <div class="stat"><div class="sv rd" id="cov-orphans">-</div><div class="sl">Orphan Movers</div></div>
+    <div class="stat"><div class="sv gr" id="cov-covered">-</div><div class="sl">Movers Covered</div></div>
+    <div class="stat"><div class="sv or" id="cov-adds">-</div><div class="sl">Proposed Adds</div></div>
+    <div class="stat"><div class="sv bl" id="cov-x">-</div><div class="sl">X Candidates</div></div>
+    <div class="stat"><div class="sv gy" id="cov-when" style="font-size:14px">-</div><div class="sl">Last Built</div></div>
+  </div>
+
+  <h3 style="margin-top:24px">Orphan movers — big price moves, no news in our stream</h3>
+  <div id="cov-orphans-list" class="loading">Loading...</div>
+
+  <h3 style="margin-top:24px">Proposed additions</h3>
+  <p class="st">Highest-signal accounts / keywords we aren't watching yet. Copy the value, add to the indicated config, reload the agent.</p>
+  <div id="cov-adds-list" class="loading">Loading...</div>
+
+  <h3 style="margin-top:24px">Top Twitter candidates (reach + topic match)</h3>
+  <div id="cov-x-list" class="loading">Loading...</div>
 </div>
 
 <!-- SUGGESTIONS — dynamic "what to change now" list -->
@@ -3488,6 +3512,75 @@ function renderSinceLive() {
     }
 }
 
+// --- COVERAGE GAPS — Polymarket movers without news ---
+function renderCoverage() {
+    const cg = DATA.coverage_gaps;
+    const orphanEl = document.getElementById('cov-orphans-list');
+    const addsEl = document.getElementById('cov-adds-list');
+    const xEl = document.getElementById('cov-x-list');
+    if (!cg) {
+        if (orphanEl) orphanEl.innerHTML = '<p class="st">Coverage tracker has not run yet. Next run: within the hour.</p>';
+        return;
+    }
+    const c = cg.counts || {};
+    document.getElementById('cov-orphans').textContent = c.orphans || 0;
+    document.getElementById('cov-covered').textContent = c.covered || 0;
+    document.getElementById('cov-adds').textContent = c.proposed_adds || 0;
+    document.getElementById('cov-x').textContent = c.twitter_candidates || 0;
+    document.getElementById('cov-when').textContent = fmtDate(cg.generated_at, {rel:true});
+
+    // Orphan movers
+    const orphans = cg.orphan_movers || [];
+    if (!orphans.length) {
+        orphanEl.innerHTML = '<p class="st">✓ Every current mover has a matching news signal. Coverage is complete for now.</p>';
+    } else {
+        let html = '<table><thead><tr><th>24h Move</th><th>Market</th><th>Vol 24h</th><th>Missing keywords</th></tr></thead><tbody>';
+        orphans.forEach(o => {
+            const cls = o.change_24h >= 0 ? 'up' : 'dn';
+            const chg = (o.change_24h*100).toFixed(1) + '%';
+            const kws = (o.missing_keywords || []).slice(0,6).join(', ');
+            html += `<tr><td class="${cls}">${o.change_24h >= 0 ? '+' : ''}${chg}</td><td>${escapeHtml(o.question || o.slug)}</td><td>$${Math.round(o.volume_24h||0).toLocaleString()}</td><td style="font-family:monospace;font-size:11px;color:#94a3b8">${escapeHtml(kws)}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        orphanEl.innerHTML = html;
+    }
+
+    // Proposed adds
+    const adds = cg.proposed_adds || [];
+    if (!adds.length) {
+        addsEl.innerHTML = '<p class="st">No additions proposed this run.</p>';
+    } else {
+        const typeColor = {
+            bluesky_keyword: '#3b82f6',
+            bluesky_handle:  '#06b6d4',
+            twitter_handle:  '#a855f7'
+        };
+        addsEl.innerHTML = adds.map(a => `
+          <div class="ac" style="border-left:4px solid ${typeColor[a.type] || '#94a3b8'};padding:14px 16px;margin-bottom:10px">
+            <div style="display:flex;gap:8px;align-items:baseline;flex-wrap:wrap">
+              <span class="badge b-n" style="font-size:10px">${a.type.replace(/_/g,' ').toUpperCase()}</span>
+              <strong style="font-size:16px;font-family:monospace">${escapeHtml(a.value)}</strong>
+              <span class="st" style="margin:0;font-size:12px">${escapeHtml(a.reason)}</span>
+            </div>
+            <div class="st" style="margin:6px 0 0 0;font-size:11px;color:#64748b">Apply in: <code>${escapeHtml(a.apply_in)}</code></div>
+          </div>
+        `).join('');
+    }
+
+    // Twitter candidates
+    const xs = cg.candidate_x_accounts || [];
+    if (!xs.length) {
+        xEl.innerHTML = '<p class="st">No X candidates surfaced this run.</p>';
+    } else {
+        let html = '<table><thead><tr><th>Handle</th><th>Name</th><th>Followers</th><th>✓</th><th>Sample post</th><th>Orphan market</th></tr></thead><tbody>';
+        xs.forEach(x => {
+            html += `<tr><td style="font-family:monospace"><a href="https://x.com/${escapeHtml(x.handle)}" target="_blank">@${escapeHtml(x.handle)}</a></td><td>${escapeHtml(x.name || '')}</td><td>${(x.followers||0).toLocaleString()}</td><td>${x.verified ? '✓' : ''}</td><td style="font-size:11px;color:#cbd5e1">${escapeHtml((x.sample||'').slice(0,80))}</td><td style="font-family:monospace;font-size:11px">${escapeHtml((x.orphan_market||'').slice(0,30))}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        xEl.innerHTML = html;
+    }
+}
+
 // --- SUGGESTIONS — data-driven change list ---
 function renderSuggestions() {
     const box = document.getElementById('suggestions-list');
@@ -3720,6 +3813,7 @@ function render() {
     renderSinceLive();
     renderOverview2();
     renderSuggestions();
+    renderCoverage();
     renderOverview();
     renderPlaysDetail();
     renderPositions();
