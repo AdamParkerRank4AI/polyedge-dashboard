@@ -252,6 +252,18 @@ tr:hover td{background:#0f172a}
 <div id="page-coverage" class="page">
   <h2>Coverage Gaps</h2>
   <p class="st">Polymarket markets moving with no matching news in our feed. Where the market knows something we don't. Runs hourly.</p>
+
+  <div id="llm-budget-strip" style="background:#111827;border:1px solid #334155;border-radius:10px;padding:12px 16px;margin:10px 0;display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:1.5px;color:#94a3b8;text-transform:uppercase">LLM Daily Budget</div>
+        <div id="llm-budget-line" style="font-size:15px;color:#f1f5f9;margin-top:4px">-</div>
+      </div>
+      <div style="text-align:right">
+        <div id="llm-budget-status" class="badge b-g" style="font-size:11px">-</div>
+      </div>
+    </div>
+  </div>
   <div class="stats" id="cov-summary">
     <div class="stat"><div class="sv rd" id="cov-orphans">-</div><div class="sl">Orphan Movers</div></div>
     <div class="stat"><div class="sv gr" id="cov-covered">-</div><div class="sl">Movers Covered</div></div>
@@ -3512,6 +3524,19 @@ function renderSinceLive() {
     }
 }
 
+function renderLLMBudget() {
+    const strip = document.getElementById('llm-budget-strip');
+    const line = document.getElementById('llm-budget-line');
+    const badge = document.getElementById('llm-budget-status');
+    const b = DATA.llm_budget;
+    if (!b || !strip) return;
+    strip.style.display = '';
+    const within = !!b.within_budget;
+    line.textContent = `$${Number(b.spent_usd).toFixed(4)} of $${Number(b.budget_usd).toFixed(2)} spent · ${b.call_count} calls · $${Number(b.remaining_usd).toFixed(4)} remaining today`;
+    badge.textContent = within ? 'WITHIN BUDGET' : 'BUDGET EXHAUSTED';
+    badge.className = within ? 'badge b-g' : 'badge b-r';
+}
+
 // --- COVERAGE GAPS — Polymarket movers without news ---
 function renderCoverage() {
     const cg = DATA.coverage_gaps;
@@ -3813,6 +3838,7 @@ function render() {
     renderSinceLive();
     renderOverview2();
     renderSuggestions();
+    renderLLMBudget();
     renderCoverage();
     renderOverview();
     renderPlaysDetail();
