@@ -120,7 +120,8 @@ tr:hover td{background:#0f172a}
   <div class="nav-row main">
     <span class="nav-brand">PolyEdge</span>
     <a class="nl since-live" onclick="showPage('sincelive')">Since Live</a>
-    <a class="nl active" onclick="showPage('overview')">Overview</a>
+    <a class="nl active" onclick="showPage('overview2')">Overview</a>
+    <a class="nl" onclick="showPage('overview')">Overview (old)</a>
     <a class="nl" onclick="showPage('positions')">Positions</a>
     <a class="nl" onclick="showPage('plays')">Plays</a>
     <a class="nl" onclick="showPage('alerts')">Alerts</a>
@@ -155,7 +156,7 @@ tr:hover td{background:#0f172a}
 </div>
 
 <!-- OVERVIEW -->
-<div id="page-overview" class="page active">
+<div id="page-overview" class="page">
 
 <!-- Hero TL;DR -->
 <div id="hero-tldr" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:1px solid #334155;border-radius:16px;padding:24px 28px;margin-bottom:24px">
@@ -245,6 +246,41 @@ tr:hover td{background:#0f172a}
 <div id="overview-open" class="loading">Loading...</div>
 </div>
 
+<!-- OVERVIEW 2 — per-play analysis, the main daily view -->
+<div id="page-overview2" class="page active">
+  <!-- Same hero strip as old overview -->
+  <div id="hero-tldr2" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:1px solid #334155;border-radius:16px;padding:24px 28px;margin-bottom:24px">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px">
+      <div>
+        <div style="font-size:12px;font-weight:700;letter-spacing:2px;color:#94a3b8;margin-bottom:6px">POLYEDGE · PAPER TRADING</div>
+        <div id="hero2-headline" style="font-size:28px;font-weight:800;color:#f1f5f9;letter-spacing:-0.5px;line-height:1.2">-</div>
+        <div id="hero2-sub" style="font-size:14px;color:#94a3b8;margin-top:6px">-</div>
+      </div>
+      <div style="display:flex;gap:24px;flex-wrap:wrap">
+        <div style="text-align:right">
+          <div id="hero2-pnl" style="font-size:42px;font-weight:900;letter-spacing:-1px;line-height:1">-</div>
+          <div class="sl">Net P&amp;L</div>
+        </div>
+        <div style="text-align:right">
+          <div id="hero2-roi" style="font-size:42px;font-weight:900;letter-spacing:-1px;line-height:1;color:#3b82f6">-</div>
+          <div class="sl">ROI</div>
+        </div>
+        <div style="text-align:right">
+          <div id="hero2-wr" style="font-size:42px;font-weight:900;letter-spacing:-1px;line-height:1;color:#cbd5e1">-</div>
+          <div class="sl">Win Rate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h2 style="margin-top:8px">Per-Play Analysis</h2>
+  <p class="st">One card per play. This is where we decide to scale, tighten, or cut. Mistakes + lab trades excluded from these numbers.</p>
+  <div id="overview2-playcards" class="loading">Loading...</div>
+
+  <h2 style="margin-top:32px">Currently Open Positions</h2>
+  <div id="overview2-open" class="loading">Loading...</div>
+</div>
+
 <!-- SINCE LIVE -->
 <div id="page-sincelive" class="page">
 <div style="background:linear-gradient(135deg,#064e3b 0%,#0f172a 100%);border:1px solid #22c55e;border-radius:16px;padding:24px 28px;margin-bottom:24px">
@@ -283,6 +319,15 @@ tr:hover td{background:#0f172a}
 </div>
 
 <h3 style="margin-top:24px">Positions opened since cutover</h3>
+<div class="filter-bar" id="sincelive-filters" style="display:none">
+  <span class="fb active" data-play="ALL" onclick="filterSinceLive(this,'ALL')">All</span>
+  <span class="fb" data-play="NEWS_EDGE" onclick="filterSinceLive(this,'NEWS_EDGE')">NEWS_EDGE</span>
+  <span class="fb" data-play="CRYPTO" onclick="filterSinceLive(this,'CRYPTO')">CRYPTO</span>
+  <span class="fb" data-play="BIG_MOVER" onclick="filterSinceLive(this,'BIG_MOVER')">BIG_MOVER</span>
+  <span class="fb" data-play="SYSTEMATIC_NO" onclick="filterSinceLive(this,'SYSTEMATIC_NO')">SYSTEMATIC_NO</span>
+  <span class="fb" data-play="TEMPORAL_ARB" onclick="filterSinceLive(this,'TEMPORAL_ARB')">TEMPORAL_ARB</span>
+  <span class="fb" data-play="TIME_DECAY" onclick="filterSinceLive(this,'TIME_DECAY')">TIME_DECAY (disabled)</span>
+</div>
 <div id="sincelive-positions" class="loading">Loading...</div>
 
 <h3 style="margin-top:24px">Live wallet (read-only pull)</h3>
@@ -3388,12 +3433,21 @@ function renderSinceLive() {
     el('sl-roi').textContent = (roi >= 0 ? '+' : '') + roi.toFixed(1) + '%';
     el('sl-roi').className = 'sv ' + (roi >= 0 ? 'bl' : 'rd');
 
+    const filterBar = document.getElementById('sincelive-filters');
+    if (filterBar) filterBar.style.display = sinceOpen.length > 0 ? 'flex' : 'none';
+
     const posEl = el('sincelive-positions');
+    const filtered = (typeof SINCELIVE_FILTER !== 'undefined' && SINCELIVE_FILTER !== 'ALL')
+        ? sinceOpen.filter(p => (p.trade_type || getTradeType(p)) === SINCELIVE_FILTER)
+        : sinceOpen;
+
     if (sinceOpen.length === 0) {
         posEl.innerHTML = '<p class="st">No new positions since cutover (Fri+Sat exclusion gate is currently active).</p>';
+    } else if (filtered.length === 0) {
+        posEl.innerHTML = `<p class="st">No ${SINCELIVE_FILTER} positions since cutover. <a onclick="filterSinceLive(document.querySelector('#sincelive-filters .fb'),'ALL')">Show all</a></p>`;
     } else {
         let html = '<table><thead><tr><th>Opened</th><th>Play</th><th>Slug</th><th>Side</th><th>Entry</th><th>Stake</th><th>Status</th><th>P&amp;L</th></tr></thead><tbody>';
-        sinceOpen.slice().sort((a,b) => new Date(b.opened) - new Date(a.opened)).forEach(p => {
+        filtered.slice().sort((a,b) => new Date(b.opened) - new Date(a.opened)).forEach(p => {
             const tt = p.trade_type || getTradeType(p);
             const pnlVal = p.pnl_usd != null ? Number(p.pnl_usd) : 0;
             const pnlStr = p.status === 'closed' ? (pnlVal >= 0 ? '+$' : '-$') + Math.abs(pnlVal).toFixed(2) : '-';
@@ -3419,6 +3473,165 @@ function renderSinceLive() {
     }
 }
 
+// --- SINCE LIVE play filter ---
+let SINCELIVE_FILTER = 'ALL';
+function filterSinceLive(btn, play) {
+    SINCELIVE_FILTER = play;
+    document.querySelectorAll('#sincelive-filters .fb').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderSinceLive();
+}
+
+// --- OVERVIEW 2 — per-play analysis, the new main view ---
+
+function pctFmt(v, digits=1) {
+    if (v == null || isNaN(v)) return '-';
+    const sign = v >= 0 ? '+' : '';
+    return sign + Number(v).toFixed(digits) + '%';
+}
+function dollarFmt(v, digits=2) {
+    if (v == null || isNaN(v)) return '-';
+    const sign = v >= 0 ? '+$' : '-$';
+    return sign + Math.abs(Number(v)).toFixed(digits);
+}
+
+function renderOverview2() {
+    if (!DATA) return;
+    const allPositions = DATA.positions || [];
+    const positions = allPositions.filter(p => !p.lab && !p.mistake);
+
+    // Overall hero stats (mirror renderOverview logic)
+    let wins = 0, losses = 0, pnl = 0, stake = 0, openStake = 0, openCount = 0;
+    positions.forEach(p => {
+        if (p.status === 'closed' && p.exit_price != null) {
+            const s = Number(p.stake) || 0;
+            const ret = (Number(p.shares) || 0) * Number(p.exit_price);
+            const pp = (p.pnl_usd != null) ? Number(p.pnl_usd) : (ret - s);
+            stake += s;
+            pnl += pp;
+            if (pp > 0) wins++; else if (pp < 0) losses++;
+        } else if (p.status === 'open') {
+            openCount++;
+            openStake += Number(p.stake) || 0;
+        }
+    });
+    const wr = (wins + losses) > 0 ? (wins / (wins + losses) * 100) : 0;
+    const roi = stake > 0 ? (pnl / stake * 100) : 0;
+
+    const heroPnl = document.getElementById('hero2-pnl');
+    heroPnl.textContent = dollarFmt(pnl);
+    heroPnl.style.color = pnl >= 0 ? '#22c55e' : '#ef4444';
+    document.getElementById('hero2-roi').textContent = pctFmt(roi);
+    document.getElementById('hero2-roi').style.color = roi >= 0 ? '#3b82f6' : '#ef4444';
+    document.getElementById('hero2-wr').textContent = wr.toFixed(0) + '%';
+    document.getElementById('hero2-headline').textContent = `${wins + losses} closed · ${openCount} open · ${mistakeCountSafe()} mistakes excluded`;
+    document.getElementById('hero2-sub').textContent = `${openCount} positions worth $${openStake.toFixed(0)} still riding. Click any play below to review its TP/SL and scale decision.`;
+
+    // Per-play aggregation
+    const settings = (DATA.settings || {}).plays || {};
+    const playNames = ['NEWS_EDGE', 'CRYPTO', 'BIG_MOVER', 'TEMPORAL_ARB', 'SYSTEMATIC_NO', 'TIME_DECAY'];
+    const byPlay = {};
+    playNames.forEach(n => byPlay[n] = {name:n, w:0, l:0, pnl:0, stake:0, open:0, openStake:0, samples:[], latest:[]});
+
+    positions.forEach(p => {
+        const t = (p.trade_type || getTradeType(p));
+        if (!byPlay[t]) return;
+        const s = Number(p.stake) || 0;
+        if (p.status === 'closed' && p.exit_price != null) {
+            const ret = (Number(p.shares) || 0) * Number(p.exit_price);
+            const pp = (p.pnl_usd != null) ? Number(p.pnl_usd) : (ret - s);
+            byPlay[t].stake += s;
+            byPlay[t].pnl += pp;
+            if (pp > 0) byPlay[t].w++; else if (pp < 0) byPlay[t].l++;
+            byPlay[t].samples.push({slug:p.slug, question:p.question, side:p.side, entry:p.entry_price, exit:p.exit_price, pnl:pp, closed:p.closed});
+        } else if (p.status === 'open') {
+            byPlay[t].open++;
+            byPlay[t].openStake += s;
+        }
+    });
+
+    // Read scenarios for recommended TP/SL
+    const scenarios = DATA.scenarios || {};
+    const recommended = scenarios.recommended_tp_sl || scenarios.tp_sl_recommendations || {};
+
+    // Render the cards
+    const rows = playNames.map(name => {
+        const p = byPlay[name];
+        const closed = p.w + p.l;
+        const roi = p.stake > 0 ? (p.pnl / p.stake * 100) : 0;
+        const winRate = closed > 0 ? (p.w / closed * 100) : 0;
+        const avgWin = p.w > 0 ? (p.pnl + Math.abs(p.l * 1)) / p.w : 0;  // approximate
+        const cfg = settings[name] || {};
+        const enabled = (cfg.enabled !== false);
+        const tp = cfg.take_profit_pct;
+        const sl = cfg.stop_loss_pct;
+        const rec = recommended[name] || {};
+        const recTp = rec.tp_recommended != null ? rec.tp_recommended : (rec.take_profit_pct);
+        const recSl = rec.sl_recommended != null ? rec.sl_recommended : (rec.stop_loss_pct);
+
+        // Verdict badge
+        let verdict = 'HOLD';
+        let verdictCls = 'b-n';
+        if (!enabled) { verdict = 'DISABLED'; verdictCls = 'b-r'; }
+        else if (p.pnl > 50 && roi > 5) { verdict = 'SCALE'; verdictCls = 'b-g'; }
+        else if (p.pnl < -50 && roi < -2) { verdict = 'CUT OR TIGHTEN'; verdictCls = 'b-o'; }
+        else if (closed < 15) { verdict = 'TOO EARLY'; verdictCls = 'b-t'; }
+
+        const latest = p.samples.sort((a,b) => (b.closed||'').localeCompare(a.closed||'')).slice(0,3);
+        const latestHtml = latest.map(s => {
+            const won = s.pnl > 0;
+            return `<div class="mr"><span class="mq">${escapeHtml((s.question||s.slug||'').slice(0,50))}</span><span class="mp" style="color:${won?'#22c55e':'#ef4444'}">${dollarFmt(s.pnl)}</span></div>`;
+        }).join('');
+
+        const tpSlLine = (tp != null && sl != null)
+            ? `Current TP/SL: <strong>${tp}% / ${sl}%</strong>` + (recTp != null || recSl != null ? ` → recommended <strong style="color:#f59e0b">${recTp ?? tp}% / ${recSl ?? sl}%</strong>` : '')
+            : 'TP/SL not configured';
+
+        const cardColor = name==='NEWS_EDGE' ? '#22c55e' : name==='CRYPTO' ? '#f59e0b' : name==='BIG_MOVER' ? '#a855f7' : name==='TEMPORAL_ARB' ? '#06b6d4' : name==='SYSTEMATIC_NO' ? '#3b82f6' : '#6b7280';
+
+        return `
+          <div class="play-card" style="border-left-color:${cardColor};opacity:${enabled?1:0.65}">
+            <div class="play-head">
+              <div class="play-title">${name}</div>
+              <span class="badge ${verdictCls}">${verdict}</span>
+            </div>
+            <div class="play-desc">${escapeHtml(cfg.description || '')}</div>
+            <div class="play-rules">${tpSlLine}</div>
+            <div class="play-stats">
+              <div class="ps"><div class="ps-v ${p.pnl>=0?'gr':'rd'}">${dollarFmt(p.pnl,0)}</div><div class="ps-l">P&amp;L</div></div>
+              <div class="ps"><div class="ps-v ${roi>=0?'gr':'rd'}">${pctFmt(roi)}</div><div class="ps-l">ROI</div></div>
+              <div class="ps"><div class="ps-v bl">${winRate.toFixed(0)}%</div><div class="ps-l">Win Rate</div></div>
+              <div class="ps"><div class="ps-v gy">${closed}</div><div class="ps-l">Closed</div></div>
+              <div class="ps"><div class="ps-v gy">${p.open}</div><div class="ps-l">Open</div></div>
+              <div class="ps"><div class="ps-v gy">$${p.openStake.toFixed(0)}</div><div class="ps-l">Open $</div></div>
+            </div>
+            ${latest.length > 0 ? `<div style="margin-top:10px;border-top:1px dashed #334155;padding-top:10px"><div class="st" style="margin-bottom:4px;font-size:10px;letter-spacing:1px;text-transform:uppercase">Recent closes</div>${latestHtml}</div>` : ''}
+          </div>
+        `;
+    }).join('');
+    document.getElementById('overview2-playcards').innerHTML = `<div class="plays-grid">${rows}</div>`;
+
+    // Open positions list
+    const opens = positions.filter(p => p.status === 'open').sort((a,b) => (b.opened||'').localeCompare(a.opened||''));
+    const openEl = document.getElementById('overview2-open');
+    if (!opens.length) {
+        openEl.innerHTML = '<p class="st">No open positions.</p>';
+    } else {
+        let html = '<table><thead><tr><th>Play</th><th>Slug</th><th>Side</th><th>Entry</th><th>Stake</th><th>Opened</th></tr></thead><tbody>';
+        opens.slice(0, 30).forEach(p => {
+            const tt = p.trade_type || getTradeType(p);
+            html += `<tr><td><span class="badge b-n">${tt}</span></td><td style="font-family:monospace;font-size:11px">${escapeHtml((p.slug||'').slice(0,50))}</td><td>${p.side||''}</td><td>${((p.entry_price||0)*100).toFixed(1)}c</td><td>$${p.stake||0}</td><td>${fmtDate(p.opened,{rel:true})}</td></tr>`;
+        });
+        if (opens.length > 30) html += `<tr><td colspan="6" class="st" style="text-align:center">... and ${opens.length - 30} more. See Positions tab.</td></tr>`;
+        html += '</tbody></table>';
+        openEl.innerHTML = html;
+    }
+}
+
+function mistakeCountSafe() {
+    return ((DATA.positions || []).filter(p => p.mistake)).length;
+}
+
 function render() {
     if (!DATA) return;
     const lu = DATA.last_updated ? new Date(DATA.last_updated) : null;
@@ -3427,6 +3640,7 @@ function render() {
     }
     document.getElementById('scanner-status').textContent = DATA.scanner_status === 'active' ? 'ACTIVE' : 'IDLE';
     renderSinceLive();
+    renderOverview2();
     renderOverview();
     renderPlaysDetail();
     renderPositions();
