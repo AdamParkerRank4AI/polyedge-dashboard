@@ -346,36 +346,8 @@ tr:hover td{background:#0f172a}
   </div>
 </div>
 
-<!-- Phase 1 vs Phase 2 split — splits the cutover window at PHASE_2_START -->
-<div id="phase-split" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px">
-  <div style="background:#1e293b;border:1px solid #334155;border-radius:14px;padding:18px">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-      <span class="badge" style="background:#475569;color:#cbd5e1">DAY 1-2</span>
-      <strong id="p1-title" style="font-size:14px;color:#cbd5e1">Initial period</strong>
-    </div>
-    <div id="p1-window" class="st" style="margin-bottom:12px;font-size:11px">-</div>
-    <div class="stats">
-      <div class="stat" style="background:#0f172a"><div class="sv" id="p1-pnl">-</div><div class="sl">P&amp;L</div></div>
-      <div class="stat" style="background:#0f172a"><div class="sv bl" id="p1-roi">-</div><div class="sl">ROI</div></div>
-      <div class="stat" style="background:#0f172a"><div class="sv gy" id="p1-closed">-</div><div class="sl">Closed</div></div>
-      <div class="stat" style="background:#0f172a"><div class="sv gy" id="p1-wr">-</div><div class="sl">Win Rate</div></div>
-    </div>
-  </div>
-  <div style="background:#1e293b;border:1px solid #22c55e;border-radius:14px;padding:18px">
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
-      <span class="badge b-g">PHASE 2 — WITH CHANGES</span>
-      <strong id="p2-title" style="font-size:14px;color:#cbd5e1">Post tuning</strong>
-    </div>
-    <div id="p2-window" class="st" style="margin-bottom:12px;font-size:11px">-</div>
-    <div class="stats">
-      <div class="stat" style="background:#0f172a"><div class="sv" id="p2-pnl">-</div><div class="sl">P&amp;L</div></div>
-      <div class="stat" style="background:#0f172a"><div class="sv bl" id="p2-roi">-</div><div class="sl">ROI</div></div>
-      <div class="stat" style="background:#0f172a"><div class="sv gy" id="p2-closed">-</div><div class="sl">Closed</div></div>
-      <div class="stat" style="background:#0f172a"><div class="sv gy" id="p2-wr">-</div><div class="sl">Win Rate</div></div>
-    </div>
-  </div>
-</div>
-<div id="phase-changes" style="background:#0f172a;border:1px dashed #334155;border-radius:10px;padding:12px 14px;margin-bottom:18px;font-size:12px;color:#cbd5e1">-</div>
+<!-- Phases — one panel per config window. Renders dynamically from DATA.phases. -->
+<div id="phases-grid" style="display:grid;gap:14px;margin-bottom:18px"></div>
 
 <div class="stats" id="sincelive-stats">
   <div class="stat"><div class="sv gy" id="sl-hours">-</div><div class="sl">Hours Live (total)</div></div>
@@ -3506,7 +3478,6 @@ function renderSinceLive() {
     if (!DATA) return;
     const positions = (DATA.positions || []);
     const cutover = LIVE_CUTOVER;
-    const phase2Start = DATA.phase_2_start ? new Date(DATA.phase_2_start) : null;
     const now = new Date();
     const hoursLive = Math.max(0, (now - cutover) / 3.6e6);
 
@@ -3515,7 +3486,6 @@ function renderSinceLive() {
         return o && o >= cutover;
     });
 
-    // Phase split (excluding lab + mistakes — clean book only)
     function phaseStats(start, end) {
         const ps = sinceOpen.filter(p => {
             if (p.lab || p.mistake || p.flagged) return false;
@@ -3543,46 +3513,63 @@ function renderSinceLive() {
         };
     }
 
-    if (phase2Start) {
-        const p1 = phaseStats(cutover, phase2Start);
-        const p2 = phaseStats(phase2Start, null);
-        const fmtH = (start, end) => {
-            const eDate = end || now;
-            const hrs = (eDate - start) / 3.6e6;
-            return `${start.toISOString().slice(5,16).replace('T',' ')} → ${(end||now).toISOString().slice(5,16).replace('T',' ')} · ${hrs.toFixed(1)}h`;
-        };
-        document.getElementById('p1-window').textContent = fmtH(cutover, phase2Start);
-        document.getElementById('p2-window').textContent = fmtH(phase2Start, null);
-
-        const setP = (prefix, ph) => {
-            const pnlEl = document.getElementById(prefix+'-pnl');
-            pnlEl.textContent = (ph.pnl >= 0 ? '+$' : '-$') + Math.abs(ph.pnl).toFixed(2);
-            pnlEl.style.color = ph.pnl >= 0 ? '#22c55e' : '#ef4444';
-            const roiEl = document.getElementById(prefix+'-roi');
-            roiEl.textContent = (ph.roi >= 0 ? '+' : '') + ph.roi.toFixed(1) + '%';
-            roiEl.style.color = ph.roi >= 0 ? '#3b82f6' : '#ef4444';
-            document.getElementById(prefix+'-closed').textContent = ph.closed + ' (' + ph.count + ' total)';
-            document.getElementById(prefix+'-wr').textContent = ph.wr.toFixed(0) + '%';
-        };
-        setP('p1', p1);
-        setP('p2', p2);
-
-        // Render the change list under the phases
-        const changes = DATA.phase_changes || [];
-        if (changes.length) {
-            const items = changes.map(c => {
-                const dets = (c.details||[]).map(d => `<li style="margin:3px 0">${escapeHtml(d)}</li>`).join('');
-                return `<div><strong>${fmtDate(c.ts, {dateOnly:true})} — ${escapeHtml(c.label)}</strong><ul style="margin:4px 0 0 18px;color:#94a3b8;font-size:11px;list-style:disc">${dets}</ul></div>`;
-            }).join('<div style="height:8px"></div>');
-            document.getElementById('phase-changes').innerHTML =
-                `<div style="font-weight:700;font-size:11px;letter-spacing:1.5px;color:#94a3b8;margin-bottom:6px">CHANGES SHIPPED</div>${items}`;
-        } else {
-            document.getElementById('phase-changes').style.display = 'none';
-        }
-    } else {
-        document.getElementById('phase-split').style.display = 'none';
-        document.getElementById('phase-changes').style.display = 'none';
+    // Render N phase panels from DATA.phases (back-compat with old phase_2_start pair)
+    let phases = DATA.phases || [];
+    if (!phases.length && DATA.phase_2_start) {
+        phases = [
+            {n:1, label:"Initial", start: cutover.toISOString(), end: DATA.phase_2_start, changes_at_start: []},
+            {n:2, label:"With changes", start: DATA.phase_2_start, end: null, changes_at_start: []},
+        ];
     }
+
+    const grid = document.getElementById('phases-grid');
+    if (!grid) return;
+    if (!phases.length) { grid.innerHTML = ''; return; }
+
+    // Layout: 2 phases = 2 cols, 3 phases = 3 cols (squishes on mobile but acceptable), 4+ = 2 cols
+    const cols = phases.length === 3 ? 3 : 2;
+    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    const isCurrent = ph => !ph.end;
+
+    grid.innerHTML = phases.map(ph => {
+        const start = new Date(ph.start);
+        const end = ph.end ? new Date(ph.end) : null;
+        const stats = phaseStats(start, end);
+        const hours = ((end || now) - start) / 3.6e6;
+        const window = `${start.toISOString().slice(5,16).replace('T',' ')} → ${(end||now).toISOString().slice(5,16).replace('T',' ')} · ${hours.toFixed(1)}h`;
+        const tooShort = stats.closed < 3;
+        const borderColor = isCurrent(ph) ? '#22c55e' : (tooShort ? '#475569' : '#334155');
+        const badgeBg = isCurrent(ph) ? '#064e3b' : (tooShort ? '#3f3f46' : '#475569');
+        const badgeColor = isCurrent(ph) ? '#6ee7b7' : '#cbd5e1';
+        const badgeText = isCurrent(ph) ? `PHASE ${ph.n} — ACTIVE` : `PHASE ${ph.n}${tooShort ? ' — too short' : ''}`;
+        const pnlSign = stats.pnl >= 0 ? '+$' : '-$';
+        const pnlColor = stats.pnl >= 0 ? '#22c55e' : '#ef4444';
+        const roiColor = stats.roi >= 0 ? '#3b82f6' : '#ef4444';
+        const roiSign = stats.roi >= 0 ? '+' : '';
+
+        const changesHtml = (ph.changes_at_start || []).map(c =>
+            `<li style="margin:3px 0">${escapeHtml(c)}</li>`).join('');
+        const changesBlock = changesHtml
+            ? `<details style="margin-top:10px;border-top:1px dashed #334155;padding-top:10px"><summary style="cursor:pointer;font-size:11px;color:#94a3b8">Changes that started this phase →</summary><ul style="margin:6px 0 0 18px;color:#cbd5e1;font-size:11px;list-style:disc">${changesHtml}</ul></details>`
+            : '';
+
+        return `
+          <div style="background:#1e293b;border:1px solid ${borderColor};border-radius:14px;padding:18px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <span class="badge" style="background:${badgeBg};color:${badgeColor}">${badgeText}</span>
+              <strong style="font-size:14px;color:#cbd5e1">${escapeHtml(ph.label || '')}</strong>
+            </div>
+            <div class="st" style="margin-bottom:12px;font-size:11px">${window}</div>
+            <div class="stats">
+              <div class="stat" style="background:#0f172a"><div class="sv" style="color:${pnlColor}">${pnlSign}${Math.abs(stats.pnl).toFixed(2)}</div><div class="sl">P&amp;L</div></div>
+              <div class="stat" style="background:#0f172a"><div class="sv" style="color:${roiColor}">${roiSign}${stats.roi.toFixed(1)}%</div><div class="sl">ROI</div></div>
+              <div class="stat" style="background:#0f172a"><div class="sv gy">${stats.closed} <span style="font-size:11px;color:#64748b">(${stats.count})</span></div><div class="sl">Closed</div></div>
+              <div class="stat" style="background:#0f172a"><div class="sv gy">${stats.wr.toFixed(0)}%</div><div class="sl">Win Rate</div></div>
+            </div>
+            ${changesBlock}
+          </div>
+        `;
+    }).join('');
 
     const closed = sinceOpen.filter(p => p.status === 'closed' && !p.mistake && !p.flagged);
     const open = sinceOpen.filter(p => p.status === 'open');
