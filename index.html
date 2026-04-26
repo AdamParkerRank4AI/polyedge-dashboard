@@ -274,6 +274,16 @@ tr:hover td{background:#0f172a}
     <div class="stat"><div class="sv gy" id="cov-when" style="font-size:14px">-</div><div class="sl">Last Built</div></div>
   </div>
 
+  <h3 style="margin-top:24px">Missed alpha — arbitrage opportunities we saw but didn't act on</h3>
+  <p class="st">Neg-risk arbs (multi-outcome markets where sum of YES prices ≠ 1) detected but not traded. Multi-leg execution requires real wallet — surfaces here for awareness only.</p>
+  <div class="stats" id="missed-alpha-stats">
+    <div class="stat"><div class="sv gy" id="ma-events">-</div><div class="sl">Unique events (7d)</div></div>
+    <div class="stat"><div class="sv gr" id="ma-profit">-</div><div class="sl">Est. capture if taken</div></div>
+    <div class="stat"><div class="sv or" id="ma-bigedges">-</div><div class="sl">5%+ edge events</div></div>
+    <div class="stat"><div class="sv bl" id="ma-traded">-</div><div class="sl">Actually traded</div></div>
+  </div>
+  <div id="missed-alpha-list" class="loading">Loading...</div>
+
   <h3 style="margin-top:24px">Orphan movers — big price moves, no news in our stream</h3>
   <div id="cov-orphans-list" class="loading">Loading...</div>
 
@@ -3784,6 +3794,42 @@ function copyToClipboard(text, btn) {
     });
 }
 
+// --- MISSED ALPHA — neg-risk arbs we never traded ---
+function renderMissedAlpha() {
+    const ma = DATA.missed_alpha;
+    const eEl = document.getElementById('ma-events');
+    if (!eEl) return;
+    if (!ma || !ma.neg_risk) {
+        eEl.textContent = '-';
+        document.getElementById('missed-alpha-list').innerHTML = '<p class="st">Missed alpha tracker hasn\'t run yet.</p>';
+        return;
+    }
+    const nr = ma.neg_risk;
+    eEl.textContent = nr.unique_events || 0;
+    const profit = nr.total_est_profit_if_taken || 0;
+    const pEl = document.getElementById('ma-profit');
+    pEl.textContent = '$' + profit.toFixed(2);
+    pEl.style.color = profit > 0 ? '#22c55e' : '#cbd5e1';
+    document.getElementById('ma-bigedges').textContent = nr.events_with_5pct_edge || 0;
+    document.getElementById('ma-traded').textContent = '0';
+
+    const top = nr.top_10_by_capture || [];
+    const list = document.getElementById('missed-alpha-list');
+    if (!top.length) {
+        list.innerHTML = '<p class="st">No arbitrage opportunities in window.</p>';
+        return;
+    }
+    let html = '<table><thead><tr><th>Title</th><th>Outcomes</th><th>Max edge</th><th>Vol 24h</th><th>Duration</th><th>Est. capture</th></tr></thead><tbody>';
+    top.forEach(s => {
+        html += `<tr><td>${escapeHtml(s.title || '?')}</td><td>${s.num_outcomes || '?'}</td><td>${(s.max_edge_pct||0).toFixed(2)}%</td><td>$${Math.round(s.volume_24h||0).toLocaleString()}</td><td>${(s.duration_hours||0).toFixed(1)}h</td><td class="up">$${(s.est_profit_if_taken_usd||0).toFixed(2)}</td></tr>`;
+    });
+    html += '</tbody></table>';
+    if (nr._caveats && nr._caveats.length) {
+        html += '<p class="st" style="margin-top:8px;font-size:11px">Caveats: ' + nr._caveats.map(c => escapeHtml(c)).join(' · ') + '</p>';
+    }
+    list.innerHTML = html;
+}
+
 // --- COVERAGE GAPS — Polymarket movers without news ---
 function renderCoverage() {
     const cg = DATA.coverage_gaps;
@@ -4102,6 +4148,7 @@ function render() {
     renderSafetyBanner();
     renderLLMBudget();
     renderEvents();
+    renderMissedAlpha();
     renderCoverage();
     renderOverview();
     renderPlaysDetail();
