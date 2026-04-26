@@ -3496,6 +3496,20 @@ function renderSinceLive() {
         return o && o >= cutover;
     });
 
+    // Apply CURRENT rules retroactively — would today's filters have allowed
+    // each historical position? Returns true if we'd still trade it under
+    // Phase 4 rules (TIME_DECAY off, SYSTEMATIC_NO off, NEWS_EDGE 0.08-0.40,
+    // CRYPTO <=0.50, BIG_MOVER 0.30-0.50).
+    function passesCurrentRules(p) {
+        const tt = p.trade_type || getTradeType(p);
+        const e = Number(p.entry_price || 0);
+        if (tt === 'TIME_DECAY' || tt === 'SYSTEMATIC_NO') return false;
+        if (tt === 'NEWS_EDGE' && (e < 0.08 || e > 0.40)) return false;
+        if (tt === 'CRYPTO' && e > 0.50) return false;
+        if (tt === 'BIG_MOVER' && (e < 0.30 || e > 0.50)) return false;
+        return true;
+    }
+
     function phaseStats(start, end) {
         const ps = sinceOpen.filter(p => {
             if (p.lab || p.mistake || p.flagged) return false;
@@ -3506,12 +3520,16 @@ function renderSinceLive() {
         });
         const closed = ps.filter(p => p.status === 'closed' && p.exit_price != null);
         let pnl = 0, stake = 0, wins = 0, losses = 0;
+        // Hypothetical: what closed P&L would have been if Phase 4 rules applied
+        let hyp_pnl = 0, hyp_kept = 0, hyp_excluded = 0;
         closed.forEach(p => {
             const pp = (p.pnl_usd != null) ? Number(p.pnl_usd) :
                        Number(p.shares||0) * (Number(p.exit_price||0) - Number(p.entry_price||0));
             pnl += pp;
             stake += Number(p.stake||0);
             if (pp > 0) wins++; else if (pp < 0) losses++;
+            if (passesCurrentRules(p)) { hyp_pnl += pp; hyp_kept++; }
+            else { hyp_excluded++; }
         });
         return {
             count: ps.length,
@@ -3520,6 +3538,10 @@ function renderSinceLive() {
             pnl, stake,
             roi: stake > 0 ? (pnl/stake*100) : 0,
             wr: (wins+losses) > 0 ? (wins/(wins+losses)*100) : 0,
+            hyp_pnl,
+            hyp_kept,
+            hyp_excluded,
+            hyp_delta: hyp_pnl - pnl,
         };
     }
 
@@ -3563,6 +3585,25 @@ function renderSinceLive() {
             ? `<details style="margin-top:10px;border-top:1px dashed #334155;padding-top:10px"><summary style="cursor:pointer;font-size:11px;color:#94a3b8">Changes that started this phase →</summary><ul style="margin:6px 0 0 18px;color:#cbd5e1;font-size:11px;list-style:disc">${changesHtml}</ul></details>`
             : '';
 
+        // Hypothetical block: only show for non-current phases (where the question makes sense)
+        let hypBlock = '';
+        if (!isCurrent(ph) && stats.closed > 0) {
+            const hypSign = stats.hyp_pnl >= 0 ? '+$' : '-$';
+            const hypColor = stats.hyp_pnl >= 0 ? '#22c55e' : '#ef4444';
+            const deltaSign = stats.hyp_delta >= 0 ? '+$' : '-$';
+            const deltaColor = stats.hyp_delta >= 0 ? '#22c55e' : '#ef4444';
+            hypBlock = `
+              <div style="margin-top:12px;padding-top:10px;border-top:1px dashed #334155">
+                <div style="font-size:10px;font-weight:700;letter-spacing:1.5px;color:#94a3b8;text-transform:uppercase;margin-bottom:6px">If Phase 4 rules had been live in this window</div>
+                <div style="display:flex;gap:14px;font-size:13px;align-items:baseline">
+                  <span><strong style="color:${hypColor}">${hypSign}${Math.abs(stats.hyp_pnl).toFixed(2)}</strong> <span class="st" style="font-size:11px">hypothetical</span></span>
+                  <span style="color:${deltaColor};font-weight:700">${deltaSign}${Math.abs(stats.hyp_delta).toFixed(2)}</span>
+                  <span class="st" style="font-size:11px">delta · ${stats.hyp_kept} kept · ${stats.hyp_excluded} blocked</span>
+                </div>
+              </div>
+            `;
+        }
+
         return `
           <div style="background:#1e293b;border:1px solid ${borderColor};border-radius:14px;padding:18px">
             <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
@@ -3571,11 +3612,12 @@ function renderSinceLive() {
             </div>
             <div class="st" style="margin-bottom:12px;font-size:11px">${window}</div>
             <div class="stats">
-              <div class="stat" style="background:#0f172a"><div class="sv" style="color:${pnlColor}">${pnlSign}${Math.abs(stats.pnl).toFixed(2)}</div><div class="sl">P&amp;L</div></div>
+              <div class="stat" style="background:#0f172a"><div class="sv" style="color:${pnlColor}">${pnlSign}${Math.abs(stats.pnl).toFixed(2)}</div><div class="sl">Actual P&amp;L</div></div>
               <div class="stat" style="background:#0f172a"><div class="sv" style="color:${roiColor}">${roiSign}${stats.roi.toFixed(1)}%</div><div class="sl">ROI</div></div>
               <div class="stat" style="background:#0f172a"><div class="sv gy">${stats.closed} <span style="font-size:11px;color:#64748b">(${stats.count})</span></div><div class="sl">Closed</div></div>
               <div class="stat" style="background:#0f172a"><div class="sv gy">${stats.wr.toFixed(0)}%</div><div class="sl">Win Rate</div></div>
             </div>
+            ${hypBlock}
             ${changesBlock}
           </div>
         `;
