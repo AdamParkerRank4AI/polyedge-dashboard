@@ -610,7 +610,8 @@ const LIVE_CUTOVER = new Date(LIVE_CUTOVER_ISO);
 
 async function loadData() {
     try {
-        const r = await fetch('https://gist.githubusercontent.com/AdamParkerRank4AI/291b8da0c6006afb5ee6851a16d4d7df/raw/polyedge_data.json?_=' + Date.now());
+        const cb = Date.now().toString(36) + Math.random().toString(36).slice(2);
+        const r = await fetch('https://gist.githubusercontent.com/AdamParkerRank4AI/291b8da0c6006afb5ee6851a16d4d7df/raw/polyedge_data.json?nocache=' + cb, { cache: 'no-store' });
         DATA = await r.json();
         render();
     } catch (e) {
