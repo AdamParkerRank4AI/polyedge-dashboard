@@ -737,7 +737,7 @@ const PLAY_RESEARCH = {
     },
     FED_DIVERGENCE: {
         thesis: "CME FedWatch reprices Fed markets ~1.44 days before Polymarket.",
-        benchmark: "NEW. CME API locked down today, FRED fallback partial.",
+        benchmark: "NEW. CME API locked down (Apr), FRED fallback partial.",
         evidence: "Research file 04 documents Fed edge. Waiting on working data source.",
     },
     LAB_CELEBRITY: {
@@ -2298,14 +2298,14 @@ function renderGoLive() {
          reason:'Multi-outcome sum ≠ $1 = free arb. Finding 10/scan. Research: $29M historically extracted.',
          action:'FULL SIZE when liquidity supports. Execute all legs atomically.', sample:'10 live arbs'},
         {name:'NEWS_EDGE', category:'Speed Edge', confidence:'MEDIUM', color:'#f59e0b',
-         reason:'March: 8/8 100% WR. Apr 17-18 direction bug (19L/1W) FIXED today with fade-rule. Needs 2 weeks post-fix OR historical backtest proof.',
-         action:'SMALL SIZE until fade rule proves itself. Paper-only for 1 more week.', sample:'28 closed, 9W/19L'},
+         reason:'March: 8/8 100% WR. Apr 17-18 direction bug (19L/1W) fixed with fade-rule (Apr 19). Backtest "NEWS_EDGE + TIME_DECAY only" = +$272 over 14d.',
+         action:'SMALL SIZE until fade rule proves itself. The only consistently-profitable strategy in the system.', sample:'28 closed, 9W/19L'},
         {name:'BIG_MOVER (surgical)', category:'Momentum', confidence:'MEDIUM', color:'#f59e0b',
-         reason:'Post-filter: +3.8% ROI on 50 trades. Working buckets: Musk tweets, oil, token launches. Excluded: Mideast, Peru, Venezuela.',
+         reason:'Post-filter: +3.8% ROI on 50 trades. Working buckets: Musk tweets, oil, token launches. Excluded: Mideast, Peru, Venezuela. Hormuz blocklist added Apr 26.',
          action:'HALF SIZE initially. Scale if it holds.', sample:'50 closed'},
-        {name:'SYSTEMATIC_NO', category:'Statistical', confidence:'MEDIUM', color:'#f59e0b',
-         reason:'Research: 73% NO base rate on low-probability binaries. 16 trades opened at 98c, none resolved yet.',
-         action:'HALF SIZE initially. Watch first 20 resolutions to validate base rate.', sample:'16 open'},
+        {name:'SYSTEMATIC_NO', category:'Statistical', confidence:'DISABLED', color:'#7f1d1d',
+         reason:'KILLED Apr 26 — full audit: 263 closed trades, 5.9% win rate, -$20,453 total. Avg loss -$85, avg win +$9. Break-even W rate needed 90%, actual 6%. Structurally -EV (long-shot NO has 99¢ risk for 2¢ upside).',
+         action:'DO NOT RE-ENABLE without restructured TP/SL. Backtest "Drop SYSTEMATIC_NO" = +$4,227 vs baseline -$16,238.', sample:'263 closed, KILLED'},
         {name:'TIME_DECAY', category:'Deadline', confidence:'LOW', color:'#ef4444',
          reason:'This week: 58W/41L, -$110. Free-Roll sim shows +$358 uplift. Need to prove Free-Roll live.',
          action:'FREE-ROLL ONLY mode. Small size until the uplift materialises.', sample:'99 closed this week'},
@@ -2359,7 +2359,7 @@ function renderGoLive() {
         <ul style="color:#e2e8f0;line-height:1.8;font-size:14px;margin:0;padding-left:20px">
             <li><strong>Week 1 ($500 budget):</strong> Only TEMPORAL_ARB + NegRisk. Prove execution works. Measure real slippage.</li>
             <li><strong>Week 2-3 ($2k budget):</strong> Add NEWS_EDGE (fade-rule validated) + BIG_MOVER surgical at half size.</li>
-            <li><strong>Week 4+ ($5k+ budget):</strong> Scale what's proven. Add SYSTEMATIC_NO if base rate holds.</li>
+            <li><strong>Week 4+ ($5k+ budget):</strong> Scale what's proven. (SYSTEMATIC_NO was killed Apr 26 — base rate did not hold; -$20,453 over 263 trades.)</li>
             <li><strong>Never without proof:</strong> TIME_DECAY, CRYPTO, LAB unless historical/live evidence turns positive.</li>
         </ul>
     </div>`;
@@ -2422,10 +2422,28 @@ function renderJourney() {
             colour: '#60a5fa',
         },
         {
-            date: "April 19 (today)",
+            date: "April 19",
             title: "Chapter 6: Regression + fix",
-            body: `Noticed <strong>NEWS_EDGE 1W/19L since Apr 17 scope fix</strong>. Diagnosis: algo was bullish on every positive-sounding headline, but Iran peace markets were already saturated and fading. Fix: added <strong>fade rule</strong> - if headline is positive but market is trending down 2%+, bet NO instead. Added 24h Pulse banner at top of Overview for instant "what's working now" read. Built Performance Timeline + this Journey view. Current state: main portfolio +$${pnl.toFixed(0)} (${roi.toFixed(1)}% ROI), ${wins}W/${losses}L. TEMPORAL_ARB emerged as the week's star play (3/3, +$114, 100% WR).`,
+            body: `Noticed <strong>NEWS_EDGE 1W/19L since Apr 17 scope fix</strong>. Diagnosis: algo was bullish on every positive-sounding headline, but Iran peace markets were already saturated and fading. Fix: added <strong>fade rule</strong> - if headline is positive but market is trending down 2%+, bet NO instead. Added 24h Pulse banner at top of Overview for instant "what's working now" read. Built Performance Timeline + this Journey view. TEMPORAL_ARB emerged as the week's star play (3/3, +$114, 100% WR).`,
             colour: '#ffaa00',
+        },
+        {
+            date: "April 26 (kill day)",
+            title: "Chapter 7: SYSTEMATIC_NO killed + audit reckoning",
+            body: `Deep audit identified <strong>SYSTEMATIC_NO as the largest single bleed</strong>: 263 closed trades, 5.9% win rate, -$20,453 total. Avg loss -$85, avg win +$9. Break-even W rate needed 90%, actual 6%. Kill switches deployed end-of-day: <strong>SYSTEMATIC_NO disabled</strong>, <strong>LAB_SPORTS disabled</strong>, <strong>Hormuz/Strait of</strong> added to MIDEAST blocklist for BIG_MOVER, <strong>ETH CRYPTO entries capped at 0.85</strong>. Backtest harness verified: dropping just SYSTEMATIC_NO flips baseline -$16,238 → +$4,227 (a $20k swing). Same evening: 6h slug cooldown added (was 33× same Iran market causing correlated risk).`,
+            colour: '#ef4444',
+        },
+        {
+            date: "May 3 (silent gap)",
+            title: "Chapter 8: 7-day Mac-off blackout",
+            body: `Mac was cleanly shut down 26 Apr 21:29 BST after the kill-switch session. Stayed off until 3 May 17:22. PolyEdge agents are Mac-resident — <strong>no scans, no trades, no monitoring for 7 days</strong>. Streaming feeds (Bluesky/Twitter/news WS) are realtime-only — irrecoverable. One position carried through (WTI April $120 NO @ 0.923) and was settled +$8.34 on resumption. Dashboard <strong>cache-bust bug separately discovered + fixed</strong> (GitHub raw-URL CDN was ignoring <code>?_=Date.now()</code>). Net financial impact: <strong>likely positive</strong> — projected -$18k of paper losses NOT incurred (system was bleeding -$2.6k/day pre-shutdown).`,
+            colour: '#7f1d1d',
+        },
+        {
+            date: "May 4 (heartbeat)",
+            title: "Chapter 9: External heartbeat deployed",
+            body: `Cloudflare Worker <code>polyedge-heartbeat</code> deployed at <code>polyedge-heartbeat.dawn-field-3d16.workers.dev</code>, cron <code>*/15 * * * *</code>, KV-backed dedupe. Fetches the gist every 15 min; emails (or pushes) Adam if <code>last_updated</code> > 30 min stale. Catches Mac-off / scanner-crash / WS-down silently. Channel still needs wiring (Pushover £4.99 recommended for real-money push, or Resend for email). <strong>Do not flip TRADING_MODE=live until this is wired.</strong>`,
+            colour: '#22c55e',
         },
     ];
 
@@ -2455,10 +2473,10 @@ function renderJourney() {
     html += `<div style="margin-top:20px;padding:14px 18px;background:#0a1020;border-radius:8px;border-left:4px solid #ffaa00">
         <div style="font-size:14px;font-weight:800;letter-spacing:1px;color:#f59e0b">WHERE WE ARE</div>
         <ul style="color:#e2e8f0;line-height:1.8;margin:8px 0 0;padding-left:20px">
-            <li><strong style="color:#22c55e">Working:</strong> March Iran trades (legacy), TEMPORAL_ARB this week (3/3), NegRisk arbitrage detection</li>
-            <li><strong style="color:#ef4444">Broken:</strong> April NEWS_EDGE direction (fixed today, monitoring)</li>
-            <li><strong style="color:#f59e0b">Unproven:</strong> SYSTEMATIC_NO (16 opens, no resolution yet), LATE_ENTRY, Lab plays</li>
-            <li><strong style="color:#60a5fa">Next:</strong> let the direction fix bake for 48h, watch TEMPORAL_ARB scale, plan real trading once SA creds arrive</li>
+            <li><strong style="color:#22c55e">Working:</strong> NEWS_EDGE + TEMPORAL_ARB + NegRisk detection (the +$272 / 14d profitable subset)</li>
+            <li><strong style="color:#ef4444">Killed Apr 26:</strong> SYSTEMATIC_NO (-$20,453 over 263 trades), LAB_SPORTS, Hormuz/Mideast for BIG_MOVER, ETH CRYPTO at &gt;0.85</li>
+            <li><strong style="color:#f59e0b">Unproven:</strong> LATE_ENTRY, FED_DIVERGENCE (no working data source), Lab plays</li>
+            <li><strong style="color:#60a5fa">Pre-go-live blocker:</strong> heartbeat alert channel (Pushover/Resend/Telegram) — Mac was off for 26 Apr → 3 May with no alerting. SA wallet creds still pending.</li>
         </ul>
     </div>`;
 
