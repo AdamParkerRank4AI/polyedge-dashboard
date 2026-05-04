@@ -2808,33 +2808,49 @@ function renderLab() {
 function renderLLMEdges() {
     const el = document.getElementById('llm-content');
     const edges = (DATA && DATA.llm_edges) || [];
+    const anyShadow = edges.some(e => e && e.shadow_mode);
+    const shadowNote = anyShadow
+      ? '<div style="background:#1e293b;border-left:4px solid #f59e0b;border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px;color:#fcd34d"><strong>SHADOW MODE</strong> — Predictions are logged + displayed for review. They are NOT auto-traded. After 48h, review accumulated predictions vs market resolution to decide whether to flip live.</div>'
+      : '';
     if (!edges.length) {
-        el.innerHTML = '<p class="st">No LLM edge candidates this scan. Estimator only fires on liquid markets (>$100k 24h vol), non-extreme price (0.15-0.85), and |edge| > 15pp.</p>';
+        el.innerHTML = shadowNote + '<p class="st">No LLM edge candidates this scan. Ensemble (Claude + GPT) flags markets where both models agree within 8pp AND both diverge from market by ≥15pp. Liquid markets only (>$50k 24h vol), price 0.10–0.90.</p>';
         return;
     }
-    let html = `<p class="st"><strong>${edges.length}</strong> market(s) where Claude's probability estimate diverges from market price.</p>`;
-    html += '<table><tr><th></th><th>Direction</th><th>Market</th><th>Market Price</th><th>LLM Est</th><th>Edge</th><th>Confidence</th></tr>';
+    // Schema (dual-model ensemble):
+    //   market_price, claude_prob, gpt_prob, ensemble_prob, edge, direction,
+    //   claude_reason, gpt_reason, shadow_mode, logged_at
+    let html = shadowNote + `<p class="st"><strong>${edges.length}</strong> market(s) where Claude + GPT agree the probability diverges from market price.</p>`;
+    html += '<table><tr><th></th><th>Direction</th><th>Market</th><th>Mkt</th><th>Claude</th><th>GPT</th><th>Ensemble</th><th>Edge</th><th>Mode</th></tr>';
     edges.forEach((e, i) => {
         const rid = 'llm-' + i;
         const edgeCls = Math.abs(e.edge) >= 0.25 ? 'up' : 'bl';
         const dirBadge = e.direction === 'YES' ? 'b-g' : 'b-n';
+        const ensemble = (e.ensemble_prob != null) ? e.ensemble_prob : (e.llm_probability != null ? e.llm_probability : null);
+        const claude = (e.claude_prob != null) ? e.claude_prob : null;
+        const gpt = (e.gpt_prob != null) ? e.gpt_prob : null;
+        const fmtPct = (v) => (v == null) ? '-' : (v * 100).toFixed(0) + '¢';
+        const modeBadge = e.shadow_mode ? '<span class="badge b-c">SHADOW</span>' : '<span class="badge b-g">LIVE</span>';
         html += `<tr style="cursor:pointer" onclick="togglePos('${rid}')">
             <td style="width:20px;color:#cbd5e1" id="${rid}-caret">▸</td>
             <td><span class="badge ${dirBadge}">${e.direction}</span></td>
             <td>${escapeHtml(e.question)}</td>
-            <td>${(e.market_price * 100).toFixed(1)}¢</td>
-            <td>${(e.llm_probability * 100).toFixed(1)}¢</td>
+            <td>${fmtPct(e.market_price)}</td>
+            <td>${fmtPct(claude)}</td>
+            <td>${fmtPct(gpt)}</td>
+            <td><strong>${fmtPct(ensemble)}</strong></td>
             <td class="${edgeCls}"><strong>${e.edge >= 0 ? '+' : ''}${(e.edge * 100).toFixed(1)}pp</strong></td>
-            <td>${e.confidence}</td>
+            <td>${modeBadge}</td>
         </tr>`;
         const url = e.slug ? 'https://polymarket.com/market/' + e.slug : '';
+        const cReason = e.claude_reason || e.reasoning || '';
+        const gReason = e.gpt_reason || '';
         const detail = `<div style="padding:12px 20px;background:#050810;border-left:3px solid #00d4ff">
-            <div class="st" style="margin-bottom:6px">LLM reasoning:</div>
-            <div style="color:#d1d5db;margin-bottom:10px">${escapeHtml(e.reasoning || '-')}</div>
+            ${cReason ? `<div class="st" style="margin-bottom:6px"><strong style="color:#f1f5f9">Claude:</strong></div><div style="color:#d1d5db;margin-bottom:10px">${escapeHtml(cReason)}</div>` : ''}
+            ${gReason ? `<div class="st" style="margin-bottom:6px"><strong style="color:#f1f5f9">GPT:</strong></div><div style="color:#d1d5db;margin-bottom:10px">${escapeHtml(gReason)}</div>` : ''}
             ${url ? `<a href="${url}" target="_blank">→ Open market on Polymarket</a>` : ''}
-            <div class="st" style="margin-top:8px">Estimated ${e.estimated_at ? fmtDate(e.estimated_at) : '-'}</div>
+            <div class="st" style="margin-top:8px">Logged ${e.logged_at ? fmtDate(e.logged_at) : (e.estimated_at ? fmtDate(e.estimated_at) : '-')}</div>
         </div>`;
-        html += `<tr id="${rid}-detail" style="display:none"><td colspan="7" style="padding:0">${detail}</td></tr>`;
+        html += `<tr id="${rid}-detail" style="display:none"><td colspan="9" style="padding:0">${detail}</td></tr>`;
     });
     html += '</table>';
     el.innerHTML = html;
