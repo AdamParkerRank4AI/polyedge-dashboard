@@ -159,97 +159,6 @@ tr:hover td{background:#0f172a}
   </div>
 </div>
 
-<!-- OVERVIEW -->
-<div id="page-overview" class="page">
-
-<!-- Hero TL;DR -->
-<div id="hero-tldr" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:1px solid #334155;border-radius:16px;padding:24px 28px;margin-bottom:24px">
-<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px">
-<div>
-<div style="font-size:12px;font-weight:700;letter-spacing:2px;color:#94a3b8;margin-bottom:6px">POLYEDGE · PAPER TRADING</div>
-<div id="hero-headline" style="font-size:28px;font-weight:800;color:#f1f5f9;letter-spacing:-0.5px;line-height:1.2">-</div>
-<div id="hero-sub" style="font-size:14px;color:#94a3b8;margin-top:6px">-</div>
-</div>
-<div style="display:flex;gap:24px;flex-wrap:wrap">
-<div style="text-align:right">
-<div id="hero-pnl" style="font-size:42px;font-weight:900;letter-spacing:-1px;line-height:1">-</div>
-<div class="sl">Net P&amp;L</div>
-</div>
-<div style="text-align:right">
-<div id="hero-roi" style="font-size:42px;font-weight:900;letter-spacing:-1px;line-height:1;color:#3b82f6">-</div>
-<div class="sl">ROI</div>
-</div>
-</div>
-</div>
-</div>
-
-<div class="stats">
-<div class="stat-label standard">STANDARD</div>
-<div class="stat"><div class="sv" id="s-staked">--</div><div class="sl">Total Bet</div></div>
-<div class="stat"><div class="sv" id="s-returned">--</div><div class="sl">Total Back</div></div>
-<div class="stat"><div class="sv" id="s-pnl">--</div><div class="sl">Net P&L</div></div>
-<div class="stat"><div class="sv bl" id="s-roi">--</div><div class="sl">ROI on Bet</div></div>
-<div class="stat"><div class="sv bl" id="s-winrate">--</div><div class="sl">Win Rate</div></div>
-<div class="stat"><div class="sv" id="s-wins">--</div><div class="sl">Wins</div></div>
-<div class="stat"><div class="sv rd" id="s-losses">--</div><div class="sl">Losses</div></div>
-<div class="stat"><div class="sv or" id="s-open">--</div><div class="sl">Open</div></div>
-</div>
-<div class="stats">
-<div class="stat-label freeroll">FREEROLL</div>
-<div class="stat"><div class="sv" id="f-staked">--</div><div class="sl">Total Bet</div></div>
-<div class="stat"><div class="sv" id="f-returned">--</div><div class="sl">Total Back</div></div>
-<div class="stat"><div class="sv" id="f-pnl">--</div><div class="sl">Net P&L</div></div>
-<div class="stat"><div class="sv bl" id="f-roi">--</div><div class="sl">ROI on Bet</div></div>
-<div class="stat"><div class="sv bl" id="f-winrate">--</div><div class="sl">Win Rate</div></div>
-<div class="stat"><div class="sv" id="f-wins">--</div><div class="sl">Wins</div></div>
-<div class="stat"><div class="sv rd" id="f-losses">--</div><div class="sl">Losses</div></div>
-<div class="stat"><div class="sv or" id="f-open">--</div><div class="sl">Open</div></div>
-</div>
-
-<div class="stats">
-<div class="stat-label optimal">OPTIMAL MIX</div>
-<div class="stat"><div class="sv" id="o-staked">--</div><div class="sl">Total Bet</div></div>
-<div class="stat"><div class="sv" id="o-returned">--</div><div class="sl">Total Back</div></div>
-<div class="stat"><div class="sv" id="o-pnl">--</div><div class="sl">Net P&L</div></div>
-<div class="stat"><div class="sv bl" id="o-roi">--</div><div class="sl">ROI on Bet</div></div>
-<div class="stat"><div class="sv" id="o-uplift">--</div><div class="sl">vs Standard</div></div>
-<div class="stat"><div class="sv" id="o-winrate">--</div><div class="sl">Win Rate</div></div>
-<div class="stat"><div class="sv" id="o-wins">--</div><div class="sl">Wins</div></div>
-<div class="stat"><div class="sv rd" id="o-losses">--</div><div class="sl">Losses</div></div>
-</div>
-
-<h2>The Plays - Live P&L by Type</h2>
-<div class="plays-grid" id="plays-overview"></div>
-
-<h2>New Plays (research-backed, some still proving)</h2>
-<div id="new-plays-section"></div>
-
-<h2>Stop Loss + Take Profit Audit</h2>
-<div id="tpsl-audit"></div>
-
-<div id="optimal-mix-breakdown"></div>
-
-<div id="all-variations"></div>
-
-<div id="pulse-alert" style="margin:16px 0"></div>
-
-<details style="margin:16px 0;padding:10px 14px;background:#0a1020;border-left:3px solid #60a5fa;border-radius:6px">
-<summary style="cursor:pointer;color:#60a5fa;font-weight:700;font-size:14px">ℹ️ How the numbers work (click to expand)</summary>
-<div class="st" style="margin-top:10px;color:#e2e8f0;font-weight:500">
-<strong style="color:#22c55e">STANDARD row</strong> - actuals. Already-closed trades are frozen at whatever rules fired them. Totals update as new trades close.<br><br>
-<strong style="color:#a855f7">FREEROLL row</strong> - simulated. Recomputes every scan: "what if we'd been banking at TP on every historical trade, letting the remainder ride to today's live price?"<br><br>
-<strong style="color:#f59e0b">Rule changes</strong> are forward-only. NEWS_EDGE TP moved from 5% → 40% on Apr 17; trades closed before that still show their old 5% exits. New NEWS_EDGE trades use 40%. Same for BIG_MOVER (5→15), TIME_DECAY (8→15), SYSTEMATIC_NO/LATE_ENTRY (new plays from Apr 17-18).<br><br>
-<strong style="color:#ef4444">Apr 17 retroactive cleanup</strong> permanently removed 96 BIG_MOVER trades (Mideast/Peru/Venezuela/sports/&gt;40% moves). Snapshots backed up at <code>~/polyedge/data/snapshot_*_pre_clean.json</code> if we need to restore.<br><br>
-<strong style="color:#cbd5e1">LAB trades</strong> (celebrity + sports experiments at $50 half-size) are filtered out of Overview and Plays - see the Lab tab for their own P&L.
-</div>
-</details>
-
-<div id="sim-comparison"></div>
-
-<h2>Currently Open Positions</h2>
-<div id="overview-open" class="loading">Loading...</div>
-</div>
-
 <!-- COVERAGE — what are we NOT seeing? -->
 <div id="page-coverage" class="page">
   <h2>Coverage Gaps</h2>
@@ -777,8 +686,10 @@ function computePlayStats() {
 }
 
 function renderOverview() {
-    // Main portfolio EXCLUDES lab trades AND flagged mistakes (bug-driven outcomes
-    // don't reflect the intended strategy). Mistakes are catalogued separately.
+    // Legacy. The original Overview page (#page-overview) was replaced by overview2;
+    // this entire function targets DOM elements that no longer exist. Bail early
+    // rather than throw on the unguarded getElementById calls below.
+    if (!document.getElementById('hero-pnl')) return;
     const allPositions = DATA.positions || [];
     const positions = allPositions.filter(p => !p.lab && !p.mistake);
     const mistakes = allPositions.filter(p => p.mistake);
