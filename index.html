@@ -212,57 +212,8 @@ tr:hover td{background:#0f172a}
 <!-- OVERVIEW 2 — per-play analysis, the main daily view -->
 <div id="page-overview2" class="page active">
 
-  <!-- LAUNCH-DAY PLAYS panel — driven by the actual closed-trade record -->
-  <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border:1px solid #334155;border-left:4px solid #22c55e;border-radius:16px;padding:20px 24px;margin-bottom:20px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:14px">
-      <div>
-        <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#22c55e;margin-bottom:4px">LAUNCH-DAY PLAYS</div>
-        <div style="font-size:20px;font-weight:800;color:#f1f5f9;letter-spacing:-0.3px">4 profitable plays · 1 break-even · 1 awaits wallet · 5 killed</div>
-      </div>
-      <div style="font-size:11px;color:#94a3b8;text-align:right">
-        <div>Last reviewed: 4 May 2026 · Phase 4</div>
-        <div style="color:#22c55e;font-weight:700">Net (excl. killed plays): +$8,332 / 640 closed</div>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-bottom:8px">
-      <div style="background:#0a1020;border:1px solid #22c55e44;border-left:3px solid #22c55e;border-radius:8px;padding:12px 14px">
-        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#22c55e;margin-bottom:4px">TIER 1 · LIVE · WORKHORSE</div>
-        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:4px">NEWS_EDGE <span style="font-size:11px;color:#22c55e;font-weight:600">+$4,082 · 34% WR · 384 closed</span></div>
-        <div style="font-size:12px;color:#cbd5e1;line-height:1.5">Volume play. Fade-rule active (Apr 19 fix). 34% WR sounds low but avg-win &gt;&gt; avg-loss. Multi-source news convergence within minutes of publication.</div>
-      </div>
-      <div style="background:#0a1020;border:1px solid #22c55e44;border-left:3px solid #22c55e;border-radius:8px;padding:12px 14px">
-        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#22c55e;margin-bottom:4px">TIER 1 · LIVE · STAR PLAY</div>
-        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:4px">CRYPTO threshold <span style="font-size:11px;color:#22c55e;font-weight:600">+$3,948 · 83% WR · 167 closed</span></div>
-        <div style="font-size:12px;color:#cbd5e1;line-height:1.5">Best WR + best $/trade ($23.64 avg). BTC/ETH near Polymarket thresholds. Entry capped 0.50 (general), 0.85 (ETH). Dashboard rec: SCALE.</div>
-      </div>
-      <div style="background:#0a1020;border:1px solid #22c55e44;border-left:3px solid #22c55e;border-radius:8px;padding:12px 14px">
-        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#22c55e;margin-bottom:4px">TIER 1 · LIVE · PURE MATH</div>
-        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:4px">TEMPORAL_ARB <span style="font-size:11px;color:#22c55e;font-weight:600">+$255 · 50% WR · 12 closed</span></div>
-        <div style="font-size:12px;color:#cbd5e1;line-height:1.5">Date-ladder mismatches. P(by earlier) &gt; P(by later) impossible. Small sample but $21/trade avg. Sports filter applied.</div>
-      </div>
-      <div style="background:#0a1020;border:1px solid #22c55e44;border-left:3px solid #22c55e;border-radius:8px;padding:12px 14px">
-        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#22c55e;margin-bottom:4px">TIER 1 · AWAITS WALLET</div>
-        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:4px">NEG_RISK arbitrage <span style="font-size:11px;color:#94a3b8;font-weight:600">5,942 detected · 0 traded</span></div>
-        <div style="font-size:12px;color:#cbd5e1;line-height:1.5">Avg 5.4% edge, 7 events &gt;5pp last 7d. Multi-leg atomic execution requires real wallet — paper mode can't fire.</div>
-      </div>
-      <div style="background:#0a1020;border:1px solid #f59e0b44;border-left:3px solid #f59e0b;border-radius:8px;padding:12px 14px">
-        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#f59e0b;margin-bottom:4px">TIER 2 · HOLD · BREAK-EVEN</div>
-        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:4px">BIG_MOVER (surgical) <span style="font-size:11px;color:#f59e0b;font-weight:600">+$47 · 58% WR · 77 closed</span></div>
-        <div style="font-size:12px;color:#cbd5e1;line-height:1.5">Barely profitable but solid 58% WR. Mideast/Peru/Venezuela/Hormuz blocked. Don't scale, don't kill.</div>
-      </div>
-      <div style="background:#0a1020;border:1px solid #7f1d1d;border-left:3px solid #7f1d1d;border-radius:8px;padding:12px 14px">
-        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#fca5a5;margin-bottom:4px">KILLED · DO NOT REVIVE</div>
-        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:4px">SYSTEMATIC_NO · TIME_DECAY · LAB_SPORTS · LATE_ENTRY · FED_DIVERGENCE</div>
-        <div style="font-size:12px;color:#cbd5e1;line-height:1.5">SYSTEMATIC_NO: -$20,445 / 264 trades / 6% WR. TIME_DECAY: -$2,234 / 265 trades. Verified disabled at runtime.</div>
-      </div>
-    </div>
-    <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#94a3b8;border-top:1px dashed #334155;padding-top:10px;margin-top:6px">
-      <div>📈 LLM ensemble in <strong style="color:#fcd34d">SHADOW</strong> mode — predictions logged, not auto-traded</div>
-      <div>🔔 Telegram alerts: 24/7 · @Adampolybot</div>
-      <div>💓 Heartbeat: stale &gt;30 min → push</div>
-      <div>🔌 Wallet pending: SA partner</div>
-    </div>
-  </div>
+  <!-- LAUNCH-DAY PLAYS panel — DATA-DRIVEN: numbers populated from DATA.positions every refresh -->
+  <div id="launch-panel" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border:1px solid #334155;border-left:4px solid #22c55e;border-radius:16px;padding:20px 24px;margin-bottom:20px"></div>
 
   <!-- Same hero strip as old overview -->
   <div id="hero-tldr2" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:1px solid #334155;border-radius:16px;padding:24px 28px;margin-bottom:24px">
@@ -4172,6 +4123,120 @@ function mistakeCountSafe() {
     return ((DATA.positions || []).filter(p => p.mistake)).length;
 }
 
+function renderLaunchPanel() {
+    // Single source of truth: DATA.positions, same as the per-play cards below.
+    // No hardcoded numbers anywhere — everything recomputes on each refresh.
+    const el = document.getElementById('launch-panel');
+    if (!el || !DATA) return;
+
+    const positions = (DATA.positions || []).filter(p => !p.lab && !p.mistake);
+    const stats = {};
+    positions.forEach(p => {
+        const t = p.trade_type || p.play || 'OTHER';
+        if (!stats[t]) stats[t] = {closed:0, open:0, wins:0, losses:0, pnl:0, staked:0};
+        const s = stats[t];
+        if (p.status === 'closed') {
+            s.closed++;
+            const pnl = Number(p.pnl_usd ?? p.pnl ?? 0);
+            s.pnl += pnl;
+            s.staked += Number(p.stake || 0);
+            if (pnl > 0) s.wins++;
+            else if (pnl < 0) s.losses++;
+        } else if (p.status === 'open') {
+            s.open++;
+        }
+    });
+
+    // Tier configuration — descriptions are static, numbers are live
+    const KILLED_PLAYS = ['SYSTEMATIC_NO', 'TIME_DECAY', 'LAB_SPORTS', 'LATE_ENTRY', 'FED_DIVERGENCE'];
+    const tiers = [
+        {id:'NEWS_EDGE',     tier:'TIER 1 · LIVE',           color:'#22c55e', sub:'Multi-source news convergence within minutes of publication. Fade-rule active (Apr 19 fix).'},
+        {id:'CRYPTO',        tier:'TIER 1 · LIVE',           color:'#22c55e', sub:'BTC/ETH near Polymarket thresholds. Entry capped 0.50 general / 0.85 ETH (Apr 26).'},
+        {id:'TEMPORAL_ARB',  tier:'TIER 1 · LIVE',           color:'#22c55e', sub:'Date-ladder mismatches. Sports filter applied. P(by earlier) > P(by later) impossible.'},
+        {id:'NEG_RISK',      tier:'TIER 1 · AWAITS WALLET',  color:'#22c55e', sub:'Multi-leg atomic execution requires real wallet — paper mode can\'t fire. Detection in NegRisk tab.', note:'detect-only'},
+        {id:'BIG_MOVER',     tier:'TIER 2 · HOLD',           color:'#f59e0b', sub:'Mideast / Peru / Venezuela / Hormuz blocked. Don\'t scale, don\'t kill.'},
+    ];
+
+    // Compute net excluding killed plays
+    let netExclKilled = 0, closedExclKilled = 0;
+    Object.entries(stats).forEach(([play, s]) => {
+        if (!KILLED_PLAYS.includes(play)) {
+            netExclKilled += s.pnl;
+            closedExclKilled += s.closed;
+        }
+    });
+
+    // Header counts
+    let profitableCount = 0, breakevenCount = 0;
+    tiers.forEach(t => {
+        if (t.note === 'detect-only') return;
+        const s = stats[t.id];
+        if (!s || s.closed === 0) return;
+        const avg = s.pnl / s.closed;
+        if (avg > 1) profitableCount++;
+        else if (avg > -1) breakevenCount++;
+    });
+
+    const fmt$ = v => (v >= 0 ? '+$' : '-$') + Math.abs(Math.round(v)).toLocaleString();
+    const netColor = netExclKilled >= 0 ? '#22c55e' : '#ef4444';
+
+    let html = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:14px">
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#22c55e;margin-bottom:4px">LAUNCH-DAY PLAYS</div>
+          <div style="font-size:20px;font-weight:800;color:#f1f5f9;letter-spacing:-0.3px">${profitableCount} profitable · ${breakevenCount} break-even · 1 awaits wallet · ${KILLED_PLAYS.length} killed</div>
+        </div>
+        <div style="font-size:11px;color:#94a3b8;text-align:right">
+          <div>Phase 4 · live data, not hardcoded</div>
+          <div style="color:${netColor};font-weight:700;font-size:13px">Net (excl. killed): ${fmt$(netExclKilled)} / ${closedExclKilled} closed</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-bottom:8px">`;
+
+    tiers.forEach(t => {
+        const s = stats[t.id] || {closed:0, open:0, wins:0, losses:0, pnl:0};
+        const wr = (s.wins + s.losses) > 0 ? Math.round(s.wins / (s.wins + s.losses) * 100) : 0;
+        const pnlColor = s.pnl >= 0 ? '#22c55e' : '#ef4444';
+        let metricLine;
+        if (t.note === 'detect-only') {
+            metricLine = `<span style="font-size:11px;color:#94a3b8;font-weight:600">detect-only · awaits wallet</span>`;
+        } else if (s.closed === 0) {
+            metricLine = `<span style="font-size:11px;color:#94a3b8;font-weight:600">no closes yet</span>`;
+        } else {
+            metricLine = `<span style="font-size:11px;color:${pnlColor};font-weight:600">${fmt$(s.pnl)} · ${wr}% WR · ${s.closed} closed${s.open ? ' · ' + s.open + ' open' : ''}</span>`;
+        }
+        html += `
+          <div style="background:#0a1020;border:1px solid ${t.color}44;border-left:3px solid ${t.color};border-radius:8px;padding:12px 14px">
+            <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:${t.color};margin-bottom:4px">${t.tier}</div>
+            <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:4px">${t.id} ${metricLine}</div>
+            <div style="font-size:12px;color:#cbd5e1;line-height:1.5">${t.sub}</div>
+          </div>`;
+    });
+
+    // Killed plays card — also data-driven
+    const killedDetails = KILLED_PLAYS.map(p => {
+        const s = stats[p];
+        if (!s || s.closed === 0) return null;
+        return `${p}: ${fmt$(s.pnl)} / ${s.closed}`;
+    }).filter(Boolean).join(' · ');
+    html += `
+      <div style="background:#0a1020;border:1px solid #7f1d1d;border-left:3px solid #7f1d1d;border-radius:8px;padding:12px 14px">
+        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#fca5a5;margin-bottom:4px">KILLED · DO NOT REVIVE</div>
+        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:4px">${KILLED_PLAYS.join(' · ')}</div>
+        <div style="font-size:11px;color:#cbd5e1;line-height:1.5">${killedDetails || 'No closes recorded for these plays.'}</div>
+      </div>`;
+
+    html += `
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#94a3b8;border-top:1px dashed #334155;padding-top:10px;margin-top:6px">
+        <div>📈 LLM ensemble in <strong style="color:#fcd34d">SHADOW</strong> mode — predictions logged, not auto-traded</div>
+        <div>🔔 Telegram alerts: 24/7 · @Adampolybot</div>
+        <div>💓 Heartbeat: stale &gt;30 min → push</div>
+        <div>🔌 Wallet pending: SA partner</div>
+      </div>`;
+    el.innerHTML = html;
+}
+
 async function refreshHealthStrip() {
     // Pull WS health from gist (already merged into DATA), and REST poller
     // health from a direct fetch since rest_prices.json isn't synced to gist.
@@ -4210,6 +4275,7 @@ function render() {
     }
     document.getElementById('scanner-status').textContent = DATA.scanner_status === 'active' ? 'ACTIVE' : 'IDLE';
     refreshHealthStrip();
+    renderLaunchPanel();
     renderSinceLive();
     renderOverview2();
     renderSuggestions();
