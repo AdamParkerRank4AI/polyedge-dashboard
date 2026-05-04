@@ -213,7 +213,10 @@ tr:hover td{background:#0f172a}
 <div id="page-overview2" class="page active">
 
   <!-- LAUNCH-DAY PLAYS panel — DATA-DRIVEN: numbers populated from DATA.positions every refresh -->
-  <div id="launch-panel" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border:1px solid #334155;border-left:4px solid #22c55e;border-radius:16px;padding:20px 24px;margin-bottom:20px"></div>
+  <div id="launch-panel" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border:1px solid #334155;border-left:4px solid #22c55e;border-radius:16px;padding:20px 24px;margin-bottom:14px"></div>
+
+  <!-- ACTIVE STRATEGY: things to watch / change / add -->
+  <div id="strategy-watch" style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;margin-bottom:20px"></div>
 
   <!-- Same hero strip as old overview -->
   <div id="hero-tldr2" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:1px solid #334155;border-radius:16px;padding:24px 28px;margin-bottom:24px">
@@ -3991,32 +3994,50 @@ function renderOverview2() {
     const allPositions = DATA.positions || [];
     const positions = allPositions.filter(p => !p.lab && !p.mistake);
 
-    // Overall hero stats (mirror renderOverview logic)
-    let wins = 0, losses = 0, pnl = 0, stake = 0, openStake = 0, openCount = 0;
-    positions.forEach(p => {
-        if (p.status === 'closed' && p.exit_price != null) {
-            const s = Number(p.stake) || 0;
-            const ret = (Number(p.shares) || 0) * Number(p.exit_price);
-            const pp = (p.pnl_usd != null) ? Number(p.pnl_usd) : (ret - s);
-            stake += s;
-            pnl += pp;
-            if (pp > 0) wins++; else if (pp < 0) losses++;
-        } else if (p.status === 'open') {
-            openCount++;
-            openStake += Number(p.stake) || 0;
-        }
-    });
-    const wr = (wins + losses) > 0 ? (wins / (wins + losses) * 100) : 0;
-    const roi = stake > 0 ? (pnl / stake * 100) : 0;
+    // Killed plays — these are no longer running, so the headline should reflect
+    // the ACTIVE strategy not the historical drag from dead plays.
+    const KILLED = new Set(['SYSTEMATIC_NO', 'TIME_DECAY', 'LAB_SPORTS', 'LATE_ENTRY', 'FED_DIVERGENCE']);
 
+    // Compute two stat sets: ACTIVE (going-forward strategy) and ALL-TIME (legacy view)
+    const compute = (filterFn) => {
+        let w=0, l=0, pnl=0, stake=0, openStake=0, openCount=0;
+        positions.filter(filterFn).forEach(p => {
+            if (p.status === 'closed' && p.exit_price != null) {
+                const s = Number(p.stake) || 0;
+                const ret = (Number(p.shares) || 0) * Number(p.exit_price);
+                const pp = (p.pnl_usd != null) ? Number(p.pnl_usd) : (ret - s);
+                stake += s; pnl += pp;
+                if (pp > 0) w++; else if (pp < 0) l++;
+            } else if (p.status === 'open') {
+                openCount++;
+                openStake += Number(p.stake) || 0;
+            }
+        });
+        return {
+            wins:w, losses:l, pnl, stake, openStake, openCount,
+            wr: (w+l)>0 ? (w/(w+l)*100) : 0,
+            roi: stake>0 ? (pnl/stake*100) : 0
+        };
+    };
+
+    const active = compute(p => !KILLED.has(p.trade_type || p.play));
+    const allTime = compute(_ => true);
+
+    // HEADLINE: active strategy. Sub-line: how all-time differs (so the killed-play
+    // drag is acknowledged but not headlined).
     const heroPnl = document.getElementById('hero2-pnl');
-    heroPnl.textContent = dollarFmt(pnl);
-    heroPnl.style.color = pnl >= 0 ? '#22c55e' : '#ef4444';
-    document.getElementById('hero2-roi').textContent = pctFmt(roi);
-    document.getElementById('hero2-roi').style.color = roi >= 0 ? '#3b82f6' : '#ef4444';
-    document.getElementById('hero2-wr').textContent = wr.toFixed(0) + '%';
-    document.getElementById('hero2-headline').textContent = `${wins + losses} closed · ${openCount} open · ${mistakeCountSafe()} mistakes excluded`;
-    document.getElementById('hero2-sub').textContent = `${openCount} positions worth $${openStake.toFixed(0)} still riding. Click any play below to review its TP/SL and scale decision.`;
+    heroPnl.textContent = dollarFmt(active.pnl);
+    heroPnl.style.color = active.pnl >= 0 ? '#22c55e' : '#ef4444';
+    document.getElementById('hero2-roi').textContent = pctFmt(active.roi);
+    document.getElementById('hero2-roi').style.color = active.roi >= 0 ? '#3b82f6' : '#ef4444';
+    document.getElementById('hero2-wr').textContent = active.wr.toFixed(0) + '%';
+    document.getElementById('hero2-headline').textContent =
+        `Active strategy · ${active.wins + active.losses} closed · ${active.openCount} open · killed plays excluded`;
+    const drag = allTime.pnl - active.pnl;
+    const dragNote = drag < 0
+        ? `All-time including killed plays: ${dollarFmt(allTime.pnl)} (${pctFmt(allTime.roi)}) · ${dollarFmt(drag)} historical drag from SYSTEMATIC_NO + TIME_DECAY · those won't run again`
+        : `All-time: ${dollarFmt(allTime.pnl)}`;
+    document.getElementById('hero2-sub').textContent = dragNote;
 
     // Per-play aggregation
     const settings = (DATA.settings || {}).plays || {};
@@ -4237,6 +4258,92 @@ function renderLaunchPanel() {
     el.innerHTML = html;
 }
 
+function renderStrategyWatch() {
+    const el = document.getElementById('strategy-watch');
+    if (!el || !DATA) return;
+    const positions = (DATA.positions || []).filter(p => !p.lab && !p.mistake && p.status === 'closed');
+    const stats = {};
+    positions.forEach(p => {
+        const t = p.trade_type || p.play || 'OTHER';
+        if (!stats[t]) stats[t] = {n:0, w:0, l:0, pnl:0};
+        const pnl = Number(p.pnl_usd ?? p.pnl ?? 0);
+        stats[t].n++;
+        stats[t].pnl += pnl;
+        if (pnl > 0) stats[t].w++; else if (pnl < 0) stats[t].l++;
+    });
+
+    // Build the watch items dynamically based on actual data
+    const watch = [];
+    const change = [];
+    const add = [];
+
+    // CRYPTO scaling decision
+    if (stats.CRYPTO && stats.CRYPTO.n >= 50) {
+        const wr = stats.CRYPTO.w / (stats.CRYPTO.w + stats.CRYPTO.l) * 100;
+        if (wr >= 70 && stats.CRYPTO.pnl > 1000) {
+            change.push({title:'Scale CRYPTO stake', why:`${wr.toFixed(0)}% WR over ${stats.CRYPTO.n} closed, $${stats.CRYPTO.pnl.toFixed(0)} PnL. Best play in the system. Worth raising stake from $100 to $150-200.`, urgency:'soon'});
+        }
+    }
+
+    // TEMPORAL_ARB sample-size watch
+    if (stats.TEMPORAL_ARB && stats.TEMPORAL_ARB.n < 30) {
+        watch.push({title:'TEMPORAL_ARB small sample', why:`Only ${stats.TEMPORAL_ARB.n} closed trades. ROI looks great but 12 closes is too thin to scale yet. Want 30-50 before sizing up.`});
+    }
+
+    // NEWS_EDGE WR watch
+    if (stats.NEWS_EDGE) {
+        const wr = stats.NEWS_EDGE.w / (stats.NEWS_EDGE.w + stats.NEWS_EDGE.l) * 100;
+        if (wr < 40 && stats.NEWS_EDGE.pnl > 0) {
+            watch.push({title:'NEWS_EDGE 34% WR', why:`Profitable because avg-win > avg-loss × 2, but watch closely. If WR drops below 30% sustained, fade-rule is failing.`});
+        }
+    }
+
+    // BIG_MOVER hold/cut decision
+    if (stats.BIG_MOVER && stats.BIG_MOVER.n >= 50) {
+        const avg = stats.BIG_MOVER.pnl / stats.BIG_MOVER.n;
+        if (Math.abs(avg) < 5) {
+            watch.push({title:'BIG_MOVER break-even', why:`+$${stats.BIG_MOVER.pnl.toFixed(0)} over ${stats.BIG_MOVER.n} trades = $${avg.toFixed(2)}/trade. Decide in next 50 closes: scale or kill.`});
+        }
+    }
+
+    // NEG_RISK awaiting wallet
+    add.push({title:'NEG_RISK auto-execution', why:'5,942 detections, 5.4% avg edge, 0 traded — multi-leg atomic execution requires real wallet. Highest pending unlock.', urgency:'when wallet arrives'});
+
+    // LLM shadow → live decision
+    add.push({title:'LLM shadow → live decision', why:'Predictions logging since today. After 48h of shadow data, compare predicted edges vs actual market resolution. If hit-rate > 55%, flip to live signal.', urgency:'2 days'});
+
+    // WS health
+    add.push({title:'Mac sleep prevention', why:'Mac was off 7 days last week (26 Apr → 3 May) with no alerting. Heartbeat catches it now, but real fix is `caffeinate -d` in startup or KeepAlive in launchd. Belt + braces.', urgency:'before real money'});
+
+    // Build the HTML
+    const section = (title, items, color) => {
+        if (!items.length) return '';
+        let s = `<div style="margin-bottom:12px"><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:${color};margin-bottom:8px">${title}</div>`;
+        items.forEach(it => {
+            const urg = it.urgency ? `<span style="font-size:10px;color:#94a3b8;margin-left:8px">· ${escapeHtml(it.urgency)}</span>` : '';
+            s += `<div style="background:#0f172a;border-left:3px solid ${color};border-radius:6px;padding:8px 12px;margin-bottom:6px">
+                    <div style="font-size:13px;font-weight:700;color:#f1f5f9">${escapeHtml(it.title)}${urg}</div>
+                    <div style="font-size:12px;color:#cbd5e1;margin-top:3px;line-height:1.5">${escapeHtml(it.why)}</div>
+                  </div>`;
+        });
+        s += '</div>';
+        return s;
+    };
+
+    let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                  <div>
+                    <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#3b82f6">ACTIVE STRATEGY · OPERATING NOTES</div>
+                    <div style="font-size:14px;color:#94a3b8;margin-top:2px">Things to watch, change, add — driven by what the data is telling us right now.</div>
+                  </div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px">
+                  <div>${section('CHANGE — actions on current plays', change, '#22c55e')}</div>
+                  <div>${section('WATCH — keep an eye on', watch, '#f59e0b')}</div>
+                  <div>${section('ADD — pending unlocks', add, '#3b82f6')}</div>
+                </div>`;
+    el.innerHTML = html;
+}
+
 async function refreshHealthStrip() {
     // Pull WS health from gist (already merged into DATA), and REST poller
     // health from a direct fetch since rest_prices.json isn't synced to gist.
@@ -4276,6 +4383,7 @@ function render() {
     document.getElementById('scanner-status').textContent = DATA.scanner_status === 'active' ? 'ACTIVE' : 'IDLE';
     refreshHealthStrip();
     renderLaunchPanel();
+    renderStrategyWatch();
     renderSinceLive();
     renderOverview2();
     renderSuggestions();
