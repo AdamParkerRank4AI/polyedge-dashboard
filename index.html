@@ -119,43 +119,34 @@ tr:hover td{background:#0f172a}
 <div class="nav">
   <div class="nav-row main">
     <span class="nav-brand">PolyEdge</span>
-    <a class="nl since-live" onclick="showPage('sincelive')">Since Live</a>
     <a class="nl active" onclick="showPage('overview2')">Overview</a>
-    <a class="nl" onclick="showPage('suggestions')">Suggestions</a>
-    <a class="nl" onclick="showPage('coverage')">Coverage</a>
-    <a class="nl" onclick="showPage('positions')">Positions</a>
     <a class="nl" onclick="showPage('plays')">Plays</a>
+    <a class="nl" onclick="showPage('positions')">Positions</a>
     <a class="nl" onclick="showPage('alerts')">Alerts</a>
-    <a class="nl" onclick="showPage('lab')">Lab</a>
+    <a class="nl" onclick="showPage('negrisk')">NegRisk</a>
     <span class="nav-right">
+      <span id="health-strip" style="margin-right:12px;font-size:11px;color:#94a3b8;font-family:monospace">--</span>
       <span id="safety-banner" style="margin-right:12px;padding:2px 9px;border-radius:10px;font-size:10px;font-weight:800;letter-spacing:1px;background:#065f46;color:#d1fae5">PAPER</span>
       🟢 <span id="scanner-status" class="status-on">LIVE</span> · <span id="last-update">--</span>
     </span>
   </div>
   <div class="nav-row secondary">
     <span class="nav-section-label">Research</span>
+    <a class="nl" onclick="showPage('coverage')">Coverage</a>
     <a class="nl" onclick="showPage('markets')">Markets</a>
     <a class="nl" onclick="showPage('opportunities')">Opps</a>
-    <a class="nl" onclick="showPage('movers')">Movers</a>
-    <a class="nl" onclick="showPage('negrisk')">NegRisk</a>
     <a class="nl" onclick="showPage('llm')">LLM</a>
     <a class="nl" onclick="showPage('whales')">Whales</a>
     <a class="nl" onclick="showPage('newslag')">News Lag</a>
     <a class="nl" onclick="showPage('missed')">Just Missed</a>
-    <a class="nl" onclick="showPage('ideas')">Ideas</a>
   </div>
   <div class="nav-row secondary">
     <span class="nav-section-label">System</span>
-    <a class="nl" onclick="showPage('journey')">Journey</a>
-    <a class="nl" onclick="showPage('timeline')">Timeline</a>
-    <a class="nl" onclick="showPage('events')">Events</a>
     <a class="nl" onclick="showPage('audit')">Audit</a>
     <a class="nl" onclick="showPage('changes')">Rule Changes</a>
-    <a class="nl" onclick="showPage('golive')">Go Live</a>
-    <a class="nl" onclick="showPage('whatif')">What If</a>
     <a class="nl" onclick="showPage('backtest')">Backtest</a>
-    <a class="nl" onclick="showPage('mistakes')">Mistakes</a>
     <a class="nl" onclick="showPage('settings')">Settings</a>
+    <a class="nl" onclick="showPage('journey')">Journey</a>
   </div>
 </div>
 
@@ -220,6 +211,59 @@ tr:hover td{background:#0f172a}
 
 <!-- OVERVIEW 2 — per-play analysis, the main daily view -->
 <div id="page-overview2" class="page active">
+
+  <!-- LAUNCH-DAY PLAYS panel — what we are running with, what's off, why -->
+  <div style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border:1px solid #334155;border-left:4px solid #22c55e;border-radius:16px;padding:20px 24px;margin-bottom:20px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;margin-bottom:14px">
+      <div>
+        <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#22c55e;margin-bottom:4px">LAUNCH-DAY PLAYS</div>
+        <div style="font-size:20px;font-weight:800;color:#f1f5f9;letter-spacing:-0.3px">3 plays going live · 2 watching · 5 killed</div>
+      </div>
+      <div style="font-size:11px;color:#94a3b8;text-align:right">
+        <div>Last reviewed: 4 May 2026 · Phase 4</div>
+        <div>Backtest: NEWS_EDGE+TEMPORAL_ARB only = +$272 / 14d</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px;margin-bottom:8px">
+      <div style="background:#0a1020;border:1px solid #22c55e44;border-left:3px solid #22c55e;border-radius:8px;padding:12px 14px">
+        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#22c55e;margin-bottom:4px">TIER 1 · LIVE</div>
+        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px">NEWS_EDGE</div>
+        <div style="font-size:12px;color:#cbd5e1;line-height:1.5">Half-size, fade-rule active (Apr 19 fix). Triggers on multi-source news convergence within minutes of publication.</div>
+      </div>
+      <div style="background:#0a1020;border:1px solid #22c55e44;border-left:3px solid #22c55e;border-radius:8px;padding:12px 14px">
+        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#22c55e;margin-bottom:4px">TIER 1 · LIVE</div>
+        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px">TEMPORAL_ARB</div>
+        <div style="font-size:12px;color:#cbd5e1;line-height:1.5">Full-size. Pure math: P(by earlier date) &gt; P(by later date) is impossible. 3/3 historical, 100% WR.</div>
+      </div>
+      <div style="background:#0a1020;border:1px solid #22c55e44;border-left:3px solid #22c55e;border-radius:8px;padding:12px 14px">
+        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#22c55e;margin-bottom:4px">TIER 1 · AWAITS WALLET</div>
+        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px">NEG_RISK arbitrage</div>
+        <div style="font-size:12px;color:#cbd5e1;line-height:1.5">5,942 detections, avg 5.4% edge, 7 events &gt;5pp last 7d. Multi-leg atomic execution requires real wallet.</div>
+      </div>
+      <div style="background:#0a1020;border:1px solid #f59e0b44;border-left:3px solid #f59e0b;border-radius:8px;padding:12px 14px">
+        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#f59e0b;margin-bottom:4px">TIER 2 · PAPER WATCH</div>
+        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px">BIG_MOVER (surgical)</div>
+        <div style="font-size:12px;color:#cbd5e1;line-height:1.5">Half-size. Mideast / Peru / Venezuela / Hormuz blocked. Working buckets only.</div>
+      </div>
+      <div style="background:#0a1020;border:1px solid #f59e0b44;border-left:3px solid #f59e0b;border-radius:8px;padding:12px 14px">
+        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#f59e0b;margin-bottom:4px">TIER 2 · PAPER WATCH</div>
+        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px">CRYPTO threshold</div>
+        <div style="font-size:12px;color:#cbd5e1;line-height:1.5">ETH entries capped at 0.85 (Apr 26). Backtest: dropping CRYPTO entirely makes things worse.</div>
+      </div>
+      <div style="background:#0a1020;border:1px solid #7f1d1d;border-left:3px solid #7f1d1d;border-radius:8px;padding:12px 14px">
+        <div style="font-size:10px;font-weight:800;letter-spacing:1.5px;color:#fca5a5;margin-bottom:4px">KILLED · DO NOT REVIVE</div>
+        <div style="font-size:14px;font-weight:700;color:#f1f5f9;margin-bottom:6px">SYSTEMATIC_NO · LAB_SPORTS · TIME_DECAY · LATE_ENTRY · FED_DIVERGENCE</div>
+        <div style="font-size:12px;color:#cbd5e1;line-height:1.5">SYSTEMATIC_NO alone bled -$20,453 over 263 trades (5.9% WR). All 5 verified disabled at runtime today.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:#94a3b8;border-top:1px dashed #334155;padding-top:10px;margin-top:6px">
+      <div>📈 LLM ensemble in <strong style="color:#fcd34d">SHADOW</strong> mode — predictions logged, not auto-traded</div>
+      <div>🔔 Telegram alerts: 24/7 · @Adampolybot</div>
+      <div>💓 Heartbeat: stale &gt;30 min → push</div>
+      <div>🔌 Wallet pending: SA partner</div>
+    </div>
+  </div>
+
   <!-- Same hero strip as old overview -->
   <div id="hero-tldr2" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:1px solid #334155;border-radius:16px;padding:24px 28px;margin-bottom:24px">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px">
@@ -2869,24 +2913,29 @@ function renderWhales() {
         <div class="stat"><div class="sv bl">${top.length}</div><div class="sl">Tracked whales</div></div>
     </div>`;
 
-    html += '<h3>Top Whales by Total Notional</h3>';
+    html += '<h3>Top Whales — sorted by realised PnL (FIFO buy/sell pairs)</h3>';
+    html += '<p class="st" style="font-size:12px">Realised PnL is computed by matching SELL trades against the wallet\'s earlier BUYs (FIFO). Open lots are NOT marked-to-market here. Counts only $5k+ trades since whale tracking started.</p>';
     if (!top.length) {
         html += '<p class="st">No whale data yet. Log fills as trades come in.</p>';
     } else {
-        html += '<table><tr><th>Rank</th><th>Wallet</th><th>Trader</th><th>Trades</th><th>Total Notional</th><th>Avg Trade</th><th>Markets</th><th>Last Seen</th></tr>';
-        top.forEach((wl, i) => {
+        const sorted = [...top].sort((a, b) => (b.realised_pnl_usd || 0) - (a.realised_pnl_usd || 0));
+        html += '<table><tr><th>Rank</th><th>Wallet</th><th>Trader</th><th>Trades</th><th>Closed Pairs</th><th>Realised PnL</th><th>Open Notional</th><th>Total Notional</th><th>Last Seen</th></tr>';
+        sorted.slice(0, 25).forEach((wl, i) => {
             const addr = wl.wallet || '';
             const short = addr ? addr.slice(0,6) + '...' + addr.slice(-4) : '-';
             const polyProf = addr ? 'https://polymarket.com/profile/' + addr : '';
             const last = wl.last_seen ? fmtDate(wl.last_seen, {rel:true}) : '-';
+            const pnl = wl.realised_pnl_usd || 0;
+            const pnlCls = pnl > 0 ? 'up' : (pnl < 0 ? 'dn' : 'fl');
             html += `<tr>
                 <td>${i+1}</td>
                 <td>${polyProf ? `<a href="${polyProf}" target="_blank">${short}</a>` : short}</td>
                 <td>${escapeHtml(wl.name || '-')}</td>
                 <td>${wl.trades}</td>
-                <td><strong>$${wl.total_notional.toLocaleString()}</strong></td>
-                <td>$${wl.avg_notional.toLocaleString()}</td>
-                <td>${wl.unique_markets}</td>
+                <td>${wl.closed_trade_pairs || 0}</td>
+                <td class="${pnlCls}"><strong>$${pnl >= 0 ? '+' : ''}${pnl.toLocaleString(undefined, {maximumFractionDigits:0})}</strong></td>
+                <td>$${(wl.open_notional_usd || 0).toLocaleString(undefined, {maximumFractionDigits:0})}</td>
+                <td>$${wl.total_notional.toLocaleString()}</td>
                 <td>${last}</td>
             </tr>`;
         });
@@ -4123,6 +4172,36 @@ function mistakeCountSafe() {
     return ((DATA.positions || []).filter(p => p.mistake)).length;
 }
 
+async function refreshHealthStrip() {
+    // Pull WS health from gist (already merged into DATA), and REST poller
+    // health from a direct fetch since rest_prices.json isn't synced to gist.
+    const el = document.getElementById('health-strip');
+    if (!el) return;
+    let parts = [];
+    // WS — comes from live_prices.json, but we don't have direct access from
+    // the dashboard. Best effort: read DATA.scanner_status + last_updated for now.
+    // Future: bake live_prices health into the gist payload.
+    if (DATA && DATA.last_updated) {
+        const ageMs = Date.now() - new Date(DATA.last_updated).getTime();
+        const ageMin = Math.floor(ageMs / 60000);
+        const ageColor = ageMin < 16 ? '#22c55e' : (ageMin < 30 ? '#f59e0b' : '#ef4444');
+        parts.push(`<span style="color:${ageColor}">●</span> scan ${ageMin}m ago`);
+    }
+    // Live trade-flow signal: count of recent paper-trade closures in DATA.positions
+    if (DATA && DATA.positions) {
+        const open = DATA.positions.filter(p => p && p.status === 'open').length;
+        parts.push(`<span style="color:#cbd5e1">${open} open</span>`);
+    }
+    // LLM budget if present
+    if (DATA && DATA.llm_budget) {
+        const b = DATA.llm_budget;
+        const pct = b.budget_usd ? (b.spent_usd / b.budget_usd * 100) : 0;
+        const llmColor = pct < 80 ? '#94a3b8' : (pct < 95 ? '#f59e0b' : '#ef4444');
+        parts.push(`<span style="color:${llmColor}">LLM $${(b.spent_usd||0).toFixed(2)}/$${b.budget_usd}</span>`);
+    }
+    el.innerHTML = parts.join(' · ');
+}
+
 function render() {
     if (!DATA) return;
     const lu = DATA.last_updated ? new Date(DATA.last_updated) : null;
@@ -4130,6 +4209,7 @@ function render() {
         document.getElementById('last-update').innerHTML = 'Updated ' + fmtDate(lu) + ' · ' + fmtDate(lu, {rel:true});
     }
     document.getElementById('scanner-status').textContent = DATA.scanner_status === 'active' ? 'ACTIVE' : 'IDLE';
+    refreshHealthStrip();
     renderSinceLive();
     renderOverview2();
     renderSuggestions();
