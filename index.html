@@ -216,7 +216,10 @@ tr:hover td{background:#0f172a}
   <div id="launch-panel" style="background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);border:1px solid #334155;border-left:4px solid #22c55e;border-radius:16px;padding:20px 24px;margin-bottom:14px"></div>
 
   <!-- ACTIVE STRATEGY: things to watch / change / add -->
-  <div id="strategy-watch" style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;margin-bottom:20px"></div>
+  <div id="strategy-watch" style="background:#1e293b;border:1px solid #334155;border-radius:12px;padding:16px 20px;margin-bottom:14px"></div>
+
+  <!-- SETTLED-PNL TRUTH: paper PnL vs what would have happened in real money -->
+  <div id="settled-truth" style="background:#1e293b;border:1px solid #334155;border-left:4px solid #f59e0b;border-radius:12px;padding:16px 20px;margin-bottom:20px"></div>
 
   <!-- Same hero strip as old overview -->
   <div id="hero-tldr2" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:1px solid #334155;border-radius:16px;padding:24px 28px;margin-bottom:24px">
@@ -4258,6 +4261,95 @@ function renderLaunchPanel() {
     el.innerHTML = html;
 }
 
+function renderSettledTruth() {
+    // Surfaces the gap between paper PnL (TP/SL fires on live snapshot) and
+    // what would actually have happened in real money (Polymarket settlement).
+    // For long-dated NEWS_EDGE bets especially, paper TP fires on a brief
+    // news spike but the underlying market may not resolve our way.
+    const el = document.getElementById('settled-truth');
+    if (!el || !DATA) return;
+    const audit = DATA.settled_audit;
+    if (!audit || !audit.by_play || !Object.keys(audit.by_play).length) {
+        el.innerHTML = `
+          <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#f59e0b;margin-bottom:6px">SETTLED-PNL TRUTH</div>
+          <div style="font-size:13px;color:#cbd5e1">Awaiting first audit run. polyedge_settled_audit.py cross-checks every closed paper bet against Polymarket's actual settlement. Re-runs daily.</div>`;
+        return;
+    }
+    const generated = audit.generated_at ? fmtDate(audit.generated_at, {rel:true}) : 'unknown';
+    const stale = audit.is_stale;
+    const KILLED = new Set(['SYSTEMATIC_NO', 'TIME_DECAY', 'LAB_SPORTS', 'LATE_ENTRY', 'FED_DIVERGENCE', 'LAB_CELEBRITY']);
+
+    // Sort by paper PnL desc
+    const plays = Object.entries(audit.by_play)
+        .filter(([k,_]) => !KILLED.has(k))
+        .sort((a,b) => (b[1].paper_pnl||0) - (a[1].paper_pnl||0));
+
+    let html = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:12px">
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#f59e0b">SETTLED-PNL TRUTH · paper vs real-money</div>
+          <div style="font-size:13px;color:#94a3b8;margin-top:2px">Cross-check: did the bot's "wins" actually win on Polymarket's real settlement, or was it a TP-fire on a news spike that faded?</div>
+        </div>
+        <div style="font-size:11px;color:${stale?'#ef4444':'#94a3b8'};text-align:right">
+          <div>${stale?'⚠ STALE — last run >36h ago':'last audit ' + generated}</div>
+          <div>${audit.total_closed||0} positions classified</div>
+        </div>
+      </div>`;
+
+    // Table per active play
+    html += `<table style="margin:0">
+      <tr>
+        <th>Play</th>
+        <th style="text-align:right">Paper PnL</th>
+        <th style="text-align:right">Settled-real</th>
+        <th style="text-align:right">Conservative real</th>
+        <th style="text-align:right">Fake-win %</th>
+        <th>Verdict</th>
+      </tr>`;
+    plays.forEach(([play, s]) => {
+        const paper = s.paper_pnl || 0;
+        const real = s.true_real_pnl || 0;
+        const cons = s.conservative_real_pnl || 0;
+        const fake = s.fake_win_share_pct || 0;
+        const drift = paper - real;
+        const driftBig = Math.abs(drift) > Math.max(100, Math.abs(paper) * 0.3);
+        let verdict;
+        if (cons > 0 && fake < 10 && driftBig === false) {
+            verdict = '<span style="color:#22c55e">✓ paper matches real</span>';
+        } else if (cons > 0 && fake < 25) {
+            verdict = '<span style="color:#3b82f6">paper slightly inflated</span>';
+        } else if (cons > 0) {
+            verdict = '<span style="color:#f59e0b">paper inflated, real still positive</span>';
+        } else if (cons < paper * 0.5 || cons < 0) {
+            verdict = '<span style="color:#ef4444">⚠ paper misleading — real money would lose or break even</span>';
+        } else {
+            verdict = '<span style="color:#cbd5e1">unclear</span>';
+        }
+        const fmt = v => (v >= 0 ? '+$' : '-$') + Math.abs(Math.round(v)).toLocaleString();
+        const realCls = real >= 0 ? 'up' : 'dn';
+        const consCls = cons >= 0 ? 'up' : 'dn';
+        const fakeCls = fake < 10 ? '' : (fake < 25 ? 'fl' : 'dn');
+        html += `<tr>
+          <td><strong>${play}</strong></td>
+          <td style="text-align:right">${fmt(paper)}</td>
+          <td style="text-align:right" class="${realCls}">${fmt(real)}</td>
+          <td style="text-align:right" class="${consCls}"><strong>${fmt(cons)}</strong></td>
+          <td style="text-align:right" class="${fakeCls}">${fake.toFixed(1)}%</td>
+          <td>${verdict}</td>
+        </tr>`;
+    });
+    html += '</table>';
+    html += `<div style="font-size:11px;color:#94a3b8;margin-top:10px;line-height:1.5">
+        <strong style="color:#cbd5e1">How to read this:</strong>
+        Paper PnL = what the bot recorded.
+        Settled-real = sum of bets that actually settled on Polymarket where our side won/lost as recorded.
+        Conservative real = treats every "fake win" (paper +$ but market went against us) as a loss instead.
+        Fake-win % = share of settled wins where the underlying market actually settled against us.
+        High fake-win % means the bot's TP fires on news spikes that fade before resolution.
+      </div>`;
+    el.innerHTML = html;
+}
+
 function renderStrategyWatch() {
     const el = document.getElementById('strategy-watch');
     if (!el || !DATA) return;
@@ -4384,6 +4476,7 @@ function render() {
     refreshHealthStrip();
     renderLaunchPanel();
     renderStrategyWatch();
+    renderSettledTruth();
     renderSinceLive();
     renderOverview2();
     renderSuggestions();
