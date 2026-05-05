@@ -221,6 +221,9 @@ tr:hover td{background:#0f172a}
   <!-- SETTLED-PNL TRUTH: paper PnL vs what would have happened in real money -->
   <div id="settled-truth" style="background:#1e293b;border:1px solid #334155;border-left:4px solid #f59e0b;border-radius:12px;padding:16px 20px;margin-bottom:20px"></div>
 
+  <!-- STRATEGY DECISIONS PENDING — per-play KEEP/KILL recommendations -->
+  <div id="strategy-decisions" style="background:#1e293b;border:1px solid #334155;border-left:4px solid #a855f7;border-radius:12px;padding:16px 20px;margin-bottom:20px"></div>
+
   <!-- Same hero strip as old overview -->
   <div id="hero-tldr2" style="background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);border:1px solid #334155;border-radius:16px;padding:24px 28px;margin-bottom:24px">
     <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:20px">
@@ -4359,6 +4362,94 @@ function renderSettledTruth() {
     el.innerHTML = html;
 }
 
+function renderStrategyDecisions() {
+    // Per-play KEEP/KILL/REBUILD/SCALE recommendations from play_review.json.
+    // Hourly refresh. Surfaces the data Adam needs to make per-play decisions.
+    const el = document.getElementById('strategy-decisions');
+    if (!el || !DATA) return;
+    const r = DATA.play_review;
+    if (!r || !r.per_play) {
+        el.innerHTML = `
+          <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#a855f7;margin-bottom:6px">STRATEGY DECISIONS PENDING</div>
+          <div style="font-size:13px;color:#cbd5e1">Awaiting first play_review run.</div>`;
+        return;
+    }
+    const stale = r.is_stale;
+    const VERDICT_COLOURS = {
+        WORKING: '#22c55e', KEEP: '#3b82f6', SCALE: '#22c55e',
+        REVIEW: '#f59e0b', PAPER_INFLATED: '#f59e0b',
+        STAY_DISABLED: '#94a3b8', DORMANT: '#94a3b8',
+        BLEEDING_KILL: '#ef4444', PAPER_INFLATED_KILL: '#ef4444',
+    };
+    let html = `
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:14px">
+        <div>
+          <div style="font-size:11px;font-weight:800;letter-spacing:2px;color:#a855f7">STRATEGY DECISIONS PENDING</div>
+          <div style="font-size:13px;color:#94a3b8;margin-top:2px">Per-play KEEP / KILL / SCALE recommendations · refreshed hourly · your call to action.</div>
+        </div>
+        <div style="font-size:11px;color:${stale?'#ef4444':'#94a3b8'};text-align:right">
+          ${stale ? '⚠ STALE — last run >6h ago' : 'last refresh ' + (r.age_hours || 0).toFixed(1) + 'h ago'}
+        </div>
+      </div>`;
+    html += `<table style="margin:0">
+      <tr>
+        <th>Play</th>
+        <th>Status</th>
+        <th>Verdict</th>
+        <th style="text-align:right">7d n</th>
+        <th style="text-align:right">7d ROI</th>
+        <th style="text-align:right">Lifetime n</th>
+        <th style="text-align:right">Lifetime PnL</th>
+        <th>Rationale</th>
+      </tr>`;
+    Object.entries(r.per_play).forEach(([play, p]) => {
+        const v = (p.recommendation || {}).verdict || '?';
+        const colour = VERDICT_COLOURS[v] || '#94a3b8';
+        const enabled = p.currently_enabled ? 'ON' : 'OFF';
+        const enColour = p.currently_enabled ? '#22c55e' : '#64748b';
+        html += `<tr>
+          <td><strong>${escapeHtml(play)}</strong></td>
+          <td><span style="color:${enColour};font-weight:700">${enabled}</span></td>
+          <td><span style="color:${colour};font-weight:800">${escapeHtml(v)}</span></td>
+          <td style="text-align:right">${p.last_7d.n}</td>
+          <td style="text-align:right" class="${p.last_7d.roi_pct>0?'up':'dn'}">${p.last_7d.roi_pct.toFixed(1)}%</td>
+          <td style="text-align:right">${p.lifetime.n}</td>
+          <td style="text-align:right" class="${p.lifetime.pnl>0?'up':'dn'}">$${p.lifetime.pnl.toFixed(0)}</td>
+          <td style="font-size:12px;color:#cbd5e1">${escapeHtml((p.recommendation||{}).rationale || '')}</td>
+        </tr>`;
+    });
+    html += '</table>';
+
+    // Mistake re-validation panel
+    const mr = r.mistake_revalidation || {};
+    if (mr.no_longer_match_known_pattern > 0) {
+        html += `<div style="margin-top:14px;padding:10px 14px;background:#0f172a;border-left:3px solid #f59e0b;border-radius:8px;font-size:13px;color:#cbd5e1">
+            <strong style="color:#f59e0b">Mistake re-validation:</strong>
+            ${mr.no_longer_match_known_pattern}/${mr.total_flagged} flagged trades NO LONGER match KNOWN_MISTAKES patterns.
+            These could be reclassified back to data. Review candidates in <code>data/play_review.json</code> → mistake_revalidation.candidates_for_unflag.
+        </div>`;
+    }
+
+    // Per-source NEWS_EDGE
+    const sources = r.news_edge_per_source || [];
+    if (sources.length) {
+        html += `<div style="margin-top:14px"><div style="font-size:11px;font-weight:800;letter-spacing:1px;color:#94a3b8;margin-bottom:8px">NEWS_EDGE per-source ROI (n≥5)</div>`;
+        html += `<table style="margin:0"><tr><th>Source</th><th style="text-align:right">N</th><th style="text-align:right">PnL</th><th style="text-align:right">ROI</th><th>Verdict</th></tr>`;
+        sources.forEach(s => {
+            const recColour = s.recommendation === 'BLOCKLIST' ? '#ef4444' : (s.recommendation === 'WATCH' ? '#f59e0b' : '#22c55e');
+            html += `<tr>
+              <td><code>${escapeHtml(s.source)}</code></td>
+              <td style="text-align:right">${s.n}</td>
+              <td style="text-align:right" class="${s.pnl>0?'up':'dn'}">$${s.pnl.toFixed(0)}</td>
+              <td style="text-align:right" class="${s.roi_pct>0?'up':'dn'}">${s.roi_pct.toFixed(1)}%</td>
+              <td><span style="color:${recColour};font-weight:700">${s.recommendation}</span></td>
+            </tr>`;
+        });
+        html += `</table></div>`;
+    }
+    el.innerHTML = html;
+}
+
 function renderStrategyWatch() {
     const el = document.getElementById('strategy-watch');
     if (!el || !DATA) return;
@@ -4486,6 +4577,7 @@ function render() {
     renderLaunchPanel();
     renderStrategyWatch();
     renderSettledTruth();
+    renderStrategyDecisions();
     renderSinceLive();
     renderOverview2();
     renderSuggestions();
