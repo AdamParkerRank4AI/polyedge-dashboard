@@ -1781,7 +1781,7 @@ function renderAuditFindings() {
     });
 
     html += `<div class="st" style="margin-top:16px;padding:10px 14px;background:#0f172a;border-radius:8px;border-left:3px solid #3b82f6">
-        <strong style="color:#3b82f6">Audit runs after every scan.</strong> Checks 7 categories: data integrity, filter logic, Polymarket state (stale slugs, resolved markets), launchd agent health, feed responsiveness, P&L reconciliation, config sanity. Errors = fix immediately. Warnings = monitor. OK = clean.
+        <strong style="color:#3b82f6">Audit runs after every scan.</strong> Checks 9 categories: data integrity, filter logic (sports leaks), Polymarket state (stale slugs, resolved markets), launchd agent health, feed responsiveness, P&L reconciliation, config sanity, <strong>path drift</strong> (asserts trading-rule constants are imported by reference across modules — added 5 May), <strong>bleeding plays</strong> (ERROR if any active play has 7d ROI<-10% on n≥20 — added 5 May). Errors = fix immediately. Warnings = monitor. OK = clean.
     </div>`;
     el.innerHTML = html;
 }
@@ -3649,8 +3649,12 @@ function renderSafetyBanner() {
     }
     const mode = s.trading_mode || 'paper';
     const allowed = !!s.real_trading_allowed;
+    const plays = s.real_trading_plays || [];
+    const playsLabel = plays.length ? plays.join('+') : 'NONE';
     if (mode === 'real' && allowed) {
-        el.textContent = '● LIVE — REAL';
+        // Surface which plays are actually live — phased rollout means
+        // 'real' could mean only one play is real-trading.
+        el.textContent = `● LIVE — REAL (${playsLabel})`;
         el.style.background = '#991b1b';
         el.style.color = '#fecaca';
     } else if (mode === 'real' && !allowed) {
@@ -3658,11 +3662,16 @@ function renderSafetyBanner() {
         el.style.background = '#9a3412';
         el.style.color = '#fed7aa';
     } else {
-        el.textContent = 'PAPER';
+        el.textContent = `PAPER · would-trade-real: ${playsLabel}`;
         el.style.background = '#065f46';
         el.style.color = '#d1fae5';
     }
-    el.title = s.block_reason || 'All guards pass';
+    // Tooltip surfaces the phased-rollout note + block reason if any.
+    const lines = [];
+    if (s.block_reason) lines.push('BLOCK: ' + s.block_reason);
+    if (s.phased_rollout_note) lines.push(s.phased_rollout_note);
+    if (s.private_key_present === false) lines.push('wallet_private_key NOT in creds — needed for order signing');
+    el.title = lines.join('\n') || 'All guards pass';
 }
 
 function renderLLMBudget() {
