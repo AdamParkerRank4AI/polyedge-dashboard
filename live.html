@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PolyEdge LIVE — Real Money</title>
+<meta http-equiv="refresh" content="30">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro', sans-serif; background: #0f172a; color: #f1f5f9; padding: 20px; max-width: 1200px; margin: 0 auto; }
+  h1 { display: inline-block; font-size: 28px; }
+  .pill { display: inline-block; padding: 4px 14px; border-radius: 999px; font-weight: bold; font-size: 14px; vertical-align: middle; margin-left: 16px; }
+  .pill-real { background: #16a34a; color: #fff; }
+  .pill-paper { background: #475569; color: #fff; }
+  .nav a { background: #1e293b; color: #f1f5f9; padding: 6px 14px; border-radius: 4px; margin-right: 6px; font-size: 13px; text-decoration: none; }
+  .nav a:hover { background: #334155; }
+  .halt { background: #b91c1c; padding: 14px; text-align: center; font-weight: bold; font-size: 18px; border-radius: 8px; margin-bottom: 20px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 20px 0; }
+  .stat { background: #1e293b; padding: 16px; border-radius: 8px; }
+  .stat-label { font-size: 11px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+  .stat-value { font-size: 26px; font-weight: bold; margin-top: 4px; }
+  .pos-tag { background: #16a34a; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+  .neg-tag { background: #dc2626; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+  table { width: 100%; background: #1e293b; border-radius: 8px; overflow: hidden; border-collapse: collapse; margin-top: 8px; }
+  th { background: #0f172a; color: #94a3b8; padding: 10px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  td { padding: 12px; border-top: 1px solid #334155; font-size: 14px; }
+  .yes { color: #16a34a; font-weight: bold; }
+  .no { color: #dc2626; font-weight: bold; }
+  .pnl-pos { color: #16a34a; }
+  .pnl-neg { color: #dc2626; }
+  .footer { font-size: 12px; color: #64748b; margin-top: 24px; line-height: 1.6; }
+  .play-pill { background: #334155; color: #f1f5f9; padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-right: 4px; }
+  a.pm-link { color: #60a5fa; font-size: 12px; }
+  #error { background: #b91c1c; padding: 16px; border-radius: 8px; margin: 20px 0; display: none; }
+</style>
+</head>
+<body>
+<div id="root">Loading…</div>
+<div id="error"></div>
+
+<script>
+function fmt(n, d=2) { return n != null ? n.toFixed(d) : '?'; }
+function fmtUsd(n, d=2) { return n != null ? '$' + n.toFixed(d) : '?'; }
+function pnlCls(n) { return n >= 0 ? 'pnl-pos' : 'pnl-neg'; }
+
+async function load() {
+  try {
+    const r = await fetch('/live-data.json?t=' + Date.now());
+    if (!r.ok) throw new Error('fetch failed: ' + r.status);
+    const d = await r.json();
+    render(d);
+  } catch (e) {
+    document.getElementById('error').style.display = 'block';
+    document.getElementById('error').textContent = 'load error: ' + e.message;
+  }
+}
+
+function render(d) {
+  const t = d.totals || {};
+  const a = d.today_activity || {};
+  const s = d.safety || {};
+  const positions = d.live_positions || [];
+  const halt = d.halt_file_present;
+  const mode = s.trading_mode || '?';
+
+  let html = '';
+  if (halt) html += '<div class="halt">🛑 HALT_FILE PRESENT — all real fires + SELLs blocked</div>';
+
+  html += '<div style="margin-bottom:14px"><h1>💵 PolyEdge LIVE</h1>';
+  html += '<span class="pill pill-' + (mode === 'real' ? 'real' : 'paper') + '">' + mode.toUpperCase() + '</span>';
+  html += ' <span style="margin-left:8px">' + (s.real_trading_plays || []).map(p => '<span class="play-pill">' + p + '</span>').join('') + '</span>';
+  html += '</div>';
+
+  html += '<div class="nav" style="margin-bottom:8px">';
+  html += '<a href="/">← Dashboard (paper)</a>';
+  html += '<a href="/live-data.json" target="_blank">JSON</a>';
+  html += '</div>';
+
+  html += '<div class="stats">';
+  html += '<div class="stat"><div class="stat-label">Open positions</div><div class="stat-value">' + (t.open_count || 0) + '</div></div>';
+  html += '<div class="stat"><div class="stat-label">Total deployed</div><div class="stat-value">' + fmtUsd(t.total_cost_usd) + '</div></div>';
+  html += '<div class="stat"><div class="stat-label">Current value</div><div class="stat-value">' + fmtUsd(t.total_value_usd) + '</div></div>';
+  html += '<div class="stat"><div class="stat-label">Unrealised PnL</div><div class="stat-value ' + pnlCls(t.unrealised_pnl_usd || 0) + '">' + fmtUsd(t.unrealised_pnl_usd) + '</div></div>';
+  html += '<div class="stat"><div class="stat-label">Wallet balance</div><div class="stat-value">' + fmtUsd(d.wallet_balance_usd) + '</div></div>';
+  html += '<div class="stat"><div class="stat-label">Today fired</div><div class="stat-value">' + (a.real_buys_filled || 0) + '<span style="font-size:14px;color:#94a3b8"> / ' + (s.max_real_trades_per_day || '?') + '</span></div></div>';
+  html += '<div class="stat"><div class="stat-label">Today spent</div><div class="stat-value">' + fmtUsd(a.real_buy_spend_usd) + '</div></div>';
+  html += '<div class="stat"><div class="stat-label">Errors / Rejected</div><div class="stat-value" style="font-size:18px">' + (a.errored || 0) + ' <span style="color:#94a3b8">/</span> ' + (a.rejected_by_safety || 0) + '</div></div>';
+  html += '</div>';
+
+  html += '<h2 style="margin-top:24px;font-size:18px">Live positions (Polymarket truth)</h2>';
+  html += '<table><thead><tr>';
+  html += '<th>Market</th><th>Side</th><th style="text-align:right">Shares</th>';
+  html += '<th style="text-align:right">Avg buy</th><th style="text-align:right">Now</th>';
+  html += '<th style="text-align:right">Cost</th><th style="text-align:right">Value</th>';
+  html += '<th style="text-align:right">PnL</th><th></th></tr></thead><tbody>';
+  if (!positions.length) {
+    html += '<tr><td colspan="9" style="text-align:center;padding:32px;color:#94a3b8">No open real positions</td></tr>';
+  } else {
+    for (const p of positions) {
+      const cost = parseFloat(p.cost || (parseFloat(p.size) * parseFloat(p.avgPrice)) || 0);
+      const val = parseFloat(p.value || (parseFloat(p.size) * parseFloat(p.curPrice)) || 0);
+      const pnl = val - cost;
+      const sideCls = p.outcome === 'Yes' ? 'yes' : 'no';
+      html += '<tr>';
+      html += '<td>' + (p.title || p.slug || '?').slice(0, 80) + '</td>';
+      html += '<td class="' + sideCls + '">' + p.outcome + '</td>';
+      html += '<td style="text-align:right">' + fmt(parseFloat(p.size), 2) + '</td>';
+      html += '<td style="text-align:right">' + fmtUsd(parseFloat(p.avgPrice), 4) + '</td>';
+      html += '<td style="text-align:right">' + fmtUsd(parseFloat(p.curPrice), 4) + '</td>';
+      html += '<td style="text-align:right">' + fmtUsd(cost) + '</td>';
+      html += '<td style="text-align:right">' + fmtUsd(val) + '</td>';
+      html += '<td style="text-align:right" class="' + pnlCls(pnl) + '"><b>' + fmtUsd(pnl) + '</b></td>';
+      html += '<td><a class="pm-link" href="https://polymarket.com/market/' + (p.slug || '') + '" target="_blank">PM →</a></td>';
+      html += '</tr>';
+    }
+  }
+  html += '</tbody></table>';
+
+  html += '<div class="footer">';
+  html += 'Data refreshed by <code>com.polyedge.live-real-refresh</code> (60s) → site rebuilds 3x daily (07/13/19 BST). Page auto-refreshes 30s.<br>';
+  html += 'Last data: ' + (d.generated_at || '?').slice(0, 19) + ' UTC<br>';
+  html += 'Caps: stake=' + fmtUsd(s.max_stake_usd) + ' · max-open=' + fmtUsd(s.max_open_usd) + ' · max-trades-day=' + (s.max_real_trades_per_day || '?') + ' · loss-halt=' + fmtUsd(s.max_real_loss_per_day_usd) + ' · staleness=' + (s.staleness_pct || '?') + '%';
+  html += '</div>';
+
+  document.getElementById('root').innerHTML = html;
+}
+
+load();
+setInterval(load, 30000);
+</script>
+</body>
+</html>
