@@ -74,7 +74,10 @@ function render(d) {
   html += '<div class="nav" style="margin-bottom:8px">';
   html += '<a href="/">← Dashboard (paper)</a>';
   html += '<a href="/live-data.json" target="_blank">JSON</a>';
+  html += '<a href="javascript:location.reload()">↻ Refresh page</a>';
+  html += '<a href="javascript:requestUpdate()" style="background:#16a34a">⚡ Update data now</a>';
   html += '</div>';
+  html += '<div id="update-status" style="font-size:12px;color:#94a3b8;margin-bottom:12px"></div>';
 
   html += '<div class="stats">';
   html += '<div class="stat"><div class="stat-label">Open positions</div><div class="stat-value">' + (t.open_count || 0) + '</div></div>';
@@ -123,6 +126,22 @@ function render(d) {
   html += '</div>';
 
   document.getElementById('root').innerHTML = html;
+}
+
+function requestUpdate() {
+  // Calls a Cloudflare Worker that touches the refresh sentinel on the Mac.
+  // Mac's refresh-on-demand watcher (every 30s) picks it up + triggers deploy.
+  // Worker URL is set after first deploy of polyedge-refresh-trigger worker.
+  const url = 'https://polyedge-refresh-trigger.dawn-field-3d16.workers.dev/refresh?key=1210';
+  document.getElementById('update-status').textContent = '⌛ Update requested — Mac will deploy within ~60s. Refresh page in 90s.';
+  fetch(url, { method: 'POST', mode: 'no-cors' })
+    .then(() => {
+      document.getElementById('update-status').innerHTML = '✓ Refresh queued. Page will auto-update when deploy completes (~60-90s). Or just message Claude "refresh" anytime.';
+    })
+    .catch(e => {
+      // Worker may not be deployed yet; fall back to message
+      document.getElementById('update-status').innerHTML = '⚠ Direct refresh unavailable. <b>Message Claude "refresh"</b> in the rc app to trigger an update — same effect within ~60s.';
+    });
 }
 
 load();
