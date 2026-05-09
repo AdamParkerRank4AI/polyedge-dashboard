@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-09T14:42:50.685588+00:00",
+  "generated_at": "2026-05-09T15:43:09.880252+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": 99.0027,
@@ -11,13 +11,13 @@
       "size": 13.9784,
       "avgPrice": 0.0929,
       "initialValue": 1.2999,
-      "currentValue": 1.1672,
-      "cashPnl": -0.1327,
-      "percentPnl": -10.2078,
+      "currentValue": 1.1392,
+      "cashPnl": -0.1607,
+      "percentPnl": -12.3616,
       "totalBought": 13.9784,
       "realizedPnl": 0,
-      "percentRealizedPnl": -10.2144,
-      "curPrice": 0.0835,
+      "percentRealizedPnl": -12.3682,
+      "curPrice": 0.0815,
       "redeemable": false,
       "mergeable": false,
       "title": "Hantavirus pandemic in 2026?",
@@ -32,8 +32,8 @@
       "endDate": "2026-12-31",
       "negativeRisk": false,
       "cost": 1.2986,
-      "value": 1.1672,
-      "unrealised_pnl": -0.1314
+      "value": 1.1392,
+      "unrealised_pnl": -0.1594
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -42,13 +42,13 @@
       "size": 7.875,
       "avgPrice": 0.16,
       "initialValue": 1.26,
-      "currentValue": 0.0315,
-      "cashPnl": -1.2285,
-      "percentPnl": -97.5,
+      "currentValue": 0.0196,
+      "cashPnl": -1.2404,
+      "percentPnl": -98.4444,
       "totalBought": 7.875,
       "realizedPnl": 0,
-      "percentRealizedPnl": -97.5,
-      "curPrice": 0.004,
+      "percentRealizedPnl": -98.4444,
+      "curPrice": 0.0025,
       "redeemable": false,
       "mergeable": false,
       "title": "Will the highest temperature in Hong Kong be 26\u00b0C on May 9?",
@@ -63,8 +63,8 @@
       "endDate": "2026-05-09",
       "negativeRisk": true,
       "cost": 1.26,
-      "value": 0.0315,
-      "unrealised_pnl": -1.2285
+      "value": 0.0197,
+      "unrealised_pnl": -1.2403
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -73,13 +73,13 @@
       "size": 7.875,
       "avgPrice": 0.16,
       "initialValue": 1.26,
-      "currentValue": 0.5118,
-      "cashPnl": -0.7482,
-      "percentPnl": -59.3809,
+      "currentValue": 0.3937,
+      "cashPnl": -0.8663,
+      "percentPnl": -68.7539,
       "totalBought": 7.875,
       "realizedPnl": 0,
-      "percentRealizedPnl": -59.3809,
-      "curPrice": 0.065,
+      "percentRealizedPnl": -68.7539,
+      "curPrice": 0.05,
       "redeemable": false,
       "mergeable": false,
       "title": "Will Bitcoin dip to $78,000 May 4-10?",
@@ -94,8 +94,8 @@
       "endDate": "2026-05-11",
       "negativeRisk": false,
       "cost": 1.26,
-      "value": 0.5119,
-      "unrealised_pnl": -0.7481
+      "value": 0.3938,
+      "unrealised_pnl": -0.8662
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -133,8 +133,8 @@
   "totals": {
     "open_count": 4,
     "total_cost_usd": 4.9183,
-    "total_value_usd": 2.7171,
-    "unrealised_pnl_usd": -2.2012
+    "total_value_usd": 2.5592,
+    "unrealised_pnl_usd": -2.3591
   },
   "today_activity": {
     "real_buys_filled": 0,
