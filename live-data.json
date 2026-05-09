@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-09T02:24:09.510650+00:00",
+  "generated_at": "2026-05-09T03:25:40.894852+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": 99.0027,
@@ -42,13 +42,13 @@
       "size": 7.875,
       "avgPrice": 0.16,
       "initialValue": 1.26,
-      "currentValue": 0.7875,
-      "cashPnl": -0.4725,
-      "percentPnl": -37.5,
+      "currentValue": 0.3543,
+      "cashPnl": -0.9057,
+      "percentPnl": -71.8809,
       "totalBought": 7.875,
       "realizedPnl": 0,
-      "percentRealizedPnl": -37.5,
-      "curPrice": 0.1,
+      "percentRealizedPnl": -71.8809,
+      "curPrice": 0.045,
       "redeemable": false,
       "mergeable": false,
       "title": "Will the highest temperature in Hong Kong be 26\u00b0C on May 9?",
@@ -63,8 +63,8 @@
       "endDate": "2026-05-09",
       "negativeRisk": true,
       "cost": 1.26,
-      "value": 0.7875,
-      "unrealised_pnl": -0.4725
+      "value": 0.3544,
+      "unrealised_pnl": -0.9056
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -104,13 +104,13 @@
       "size": 2.0754,
       "avgPrice": 0.5299,
       "initialValue": 1.0999,
-      "currentValue": 0.9962,
-      "cashPnl": -0.1037,
-      "percentPnl": -9.4272,
+      "currentValue": 0.9858,
+      "cashPnl": -0.1141,
+      "percentPnl": -10.3727,
       "totalBought": 2.0754,
       "realizedPnl": 0,
-      "percentRealizedPnl": -9.4361,
-      "curPrice": 0.48,
+      "percentRealizedPnl": -10.3815,
+      "curPrice": 0.475,
       "redeemable": false,
       "mergeable": false,
       "title": "Will Bitcoin reach $85,000 in May?",
@@ -125,16 +125,16 @@
       "endDate": "2026-06-01",
       "negativeRisk": false,
       "cost": 1.0998,
-      "value": 0.9962,
-      "unrealised_pnl": -0.1036
+      "value": 0.9858,
+      "unrealised_pnl": -0.1139
     }
   ],
   "live_positions_error": null,
   "totals": {
     "open_count": 4,
     "total_cost_usd": 4.9183,
-    "total_value_usd": 3.6114,
-    "unrealised_pnl_usd": -1.3069
+    "total_value_usd": 3.1679,
+    "unrealised_pnl_usd": -1.7504
   },
   "today_activity": {
     "real_buys_filled": 0,
