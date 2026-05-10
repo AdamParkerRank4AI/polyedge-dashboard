@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-10T09:47:40.227826+00:00",
+  "generated_at": "2026-05-10T10:47:56.151003+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": 99.0027,
@@ -42,13 +42,13 @@
       "size": 7.875,
       "avgPrice": 0.16,
       "initialValue": 1.26,
-      "currentValue": 0.0275,
-      "cashPnl": -1.2325,
-      "percentPnl": -97.8174,
+      "currentValue": 0.0196,
+      "cashPnl": -1.2404,
+      "percentPnl": -98.4444,
       "totalBought": 7.875,
       "realizedPnl": 0,
-      "percentRealizedPnl": -97.8174,
-      "curPrice": 0.0035,
+      "percentRealizedPnl": -98.4444,
+      "curPrice": 0.0025,
       "redeemable": false,
       "mergeable": false,
       "title": "Will the highest temperature in Hong Kong be 26\u00b0C on May 9?",
@@ -63,8 +63,8 @@
       "endDate": "2026-05-09",
       "negativeRisk": true,
       "cost": 1.26,
-      "value": 0.0276,
-      "unrealised_pnl": -1.2324
+      "value": 0.0197,
+      "unrealised_pnl": -1.2403
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -73,13 +73,13 @@
       "size": 7.875,
       "avgPrice": 0.16,
       "initialValue": 1.26,
-      "currentValue": 0.1063,
-      "cashPnl": -1.1537,
-      "percentPnl": -91.5634,
+      "currentValue": 0.0826,
+      "cashPnl": -1.1774,
+      "percentPnl": -93.4444,
       "totalBought": 7.875,
       "realizedPnl": 0,
-      "percentRealizedPnl": -91.5634,
-      "curPrice": 0.0135,
+      "percentRealizedPnl": -93.4444,
+      "curPrice": 0.0105,
       "redeemable": false,
       "mergeable": false,
       "title": "Will Bitcoin dip to $78,000 May 4-10?",
@@ -94,8 +94,8 @@
       "endDate": "2026-05-11",
       "negativeRisk": false,
       "cost": 1.26,
-      "value": 0.1063,
-      "unrealised_pnl": -1.1537
+      "value": 0.0827,
+      "unrealised_pnl": -1.1773
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -133,8 +133,8 @@
   "totals": {
     "open_count": 4,
     "total_cost_usd": 4.9183,
-    "total_value_usd": 2.0709,
-    "unrealised_pnl_usd": -2.8475
+    "total_value_usd": 2.0394,
+    "unrealised_pnl_usd": -2.879
   },
   "today_activity": {
     "real_buys_filled": 0,
