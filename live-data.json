@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-10T15:51:57.374016+00:00",
+  "generated_at": "2026-05-10T16:53:09.478029+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": 99.0027,
@@ -11,13 +11,13 @@
       "size": 13.9784,
       "avgPrice": 0.0929,
       "initialValue": 1.2999,
-      "currentValue": 0.9505,
-      "cashPnl": -0.3494,
-      "percentPnl": -26.8772,
+      "currentValue": 0.9575,
+      "cashPnl": -0.3424,
+      "percentPnl": -26.3387,
       "totalBought": 13.9784,
       "realizedPnl": 0,
-      "percentRealizedPnl": -26.8838,
-      "curPrice": 0.068,
+      "percentRealizedPnl": -26.3453,
+      "curPrice": 0.0685,
       "redeemable": false,
       "mergeable": false,
       "title": "Hantavirus pandemic in 2026?",
@@ -32,8 +32,8 @@
       "endDate": "2026-12-31",
       "negativeRisk": false,
       "cost": 1.2986,
-      "value": 0.9505,
-      "unrealised_pnl": -0.3481
+      "value": 0.9575,
+      "unrealised_pnl": -0.3411
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -73,13 +73,13 @@
       "size": 7.875,
       "avgPrice": 0.16,
       "initialValue": 1.26,
-      "currentValue": 0.059,
-      "cashPnl": -1.201,
-      "percentPnl": -95.3174,
+      "currentValue": 0.0669,
+      "cashPnl": -1.1931,
+      "percentPnl": -94.6904,
       "totalBought": 7.875,
       "realizedPnl": 0,
-      "percentRealizedPnl": -95.3174,
-      "curPrice": 0.0075,
+      "percentRealizedPnl": -94.6904,
+      "curPrice": 0.0085,
       "redeemable": false,
       "mergeable": false,
       "title": "Will Bitcoin dip to $78,000 May 4-10?",
@@ -94,8 +94,8 @@
       "endDate": "2026-05-11",
       "negativeRisk": false,
       "cost": 1.26,
-      "value": 0.0591,
-      "unrealised_pnl": -1.2009
+      "value": 0.0669,
+      "unrealised_pnl": -1.1931
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -104,13 +104,13 @@
       "size": 2.0754,
       "avgPrice": 0.5299,
       "initialValue": 1.0999,
-      "currentValue": 0.882,
-      "cashPnl": -0.2179,
-      "percentPnl": -19.8091,
+      "currentValue": 0.8198,
+      "cashPnl": -0.2801,
+      "percentPnl": -25.4637,
       "totalBought": 2.0754,
       "realizedPnl": 0,
-      "percentRealizedPnl": -19.8179,
-      "curPrice": 0.425,
+      "percentRealizedPnl": -25.4725,
+      "curPrice": 0.395,
       "redeemable": false,
       "mergeable": false,
       "title": "Will Bitcoin reach $85,000 in May?",
@@ -125,16 +125,16 @@
       "endDate": "2026-06-01",
       "negativeRisk": false,
       "cost": 1.0998,
-      "value": 0.882,
-      "unrealised_pnl": -0.2177
+      "value": 0.8198,
+      "unrealised_pnl": -0.28
     }
   ],
   "live_positions_error": null,
   "totals": {
     "open_count": 4,
     "total_cost_usd": 4.9183,
-    "total_value_usd": 1.9035,
-    "unrealised_pnl_usd": -3.0149
+    "total_value_usd": 1.8561,
+    "unrealised_pnl_usd": -3.0623
   },
   "today_activity": {
     "real_buys_filled": 0,

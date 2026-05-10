@@ -90,6 +90,10 @@ function render(d) {
   html += '<div class="stat"><div class="stat-label">Errors / Rejected</div><div class="stat-value" style="font-size:18px">' + (a.errored || 0) + ' <span style="color:#94a3b8">/</span> ' + (a.rejected_by_safety || 0) + '</div></div>';
   html += '</div>';
 
+  // Per-play PnL section (10 May Tier-3) — fetched in parallel
+  html += '<h2 style="margin-top:24px;font-size:18px">Per-play settled PnL <span style="font-size:12px;color:#94a3b8;font-weight:normal">(refreshed every 5 min)</span></h2>';
+  html += '<div id="play-pnl">Loading per-play stats…</div>';
+
   html += '<h2 style="margin-top:24px;font-size:18px">Live positions (Polymarket truth)</h2>';
   html += '<table><thead><tr>';
   html += '<th>Market</th><th>Side</th><th style="text-align:right">Shares</th>';
@@ -128,6 +132,46 @@ function render(d) {
   document.getElementById('root').innerHTML = html;
 }
 
+async function loadPlayPnl() {
+  try {
+    const r = await fetch('/real-pnl.json?t=' + Date.now());
+    if (!r.ok) {
+      document.getElementById('play-pnl').innerHTML = '<p style="color:#94a3b8">Per-play data not yet available.</p>';
+      return;
+    }
+    const d = await r.json();
+    const totals = d.totals || {};
+    const byPlay = d.by_play || {};
+    let h = '<table><thead><tr>';
+    h += '<th>Play</th><th style="text-align:right">Fires</th><th style="text-align:right">Spent</th>';
+    h += '<th style="text-align:right">Settled PnL</th><th style="text-align:right">Open</th>';
+    h += '<th style="text-align:right">Unrealised</th><th style="text-align:right">Total PnL</th>';
+    h += '<th style="text-align:right">ROI</th><th style="text-align:right">W/L</th></tr></thead><tbody>';
+    const plays = Object.keys(byPlay).sort();
+    for (const p of plays) {
+      const s = byPlay[p];
+      const totPnl = s.total_pnl_usd || 0;
+      const cls = totPnl >= 0 ? 'pnl-pos' : 'pnl-neg';
+      h += '<tr>';
+      h += `<td><b>${p}</b></td>`;
+      h += `<td style="text-align:right">${s.fires}</td>`;
+      h += `<td style="text-align:right">$${(s.spent_usd||0).toFixed(2)}</td>`;
+      h += `<td style="text-align:right">$${(s.settled_pnl_usd||0).toFixed(2)}</td>`;
+      h += `<td style="text-align:right">${s.open_count||0}</td>`;
+      h += `<td style="text-align:right" class="${(s.unrealised_pnl_usd||0)>=0?'pnl-pos':'pnl-neg'}">$${(s.unrealised_pnl_usd||0).toFixed(2)}</td>`;
+      h += `<td style="text-align:right" class="${cls}"><b>$${totPnl.toFixed(2)}</b></td>`;
+      h += `<td style="text-align:right" class="${cls}">${(s.roi_pct||0).toFixed(1)}%</td>`;
+      h += `<td style="text-align:right">${s.wins||0}/${s.losses||0}</td>`;
+      h += '</tr>';
+    }
+    h += '</tbody></table>';
+    h += `<p style="font-size:11px;color:#64748b;margin-top:6px">TOTAL: ${totals.fires} fires, $${(totals.spent_usd||0).toFixed(2)} spent, ${(totals.roi_pct||0).toFixed(1)}% ROI</p>`;
+    document.getElementById('play-pnl').innerHTML = h;
+  } catch (e) {
+    document.getElementById('play-pnl').innerHTML = '<p style="color:#94a3b8">Per-play fetch failed: ' + e.message + '</p>';
+  }
+}
+
 function requestUpdate() {
   // Calls a Cloudflare Worker that touches the refresh sentinel on the Mac.
   // Mac's refresh-on-demand watcher (every 30s) picks it up + triggers deploy.
@@ -139,13 +183,14 @@ function requestUpdate() {
       document.getElementById('update-status').innerHTML = '✓ Refresh queued. Page will auto-update when deploy completes (~60-90s). Or just message Claude "refresh" anytime.';
     })
     .catch(e => {
-      // Worker may not be deployed yet; fall back to message
       document.getElementById('update-status').innerHTML = '⚠ Direct refresh unavailable. <b>Message Claude "refresh"</b> in the rc app to trigger an update — same effect within ~60s.';
     });
 }
 
 load();
+loadPlayPnl();
 setInterval(load, 30000);
+setInterval(loadPlayPnl, 30000);
 </script>
 </body>
 </html>
