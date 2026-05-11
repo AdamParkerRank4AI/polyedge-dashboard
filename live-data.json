@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-11T18:41:56.878812+00:00",
+  "generated_at": "2026-05-11T19:42:18.405257+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": 96.2214,
@@ -104,13 +104,13 @@
       "size": 7.1186,
       "avgPrice": 0.1769,
       "initialValue": 1.2599,
-      "currentValue": 1.2564,
-      "cashPnl": -0.0035,
-      "percentPnl": -0.2777,
+      "currentValue": 1.2671,
+      "cashPnl": 0.0071,
+      "percentPnl": 0.5634,
       "totalBought": 7.1186,
       "realizedPnl": 0,
-      "percentRealizedPnl": -0.2851,
-      "curPrice": 0.1765,
+      "percentRealizedPnl": 0.564,
+      "curPrice": 0.178,
       "redeemable": false,
       "mergeable": false,
       "title": "Will the San Antonio Spurs win the 2026 NBA Finals?",
@@ -125,8 +125,8 @@
       "endDate": "2026-07-01",
       "negativeRisk": true,
       "cost": 1.2593,
-      "value": 1.2564,
-      "unrealised_pnl": -0.0028
+      "value": 1.2671,
+      "unrealised_pnl": 0.0078
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -195,14 +195,14 @@
   "totals": {
     "open_count": 6,
     "total_cost_usd": 7.347,
-    "total_value_usd": 4.7054,
-    "unrealised_pnl_usd": -2.6416
+    "total_value_usd": 4.7161,
+    "unrealised_pnl_usd": -2.6309
   },
   "today_activity": {
     "real_buys_filled": 3,
     "real_buy_spend_usd": 3.9,
     "rejected_by_safety": 0,
-    "errored": 23
+    "errored": 24
   },
   "safety": {
     "trading_mode": "real",
