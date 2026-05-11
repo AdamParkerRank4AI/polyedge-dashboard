@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-11T11:32:59.028574+00:00",
+  "generated_at": "2026-05-11T12:34:45.936570+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": 99.8482,
@@ -11,13 +11,13 @@
       "size": 13.9784,
       "avgPrice": 0.0929,
       "initialValue": 1.2999,
-      "currentValue": 1.1112,
-      "cashPnl": -0.1887,
-      "percentPnl": -14.5155,
+      "currentValue": 1.0973,
+      "cashPnl": -0.2026,
+      "percentPnl": -15.5847,
       "totalBought": 13.9784,
       "realizedPnl": 0,
-      "percentRealizedPnl": -14.5221,
-      "curPrice": 0.0795,
+      "percentRealizedPnl": -15.5913,
+      "curPrice": 0.0785,
       "redeemable": false,
       "mergeable": false,
       "title": "Hantavirus pandemic in 2026?",
@@ -32,8 +32,8 @@
       "endDate": "2026-12-31",
       "negativeRisk": false,
       "cost": 1.2986,
-      "value": 1.1113,
-      "unrealised_pnl": -0.1873
+      "value": 1.0973,
+      "unrealised_pnl": -0.2013
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -102,8 +102,8 @@
   "totals": {
     "open_count": 3,
     "total_cost_usd": 3.8186,
-    "total_value_usd": 1.1113,
-    "unrealised_pnl_usd": -2.7073
+    "total_value_usd": 1.0973,
+    "unrealised_pnl_usd": -2.7213
   },
   "today_activity": {
     "real_buys_filled": 0,
