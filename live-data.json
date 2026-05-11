@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-11T17:40:17.282637+00:00",
+  "generated_at": "2026-05-11T18:41:56.878812+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
-  "wallet_balance_usd": 97.5125,
+  "wallet_balance_usd": 96.2214,
   "live_positions": [
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -99,6 +99,37 @@
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
+      "asset": "102227184035967850089766981958743064457339118173548431660886438726896222843254",
+      "conditionId": "0xb6b3d7a2037b3faa7e1306d741840d453432902d73cc9a146a035e40271eae73",
+      "size": 7.1186,
+      "avgPrice": 0.1769,
+      "initialValue": 1.2599,
+      "currentValue": 1.2564,
+      "cashPnl": -0.0035,
+      "percentPnl": -0.2777,
+      "totalBought": 7.1186,
+      "realizedPnl": 0,
+      "percentRealizedPnl": -0.2851,
+      "curPrice": 0.1765,
+      "redeemable": false,
+      "mergeable": false,
+      "title": "Will the San Antonio Spurs win the 2026 NBA Finals?",
+      "slug": "will-the-san-antonio-spurs-win-the-2026-nba-finals",
+      "icon": "https://polymarket-upload.s3.us-east-2.amazonaws.com/nba-finals-points-leader-7g2ZEZvMXxLb.jpg",
+      "eventId": "27830",
+      "eventSlug": "2026-nba-champion",
+      "outcome": "Yes",
+      "outcomeIndex": 0,
+      "oppositeOutcome": "No",
+      "oppositeAsset": "12636035070565821048178968461063687179393834041535317885287743395873720755118",
+      "endDate": "2026-07-01",
+      "negativeRisk": true,
+      "cost": 1.2593,
+      "value": 1.2564,
+      "unrealised_pnl": -0.0028
+    },
+    {
+      "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
       "asset": "33156410999665902694791064431724433042010245771106314074312009703157423879038",
       "conditionId": "0xd5d9fc47718bd553592d126b1fa5e87183d27f3936975b0c04cc0f2dec1f1bb4",
       "size": 5.4347,
@@ -162,16 +193,16 @@
   ],
   "live_positions_error": null,
   "totals": {
-    "open_count": 5,
-    "total_cost_usd": 6.0877,
-    "total_value_usd": 3.449,
-    "unrealised_pnl_usd": -2.6387
+    "open_count": 6,
+    "total_cost_usd": 7.347,
+    "total_value_usd": 4.7054,
+    "unrealised_pnl_usd": -2.6416
   },
   "today_activity": {
-    "real_buys_filled": 2,
-    "real_buy_spend_usd": 2.6,
+    "real_buys_filled": 3,
+    "real_buy_spend_usd": 3.9,
     "rejected_by_safety": 0,
-    "errored": 14
+    "errored": 23
   },
   "safety": {
     "trading_mode": "real",
