@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-11T20:42:45.765261+00:00",
+  "generated_at": "2026-05-12T07:10:47.344022+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
-  "wallet_balance_usd": 94.9614,
+  "wallet_balance_usd": 93.8497,
   "live_positions": [
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -11,13 +11,13 @@
       "size": 21,
       "avgPrice": 0.06,
       "initialValue": 1.26,
-      "currentValue": 1.365,
-      "cashPnl": 0.1049,
-      "percentPnl": 8.3253,
+      "currentValue": 0.9114,
+      "cashPnl": -0.3486,
+      "percentPnl": -27.6666,
       "totalBought": 21,
       "realizedPnl": 0,
-      "percentRealizedPnl": 8.3333,
-      "curPrice": 0.065,
+      "percentRealizedPnl": -27.6666,
+      "curPrice": 0.0434,
       "redeemable": false,
       "mergeable": false,
       "title": "Will Donald Trump visit China on May 13, 2026?",
@@ -32,8 +32,8 @@
       "endDate": "2026-05-31",
       "negativeRisk": true,
       "cost": 1.26,
-      "value": 1.365,
-      "unrealised_pnl": 0.105
+      "value": 0.9114,
+      "unrealised_pnl": -0.3486
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -42,13 +42,13 @@
       "size": 13.9784,
       "avgPrice": 0.0929,
       "initialValue": 1.2999,
-      "currentValue": 1.2077,
-      "cashPnl": -0.0922,
-      "percentPnl": -7.0923,
+      "currentValue": 1.1951,
+      "cashPnl": -0.1048,
+      "percentPnl": -8.0616,
       "totalBought": 13.9784,
       "realizedPnl": 0,
-      "percentRealizedPnl": -7.0989,
-      "curPrice": 0.0864,
+      "percentRealizedPnl": -8.0682,
+      "curPrice": 0.0855,
       "redeemable": false,
       "mergeable": false,
       "title": "Hantavirus pandemic in 2026?",
@@ -63,8 +63,8 @@
       "endDate": "2026-12-31",
       "negativeRisk": false,
       "cost": 1.2986,
-      "value": 1.2077,
-      "unrealised_pnl": -0.0909
+      "value": 1.1952,
+      "unrealised_pnl": -0.1034
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -135,13 +135,13 @@
       "size": 7.1186,
       "avgPrice": 0.1769,
       "initialValue": 1.2599,
-      "currentValue": 1.2414,
-      "cashPnl": -0.0185,
-      "percentPnl": -1.4682,
+      "currentValue": 1.2564,
+      "cashPnl": -0.0035,
+      "percentPnl": -0.2777,
       "totalBought": 7.1186,
       "realizedPnl": 0,
-      "percentRealizedPnl": -1.4756,
-      "curPrice": 0.1744,
+      "percentRealizedPnl": -0.2851,
+      "curPrice": 0.1765,
       "redeemable": false,
       "mergeable": false,
       "title": "Will the San Antonio Spurs win the 2026 NBA Finals?",
@@ -156,8 +156,8 @@
       "endDate": "2026-07-01",
       "negativeRisk": true,
       "cost": 1.2593,
-      "value": 1.2415,
-      "unrealised_pnl": -0.0178
+      "value": 1.2564,
+      "unrealised_pnl": -0.0028
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -189,6 +189,37 @@
       "cost": 1.2494,
       "value": 1.1685,
       "unrealised_pnl": -0.081
+    },
+    {
+      "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
+      "asset": "20705956847651355292903061592334315186019059728484478747049630947764308652621",
+      "conditionId": "0x8d62f20324e9e7f1a3c663ab6aac9a2f6e7adb96c6a69ac2cea7e08a71a7f2ef",
+      "size": 4.0754,
+      "avgPrice": 0.2649,
+      "initialValue": 1.0799,
+      "currentValue": 1.0596,
+      "cashPnl": -0.0203,
+      "percentPnl": -1.8796,
+      "totalBought": 4.0754,
+      "realizedPnl": 0,
+      "percentRealizedPnl": -1.8884,
+      "curPrice": 0.26,
+      "redeemable": false,
+      "mergeable": false,
+      "title": "Will Tom Steyer win the California Governor Election in 2026?",
+      "slug": "will-tom-steyer-win-the-california-governor-election-in-2026",
+      "icon": "https://polymarket-upload.s3.us-east-2.amazonaws.com/will-option-b-win-the-california-governor-election-in-2026-EcAkqKw7Rzsk.png",
+      "eventId": "57096",
+      "eventSlug": "california-governor-election-2026",
+      "outcome": "Yes",
+      "outcomeIndex": 0,
+      "oppositeOutcome": "No",
+      "oppositeAsset": "36038186568927998467509291483985866554521847803798174147820946484272760262519",
+      "endDate": "2026-11-03",
+      "negativeRisk": true,
+      "cost": 1.0796,
+      "value": 1.0596,
+      "unrealised_pnl": -0.02
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -224,16 +255,16 @@
   ],
   "live_positions_error": null,
   "totals": {
-    "open_count": 7,
-    "total_cost_usd": 8.607,
-    "total_value_usd": 6.0011,
-    "unrealised_pnl_usd": -2.6059
+    "open_count": 8,
+    "total_cost_usd": 9.6866,
+    "total_value_usd": 6.6095,
+    "unrealised_pnl_usd": -3.0771
   },
   "today_activity": {
-    "real_buys_filled": 4,
-    "real_buy_spend_usd": 5.2,
+    "real_buys_filled": 0,
+    "real_buy_spend_usd": 0,
     "rejected_by_safety": 0,
-    "errored": 71
+    "errored": 14
   },
   "safety": {
     "trading_mode": "real",

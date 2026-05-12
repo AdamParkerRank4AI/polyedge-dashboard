@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-05-11T20:42:47.189195+00:00",
+  "generated_at": "2026-05-12T07:10:48.237775+00:00",
   "totals": {
-    "fires": 8,
-    "spent_usd": 10.2,
+    "fires": 9,
+    "spent_usd": 11.5,
     "settled_pnl_usd": -0.1764,
-    "unrealised_pnl_usd": -2.6059,
-    "open_count": 7,
-    "total_pnl_usd": -2.7823,
-    "roi_pct": -27.28
+    "unrealised_pnl_usd": -3.0771,
+    "open_count": 8,
+    "total_pnl_usd": -3.2535,
+    "roi_pct": -28.29
   },
   "by_play": {
     "CRYPTO": {
@@ -41,18 +41,18 @@
       "win_rate_pct": 0
     },
     "NEWS_EDGE": {
-      "fires": 2,
-      "spent_usd": 2.6,
+      "fires": 3,
+      "spent_usd": 3.9,
       "settled_count": 0,
       "settled_pnl_usd": 0.0,
       "wins": 0,
       "losses": 0,
-      "open_count": 2,
-      "open_cost_usd": 2.5579,
-      "open_value_usd": 2.4492,
-      "unrealised_pnl_usd": -0.1087,
-      "total_pnl_usd": -0.1087,
-      "roi_pct": -4.18,
+      "open_count": 3,
+      "open_cost_usd": 3.6374,
+      "open_value_usd": 3.5112,
+      "unrealised_pnl_usd": -0.1263,
+      "total_pnl_usd": -0.1263,
+      "roi_pct": -3.24,
       "win_rate_pct": 0
     },
     "NEWS_FADE_LATE": {
@@ -64,10 +64,10 @@
       "losses": 0,
       "open_count": 3,
       "open_cost_usd": 3.5291,
-      "open_value_usd": 3.5519,
-      "unrealised_pnl_usd": 0.0228,
-      "total_pnl_usd": 0.0228,
-      "roi_pct": 0.58,
+      "open_value_usd": 3.0983,
+      "unrealised_pnl_usd": -0.4308,
+      "total_pnl_usd": -0.4308,
+      "roi_pct": -11.05,
       "win_rate_pct": 0
     }
   }
