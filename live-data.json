@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-12T07:10:47.344022+00:00",
+  "generated_at": "2026-05-12T08:11:23.655399+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": 93.8497,
@@ -11,13 +11,13 @@
       "size": 21,
       "avgPrice": 0.06,
       "initialValue": 1.26,
-      "currentValue": 0.9114,
-      "cashPnl": -0.3486,
-      "percentPnl": -27.6666,
+      "currentValue": 0.9009,
+      "cashPnl": -0.359,
+      "percentPnl": -28.492,
       "totalBought": 21,
       "realizedPnl": 0,
-      "percentRealizedPnl": -27.6666,
-      "curPrice": 0.0434,
+      "percentRealizedPnl": -28.4999,
+      "curPrice": 0.0429,
       "redeemable": false,
       "mergeable": false,
       "title": "Will Donald Trump visit China on May 13, 2026?",
@@ -32,8 +32,8 @@
       "endDate": "2026-05-31",
       "negativeRisk": true,
       "cost": 1.26,
-      "value": 0.9114,
-      "unrealised_pnl": -0.3486
+      "value": 0.9009,
+      "unrealised_pnl": -0.3591
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -135,13 +135,13 @@
       "size": 7.1186,
       "avgPrice": 0.1769,
       "initialValue": 1.2599,
-      "currentValue": 1.2564,
-      "cashPnl": -0.0035,
-      "percentPnl": -0.2777,
+      "currentValue": 1.2635,
+      "cashPnl": 0.0035,
+      "percentPnl": 0.2777,
       "totalBought": 7.1186,
       "realizedPnl": 0,
-      "percentRealizedPnl": -0.2851,
-      "curPrice": 0.1765,
+      "percentRealizedPnl": 0.2783,
+      "curPrice": 0.1775,
       "redeemable": false,
       "mergeable": false,
       "title": "Will the San Antonio Spurs win the 2026 NBA Finals?",
@@ -156,8 +156,8 @@
       "endDate": "2026-07-01",
       "negativeRisk": true,
       "cost": 1.2593,
-      "value": 1.2564,
-      "unrealised_pnl": -0.0028
+      "value": 1.2636,
+      "unrealised_pnl": 0.0043
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -197,13 +197,13 @@
       "size": 4.0754,
       "avgPrice": 0.2649,
       "initialValue": 1.0799,
-      "currentValue": 1.0596,
-      "cashPnl": -0.0203,
-      "percentPnl": -1.8796,
+      "currentValue": 1.0555,
+      "cashPnl": -0.0244,
+      "percentPnl": -2.2592,
       "totalBought": 4.0754,
       "realizedPnl": 0,
-      "percentRealizedPnl": -1.8884,
-      "curPrice": 0.26,
+      "percentRealizedPnl": -2.2681,
+      "curPrice": 0.259,
       "redeemable": false,
       "mergeable": false,
       "title": "Will Tom Steyer win the California Governor Election in 2026?",
@@ -218,8 +218,8 @@
       "endDate": "2026-11-03",
       "negativeRisk": true,
       "cost": 1.0796,
-      "value": 1.0596,
-      "unrealised_pnl": -0.02
+      "value": 1.0555,
+      "unrealised_pnl": -0.024
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -257,14 +257,14 @@
   "totals": {
     "open_count": 8,
     "total_cost_usd": 9.6866,
-    "total_value_usd": 6.6095,
-    "unrealised_pnl_usd": -3.0771
+    "total_value_usd": 6.602,
+    "unrealised_pnl_usd": -3.0845
   },
   "today_activity": {
     "real_buys_filled": 0,
     "real_buy_spend_usd": 0,
     "rejected_by_safety": 0,
-    "errored": 14
+    "errored": 307
   },
   "safety": {
     "trading_mode": "real",
@@ -282,5 +282,5 @@
     "max_real_loss_per_day_usd": 5.0,
     "staleness_pct": 2.0
   },
-  "halt_file_present": false
+  "halt_file_present": true
 }
