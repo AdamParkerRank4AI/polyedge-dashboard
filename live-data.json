@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-12T11:16:35.609053+00:00",
+  "generated_at": "2026-05-12T12:31:15.028507+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
-  "wallet_balance_usd": 98.4301,
+  "wallet_balance_usd": 97.1143,
   "live_positions": [
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -68,6 +68,37 @@
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
+      "asset": "42973597575542677450413139466966808508589724152531865984380674394692890859772",
+      "conditionId": "0xe3033b163d0e0e30cb3154049f28295dada348030e5c6cdfe58ed0d4e393c7e9",
+      "size": 4.2666,
+      "avgPrice": 0.2999,
+      "initialValue": 1.2799,
+      "currentValue": 1.2586,
+      "cashPnl": -0.0213,
+      "percentPnl": -1.664,
+      "totalBought": 4.2666,
+      "realizedPnl": 0,
+      "percentRealizedPnl": -1.6715,
+      "curPrice": 0.295,
+      "redeemable": false,
+      "mergeable": false,
+      "title": "Will Thomas Massie be the Republican nominee for KY-04?",
+      "slug": "will-thomas-massie-be-the-republican-nominee-for-ky-04",
+      "icon": "https://polymarket-upload.s3.us-east-2.amazonaws.com/ky-04-republican-primary-winner-1me1dCIzzosm.png",
+      "eventId": "95227",
+      "eventSlug": "ky-04-republican-primary-winner",
+      "outcome": "No",
+      "outcomeIndex": 1,
+      "oppositeOutcome": "Yes",
+      "oppositeAsset": "8447490071089963395442264544330207052705118369414975510775922677277264472371",
+      "endDate": "2026-05-19",
+      "negativeRisk": true,
+      "cost": 1.2796,
+      "value": 1.2586,
+      "unrealised_pnl": -0.0209
+    },
+    {
+      "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
       "asset": "98370392921180853291246178911847358715619253727424412235366815685411062334831",
       "conditionId": "0xa8e8cdf6ed1a4132ce687c5cd5d0eec65f439e0c83ae7bad3463a0906aba7aa8",
       "size": 4.258,
@@ -100,14 +131,14 @@
   ],
   "live_positions_error": null,
   "totals": {
-    "open_count": 3,
-    "total_cost_usd": 3.8396,
-    "total_value_usd": 1.2987,
-    "unrealised_pnl_usd": -2.5409
+    "open_count": 4,
+    "total_cost_usd": 5.1191,
+    "total_value_usd": 2.5573,
+    "unrealised_pnl_usd": -2.5618
   },
   "today_activity": {
-    "real_buys_filled": 1,
-    "real_buy_spend_usd": 1.3,
+    "real_buys_filled": 2,
+    "real_buy_spend_usd": 2.6,
     "rejected_by_safety": 0,
     "errored": 308
   },
@@ -116,7 +147,8 @@
     "real_trading_plays": [
       "CRYPTO",
       "TEMPORAL_ARB",
-      "NEWS_FADE_LATE"
+      "NEWS_FADE_LATE",
+      "NEG_RISK"
     ],
     "max_stake_usd": 1.3,
     "max_real_trades_per_day": 10,
@@ -124,5 +156,5 @@
     "max_real_loss_per_day_usd": 5.0,
     "staleness_pct": 2.0
   },
-  "halt_file_present": false
+  "halt_file_present": true
 }
