@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-12T15:16:05.845329+00:00",
+  "generated_at": "2026-05-12T15:21:30.032444+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": 94.7786,
@@ -218,5 +218,5 @@
     "max_real_loss_per_day_usd": 5.0,
     "staleness_pct": 2.0
   },
-  "halt_file_present": false
+  "halt_file_present": true
 }
