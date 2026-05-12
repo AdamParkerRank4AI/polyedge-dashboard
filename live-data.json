@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-12T16:22:06.167182+00:00",
+  "generated_at": "2026-05-12T17:23:20.408533+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
-  "wallet_balance_usd": 94.7786,
+  "wallet_balance_usd": null,
   "live_positions": [
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -135,13 +135,13 @@
       "size": 4.258,
       "avgPrice": 0.3099,
       "initialValue": 1.3199,
-      "currentValue": 1.2987,
-      "cashPnl": -0.0212,
-      "percentPnl": -1.606,
+      "currentValue": 1.1922,
+      "cashPnl": -0.1277,
+      "percentPnl": -9.6742,
       "totalBought": 4.258,
       "realizedPnl": 0,
-      "percentRealizedPnl": -1.6132,
-      "curPrice": 0.305,
+      "percentRealizedPnl": -9.6814,
+      "curPrice": 0.28,
       "redeemable": false,
       "mergeable": false,
       "title": "Will Mette Frederiksen be the next prime minister of Denmark after the 2026 parliamentary elections?",
@@ -156,8 +156,8 @@
       "endDate": "2026-03-24",
       "negativeRisk": true,
       "cost": 1.3196,
-      "value": 1.2987,
-      "unrealised_pnl": -0.0209
+      "value": 1.1922,
+      "unrealised_pnl": -0.1273
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -166,13 +166,13 @@
       "size": 3.1169,
       "avgPrice": 0.3339,
       "initialValue": 1.0409,
-      "currentValue": 1.0504,
-      "cashPnl": 0.0094,
-      "percentPnl": 0.9029,
+      "currentValue": 1.075,
+      "cashPnl": 0.034,
+      "percentPnl": 3.2661,
       "totalBought": 6.1169,
       "realizedPnl": -0.0029,
-      "percentRealizedPnl": -48.5835,
-      "curPrice": 0.337,
+      "percentRealizedPnl": -47.3794,
+      "curPrice": 0.3449,
       "redeemable": false,
       "mergeable": false,
       "title": "MicroStrategy sells any Bitcoin by June 30, 2026?",
@@ -187,16 +187,16 @@
       "endDate": "2026-07-01",
       "negativeRisk": false,
       "cost": 1.0407,
-      "value": 1.0504,
-      "unrealised_pnl": 0.0097
+      "value": 1.075,
+      "unrealised_pnl": 0.0343
     }
   ],
   "live_positions_error": null,
   "totals": {
     "open_count": 6,
     "total_cost_usd": 7.5092,
-    "total_value_usd": 4.9284,
-    "unrealised_pnl_usd": -2.5809
+    "total_value_usd": 4.8465,
+    "unrealised_pnl_usd": -2.6627
   },
   "today_activity": {
     "real_buys_filled": 4,
