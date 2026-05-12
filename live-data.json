@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-12T12:31:15.028507+00:00",
+  "generated_at": "2026-05-12T13:18:21.654661+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
-  "wallet_balance_usd": 97.1143,
+  "wallet_balance_usd": 95.8258,
   "live_positions": [
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -65,6 +65,37 @@
       "cost": 1.26,
       "value": 0.0,
       "unrealised_pnl": -1.26
+    },
+    {
+      "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
+      "asset": "33156410999665902694791064431724433042010245771106314074312009703157423879038",
+      "conditionId": "0xd5d9fc47718bd553592d126b1fa5e87183d27f3936975b0c04cc0f2dec1f1bb4",
+      "size": 5.8695,
+      "avgPrice": 0.2299,
+      "initialValue": 1.3499,
+      "currentValue": 1.3206,
+      "cashPnl": -0.0293,
+      "percentPnl": -2.1703,
+      "totalBought": 10.8695,
+      "realizedPnl": -0.0999,
+      "percentRealizedPnl": -47.1757,
+      "curPrice": 0.225,
+      "redeemable": false,
+      "mergeable": false,
+      "title": "Will the Democratic Party control the House after the 2026 Midterm elections?",
+      "slug": "will-the-democratic-party-control-the-house-after-the-2026-midterm-elections",
+      "icon": "https://polymarket-upload.s3.us-east-2.amazonaws.com/will-the-democratic-party-control-the-senate-after-the-2026-midterm-elections-JJ9h02JGR09z.png",
+      "eventId": "32225",
+      "eventSlug": "which-party-will-win-the-house-in-2026",
+      "outcome": "No",
+      "outcomeIndex": 1,
+      "oppositeOutcome": "Yes",
+      "oppositeAsset": "83247781037352156539108067944461291821683755894607244160607042790356561625563",
+      "endDate": "2026-11-03",
+      "negativeRisk": true,
+      "cost": 1.3494,
+      "value": 1.3206,
+      "unrealised_pnl": -0.0288
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -131,14 +162,14 @@
   ],
   "live_positions_error": null,
   "totals": {
-    "open_count": 4,
-    "total_cost_usd": 5.1191,
-    "total_value_usd": 2.5573,
-    "unrealised_pnl_usd": -2.5618
+    "open_count": 5,
+    "total_cost_usd": 6.4685,
+    "total_value_usd": 3.878,
+    "unrealised_pnl_usd": -2.5905
   },
   "today_activity": {
-    "real_buys_filled": 2,
-    "real_buy_spend_usd": 2.6,
+    "real_buys_filled": 3,
+    "real_buy_spend_usd": 3.9,
     "rejected_by_safety": 0,
     "errored": 308
   },
@@ -156,5 +187,5 @@
     "max_real_loss_per_day_usd": 5.0,
     "staleness_pct": 2.0
   },
-  "halt_file_present": true
+  "halt_file_present": false
 }
