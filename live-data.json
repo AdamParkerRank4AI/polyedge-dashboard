@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-05-12T09:13:13.890425+00:00",
+  "generated_at": "2026-05-12T10:14:47.992931+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
-  "wallet_balance_usd": 99.7866,
+  "wallet_balance_usd": 98.4301,
   "live_positions": [
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -65,18 +65,49 @@
       "cost": 1.26,
       "value": 0.0,
       "unrealised_pnl": -1.26
+    },
+    {
+      "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
+      "asset": "98370392921180853291246178911847358715619253727424412235366815685411062334831",
+      "conditionId": "0xa8e8cdf6ed1a4132ce687c5cd5d0eec65f439e0c83ae7bad3463a0906aba7aa8",
+      "size": 4.258,
+      "avgPrice": 0.3099,
+      "initialValue": 1.3199,
+      "currentValue": 1.2987,
+      "cashPnl": -0.0212,
+      "percentPnl": -1.606,
+      "totalBought": 4.258,
+      "realizedPnl": 0,
+      "percentRealizedPnl": -1.6132,
+      "curPrice": 0.305,
+      "redeemable": false,
+      "mergeable": false,
+      "title": "Will Mette Frederiksen be the next prime minister of Denmark after the 2026 parliamentary elections?",
+      "slug": "will-mette-frederiksen-be-the-next-prime-minister-of-denmark-after-the-2026-parliamentary-elections",
+      "icon": "https://polymarket-upload.s3.us-east-2.amazonaws.com/will-mette-frederiksen-be-the-next-prime-minister-of-denmark-after-the-2026-parliamentary-elections--cAeC5RzMAb-.jpg",
+      "eventId": "233322",
+      "eventSlug": "next-prime-minister-of-denmark-after-parliamentary-election",
+      "outcome": "No",
+      "outcomeIndex": 1,
+      "oppositeOutcome": "Yes",
+      "oppositeAsset": "48415598117950998813668194547924169333853002963929921505783256757891425660989",
+      "endDate": "2026-03-24",
+      "negativeRisk": true,
+      "cost": 1.3196,
+      "value": 1.2987,
+      "unrealised_pnl": -0.0209
     }
   ],
   "live_positions_error": null,
   "totals": {
-    "open_count": 2,
-    "total_cost_usd": 2.52,
-    "total_value_usd": 0.0,
-    "unrealised_pnl_usd": -2.52
+    "open_count": 3,
+    "total_cost_usd": 3.8396,
+    "total_value_usd": 1.2987,
+    "unrealised_pnl_usd": -2.5409
   },
   "today_activity": {
-    "real_buys_filled": 0,
-    "real_buy_spend_usd": 0,
+    "real_buys_filled": 1,
+    "real_buy_spend_usd": 1.3,
     "rejected_by_safety": 0,
     "errored": 308
   },
