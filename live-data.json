@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-12T15:54:20.852750+00:00",
+  "generated_at": "2026-05-12T16:22:06.167182+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": 94.7786,
@@ -166,13 +166,13 @@
       "size": 3.1169,
       "avgPrice": 0.3339,
       "initialValue": 1.0409,
-      "currentValue": 1.0395,
-      "cashPnl": -0.0014,
-      "percentPnl": -0.1344,
+      "currentValue": 1.0504,
+      "cashPnl": 0.0094,
+      "percentPnl": 0.9029,
       "totalBought": 6.1169,
       "realizedPnl": -0.0029,
-      "percentRealizedPnl": -49.1171,
-      "curPrice": 0.3335,
+      "percentRealizedPnl": -48.5835,
+      "curPrice": 0.337,
       "redeemable": false,
       "mergeable": false,
       "title": "MicroStrategy sells any Bitcoin by June 30, 2026?",
@@ -187,16 +187,16 @@
       "endDate": "2026-07-01",
       "negativeRisk": false,
       "cost": 1.0407,
-      "value": 1.0395,
-      "unrealised_pnl": -0.0012
+      "value": 1.0504,
+      "unrealised_pnl": 0.0097
     }
   ],
   "live_positions_error": null,
   "totals": {
     "open_count": 6,
     "total_cost_usd": 7.5092,
-    "total_value_usd": 4.9175,
-    "unrealised_pnl_usd": -2.5918
+    "total_value_usd": 4.9284,
+    "unrealised_pnl_usd": -2.5809
   },
   "today_activity": {
     "real_buys_filled": 4,
@@ -218,5 +218,5 @@
     "max_real_loss_per_day_usd": 5.0,
     "staleness_pct": 2.0
   },
-  "halt_file_present": true
+  "halt_file_present": false
 }
