@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-13T10:55:47.423230+00:00",
+  "generated_at": "2026-05-13T11:59:17.486968+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": 94.7786,
@@ -104,13 +104,13 @@
       "size": 4.2666,
       "avgPrice": 0.2999,
       "initialValue": 1.2799,
-      "currentValue": 1.4293,
-      "cashPnl": 0.1493,
-      "percentPnl": 11.6641,
+      "currentValue": 1.3439,
+      "cashPnl": 0.0639,
+      "percentPnl": 4.9922,
       "totalBought": 4.2666,
       "realizedPnl": 0,
-      "percentRealizedPnl": 11.6644,
-      "curPrice": 0.335,
+      "percentRealizedPnl": 4.9925,
+      "curPrice": 0.315,
       "redeemable": false,
       "mergeable": false,
       "title": "Will Thomas Massie be the Republican nominee for KY-04?",
@@ -125,8 +125,8 @@
       "endDate": "2026-05-19",
       "negativeRisk": true,
       "cost": 1.2796,
-      "value": 1.4293,
-      "unrealised_pnl": 0.1498
+      "value": 1.344,
+      "unrealised_pnl": 0.0644
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -195,14 +195,14 @@
   "totals": {
     "open_count": 6,
     "total_cost_usd": 7.5092,
-    "total_value_usd": 4.8393,
-    "unrealised_pnl_usd": -2.6699
+    "total_value_usd": 4.754,
+    "unrealised_pnl_usd": -2.7552
   },
   "today_activity": {
     "real_buys_filled": 0,
     "real_buy_spend_usd": 0,
     "rejected_by_safety": 0,
-    "errored": 127
+    "errored": 214
   },
   "safety": {
     "trading_mode": "real",
