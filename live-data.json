@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-13T11:59:17.486968+00:00",
+  "generated_at": "2026-05-13T13:00:10.084791+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": 94.7786,
@@ -104,13 +104,13 @@
       "size": 4.2666,
       "avgPrice": 0.2999,
       "initialValue": 1.2799,
-      "currentValue": 1.3439,
-      "cashPnl": 0.0639,
-      "percentPnl": 4.9922,
+      "currentValue": 1.5999,
+      "cashPnl": 0.3199,
+      "percentPnl": 24.9922,
       "totalBought": 4.2666,
       "realizedPnl": 0,
-      "percentRealizedPnl": 4.9925,
-      "curPrice": 0.315,
+      "percentRealizedPnl": 24.9926,
+      "curPrice": 0.375,
       "redeemable": false,
       "mergeable": false,
       "title": "Will Thomas Massie be the Republican nominee for KY-04?",
@@ -125,8 +125,8 @@
       "endDate": "2026-05-19",
       "negativeRisk": true,
       "cost": 1.2796,
-      "value": 1.344,
-      "unrealised_pnl": 0.0644
+      "value": 1.6,
+      "unrealised_pnl": 0.3204
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -166,13 +166,13 @@
       "size": 3.1169,
       "avgPrice": 0.3339,
       "initialValue": 1.0409,
-      "currentValue": 1.0145,
-      "cashPnl": -0.0264,
-      "percentPnl": -2.536,
+      "currentValue": 1.0052,
+      "cashPnl": -0.0357,
+      "percentPnl": -3.4294,
       "totalBought": 6.1169,
       "realizedPnl": -0.0029,
-      "percentRealizedPnl": -50.3408,
-      "curPrice": 0.3255,
+      "percentRealizedPnl": -50.7961,
+      "curPrice": 0.3225,
       "redeemable": false,
       "mergeable": false,
       "title": "MicroStrategy sells any Bitcoin by June 30, 2026?",
@@ -187,22 +187,22 @@
       "endDate": "2026-07-01",
       "negativeRisk": false,
       "cost": 1.0407,
-      "value": 1.0146,
-      "unrealised_pnl": -0.0262
+      "value": 1.0052,
+      "unrealised_pnl": -0.0355
     }
   ],
   "live_positions_error": null,
   "totals": {
     "open_count": 6,
     "total_cost_usd": 7.5092,
-    "total_value_usd": 4.754,
-    "unrealised_pnl_usd": -2.7552
+    "total_value_usd": 5.0007,
+    "unrealised_pnl_usd": -2.5086
   },
   "today_activity": {
     "real_buys_filled": 0,
     "real_buy_spend_usd": 0,
     "rejected_by_safety": 0,
-    "errored": 214
+    "errored": 265
   },
   "safety": {
     "trading_mode": "real",
@@ -218,5 +218,5 @@
     "max_real_loss_per_day_usd": 5.0,
     "staleness_pct": 2.0
   },
-  "halt_file_present": false
+  "halt_file_present": true
 }
