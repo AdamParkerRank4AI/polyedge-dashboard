@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-13T09:55:21.945023+00:00",
+  "generated_at": "2026-05-13T10:55:47.423230+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": 94.7786,
@@ -104,13 +104,13 @@
       "size": 4.2666,
       "avgPrice": 0.2999,
       "initialValue": 1.2799,
-      "currentValue": 1.3866,
-      "cashPnl": 0.1066,
-      "percentPnl": 8.3281,
+      "currentValue": 1.4293,
+      "cashPnl": 0.1493,
+      "percentPnl": 11.6641,
       "totalBought": 4.2666,
       "realizedPnl": 0,
-      "percentRealizedPnl": 8.3285,
-      "curPrice": 0.325,
+      "percentRealizedPnl": 11.6644,
+      "curPrice": 0.335,
       "redeemable": false,
       "mergeable": false,
       "title": "Will Thomas Massie be the Republican nominee for KY-04?",
@@ -125,8 +125,8 @@
       "endDate": "2026-05-19",
       "negativeRisk": true,
       "cost": 1.2796,
-      "value": 1.3866,
-      "unrealised_pnl": 0.1071
+      "value": 1.4293,
+      "unrealised_pnl": 0.1498
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -135,13 +135,13 @@
       "size": 4.258,
       "avgPrice": 0.3099,
       "initialValue": 1.3199,
-      "currentValue": 1.1709,
-      "cashPnl": -0.149,
-      "percentPnl": -11.2879,
+      "currentValue": 1.1922,
+      "cashPnl": -0.1277,
+      "percentPnl": -9.6742,
       "totalBought": 4.258,
       "realizedPnl": 0,
-      "percentRealizedPnl": -11.2951,
-      "curPrice": 0.275,
+      "percentRealizedPnl": -9.6814,
+      "curPrice": 0.28,
       "redeemable": false,
       "mergeable": false,
       "title": "Will Mette Frederiksen be the next prime minister of Denmark after the 2026 parliamentary elections?",
@@ -156,8 +156,8 @@
       "endDate": "2026-03-24",
       "negativeRisk": true,
       "cost": 1.3196,
-      "value": 1.171,
-      "unrealised_pnl": -0.1486
+      "value": 1.1922,
+      "unrealised_pnl": -0.1273
     },
     {
       "proxyWallet": "0x717f0af821b9fb01e0fef0285bf6e34247c710a8",
@@ -166,13 +166,13 @@
       "size": 3.1169,
       "avgPrice": 0.3339,
       "initialValue": 1.0409,
-      "currentValue": 1.013,
-      "cashPnl": -0.0279,
-      "percentPnl": -2.6801,
+      "currentValue": 1.0145,
+      "cashPnl": -0.0264,
+      "percentPnl": -2.536,
       "totalBought": 6.1169,
       "realizedPnl": -0.0029,
-      "percentRealizedPnl": -50.4143,
-      "curPrice": 0.325,
+      "percentRealizedPnl": -50.3408,
+      "curPrice": 0.3255,
       "redeemable": false,
       "mergeable": false,
       "title": "MicroStrategy sells any Bitcoin by June 30, 2026?",
@@ -187,22 +187,22 @@
       "endDate": "2026-07-01",
       "negativeRisk": false,
       "cost": 1.0407,
-      "value": 1.013,
-      "unrealised_pnl": -0.0277
+      "value": 1.0146,
+      "unrealised_pnl": -0.0262
     }
   ],
   "live_positions_error": null,
   "totals": {
     "open_count": 6,
     "total_cost_usd": 7.5092,
-    "total_value_usd": 4.7738,
-    "unrealised_pnl_usd": -2.7354
+    "total_value_usd": 4.8393,
+    "unrealised_pnl_usd": -2.6699
   },
   "today_activity": {
     "real_buys_filled": 0,
     "real_buy_spend_usd": 0,
     "rejected_by_safety": 0,
-    "errored": 102
+    "errored": 127
   },
   "safety": {
     "trading_mode": "real",
