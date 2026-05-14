@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-13T23:16:14.630212+00:00",
+  "generated_at": "2026-05-14T00:16:18.442730+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": null,
@@ -15,7 +15,7 @@
     "real_buys_filled": 0,
     "real_buy_spend_usd": 0,
     "rejected_by_safety": 0,
-    "errored": 265
+    "errored": 0
   },
   "safety": {
     "trading_mode": "real",
