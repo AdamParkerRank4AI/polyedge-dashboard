@@ -1,10 +1,10 @@
 {
-  "generated_at": "2026-05-30T16:47:46.072224+00:00",
+  "generated_at": "2026-05-30T17:49:04.811899+00:00",
   "wallet_proxy": "0x717f0AF821B9fb01e0FEF0285bf6E34247C710a8",
   "wallet_eoa": "0x08263b407c5f944Ab5Bdd011e105ab9A33a3CfF1",
   "wallet_balance_usd": null,
   "live_positions": [],
-  "live_positions_error": "<urlopen error Tunnel connection failed: 402 Payment Required>",
+  "live_positions_error": "<urlopen error timed out>",
   "totals": {
     "open_count": 0,
     "total_cost_usd": 0,
